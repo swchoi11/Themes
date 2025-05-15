@@ -1,35 +1,32 @@
 """
 Extracts Skeleton UI Layout from Samsung Themes using GUIParser
 """
-
+import os
 import cv2
 import numpy as np
 import torch
 from PIL import Image
-
 import json
 from typing import Dict, List, Tuple, Optional, Union
 from dataclasses import dataclass, asdict
-
 
 from utils.utils import get_som_labeled_img, get_caption_model_processor, get_yolo_model, check_ocr_box
 from utils.box_annotator import BoxAnnotator
 import supervision as sv
 import torchvision.transforms as T
 
-
 @dataclass
 class UIElement:
     """UI 요소 정보를 담는 데이터 클래스"""
     id: str
-    type: str  # 'text', 'button', 'input', 'icon', 'image', 'container'
-    bbox: List[float]  # [x1, y1, x2, y2] normalized
+    type: str
+    bbox: List[float]
     content: Optional[str] = None
     confidence: float = 0.0
     interactivity: bool = False
     parent_id: Optional[str] = None
     children: List[str] = None
-    layout_role: Optional[str] = None  # 'header', 'navigation', 'content', 'sidebar', 'footer'
+    layout_role: Optional[str] = None
 
     def __post_init__(self):
         if self.children is None:
@@ -39,24 +36,28 @@ class UIElement:
 @dataclass
 class LayoutStructure:
     """레이아웃 구조 정보"""
-    structure_type: str  # 'linear', 'grid', 'nested', 'tabs'
+    structure_type: str
     elements: List[UIElement]
-    hierarchy: Dict[str, List[str]]  # parent_id -> children_ids
-    layout_regions: Dict[str, List[UIElement]]  # region_name -> elements
-
+    hierarchy: Dict[str, List[str]]
+    layout_regions: Dict[str, Dict]
 
 class SkeletonUIExtractor:
     """스켈레톤 UI 구조 추출기"""
 
     def __init__(self, config: Dict):
         self.config = config
-        device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
+        # device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        device = 'cpu'
         # 모델 초기화
-        self.som_model = get_yolo_model(model_path=config.get('som_model_path', 'weights/icon_detect/weights.pt'))
+
+        model_path = os.path.abspath(config.get('som_model_path'))
+        print("모델 경로:", model_path)
+        print("존재 여부:", os.path.exists(model_path))
+
+        self.som_model = get_yolo_model(model_path=model_path)
         self.caption_model_processor = get_caption_model_processor(
             model_name=config.get('caption_model_name', 'florence2'),
-            model_name_or_path=config.get('caption_model_path', 'weights/icon_caption_florence'),
+            model_name_or_path=os.path.abspath(config.get('caption_model_path')),
             device=device
         )
 
@@ -73,6 +74,12 @@ class SkeletonUIExtractor:
             image = Image.open(image)
         elif isinstance(image, np.ndarray):
             image = Image.fromarray(image)
+
+        # ✅ 이미지 리사이즈 (성능 최적화)
+        if max(image.size) > 640:
+            new_w = 640
+            new_h = int(image.height * (640 / image.width))
+            image = image.resize((new_w, new_h))
 
         image = image.convert("RGB")
         w, h = image.size
@@ -104,8 +111,7 @@ class SkeletonUIExtractor:
             layout_regions=layout_regions
         )
 
-    def _detect_ui_elements(self, image: Image.Image, ocr_bbox: List, text_list: List, w: int, h: int) -> List[
-        UIElement]:
+    def _detect_ui_elements(self, image: Image.Image, ocr_bbox: List, text_list: List, w: int, h: int) -> List[UIElement]:
         """UI 요소 검출"""
         elements = []
 
@@ -141,16 +147,15 @@ class SkeletonUIExtractor:
             draw_bbox_config=draw_bbox_config,
             caption_model_processor=self.caption_model_processor,
             ocr_text=text_list,
-            use_local_semantics=True,
+            use_local_semantics=False,
             iou_threshold=self.config.get('iou_threshold', 0.7),
-            batch_size=128
+            batch_size=16
         )
 
         # 파싱된 내용을 UIElement로 변환
         for i, parsed_item in enumerate(parsed_content_list):
             bbox = parsed_item['bbox']
             element_type = self._classify_element_type(parsed_item)
-
             elements.append(UIElement(
                 id=f"{element_type}_{i}",
                 type=element_type,
@@ -172,12 +177,7 @@ class SkeletonUIExtractor:
             bbox = parsed_item['bbox']
             width = bbox[2] - bbox[0]
             height = bbox[3] - bbox[1]
-
-            # 가로가 세로보다 훨씬 긴 경우 입력 필드
-            if width / height > 4:
-                return 'input'
-            else:
-                return 'button'
+            return 'input' if width / height > 4 else 'button'
         else:
             return 'icon'
 
@@ -202,7 +202,6 @@ class SkeletonUIExtractor:
 
     def _determine_structure_type(self, layout_regions: Dict) -> str:
         """레이아웃 구조 타입 결정"""
-        # 레이아웃 영역 분석으로 구조 타입 결정
         if 'sidebar' in layout_regions and 'content' in layout_regions:
             return 'sidebar_layout'
         elif 'header' in layout_regions and 'footer' in layout_regions:
@@ -211,7 +210,6 @@ class SkeletonUIExtractor:
             return 'navigation_layout'
         else:
             return 'single_column'
-
 
 class LayoutDetector:
     """레이아웃 영역 검출기"""
@@ -322,6 +320,10 @@ class LayoutAwareParser:
 
     def parse_by_layout(self, image: Union[str, Image.Image]) -> Dict:
         """레이아웃별로 파싱 수행"""
+
+        if isinstance(image, str):
+            image = Image.open(image)
+
         # 1. 스켈레톤 구조 추출
         layout_structure = self.skeleton_extractor.extract_skeleton(image)
 
@@ -448,7 +450,7 @@ def extract_ui_skeleton(image_path: str, config: Optional[Dict] = None) -> Dict:
     """UI 스켈레톤 추출 편의 함수"""
     if config is None:
         config = {
-            'som_model_path': 'weights/icon_detect/weights.pt',
+            'som_model_path': 'weights/icon_detect/model.pt',
             'caption_model_name': 'florence2',
             'caption_model_path': 'weights/icon_caption_florence',
             'BOX_TRESHOLD': 0.05,
@@ -462,22 +464,24 @@ def extract_ui_skeleton(image_path: str, config: Optional[Dict] = None) -> Dict:
 # 사용 예제
 if __name__ == "__main__":
     # 설정
+    image_path = "../resource/sample/com.android.settings_SubSettings_20250509_160428_settings_checkbox_cut_Default_xuka.png"
+    filename = os.path.splitext(os.path.basename(image_path))[0]
+    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    OUT_DIR = os.path.join(BASE_DIR, 'output')
+    os.makedirs(OUT_DIR, exist_ok=True)
     config = {
-        'som_model_path': 'weights/icon_detect/weights.pt',
+        'som_model_path': os.path.join(BASE_DIR, 'weights/icon_detect/model.pt'),
         'caption_model_name': 'florence2',
-        'caption_model_path': 'weights/icon_caption_florence',
+        'caption_model_path': os.path.join(BASE_DIR, 'weights/icon_caption_florence'),
         'BOX_TRESHOLD': 0.05,
         'iou_threshold': 0.7
     }
 
     # 파서 생성
     parser = LayoutAwareParser(config)
+    result = parser.parse_by_layout(image_path)
 
-    # 이미지 파싱
-    result = parser.parse_by_layout("./resource/sample/com.android.settings_SubSettings_20250509_160428_settings_checkbox_cut_Default_xuka.png")
-
-    # 결과 저장
-    with open("ui_skeleton_result.json", "w", encoding="utf-8") as f:
+    with open(f"{OUT_DIR}/{filename}.json", "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)
 
     # 결과 출력

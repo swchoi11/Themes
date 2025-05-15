@@ -1,0 +1,6 @@
+download url: https://drive.google.com/drive/u/0/folders/1I5mY8uT5D7dNY-3OFGluTV2uVAQ8PGjT
+
+/weights/icon_caption_florence/model.safetensors
+/weights/icon_caption_florence/generation_config.json
+/weights/icon_caption_florence/config.json
+/weights/icon_detect/model.pt

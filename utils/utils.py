@@ -34,7 +34,7 @@ import re
 from torchvision.transforms import ToPILImage
 import supervision as sv
 import torchvision.transforms as T
-from util.box_annotator import BoxAnnotator 
+from utils.box_annotator import BoxAnnotator
 
 
 def get_caption_model_processor(model_name, model_name_or_path="Salesforce/blip2-opt-2.7b", device=None):
@@ -62,6 +62,7 @@ def get_caption_model_processor(model_name, model_name_or_path="Salesforce/blip2
 
 
 def get_yolo_model(model_path):
+
     from ultralytics import YOLO
     # Load the weights.
     model = YOLO(model_path)
