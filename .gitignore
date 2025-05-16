@@ -1,3 +1,13 @@
 .env
 /weights/*
 /weights/icon_detect/
+
+.png
+.jpg
+.jpeg
+
+output/
+resource/
+__pycache__/
+*.__pycache__
+*.pyc
