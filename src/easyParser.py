@@ -2,6 +2,10 @@
 Extracts Skeleton UI Layout from Samsung Themes using GUIParser
 """
 import os
+
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+os.environ['OMP_NUM_THREADS'] = '1'
+
 import cv2
 import numpy as np
 import torch
@@ -75,7 +79,7 @@ class SkeletonUIExtractor:
         elif isinstance(image, np.ndarray):
             image = Image.fromarray(image)
 
-        # ✅ 이미지 리사이즈 (성능 최적화)
+        # 이미지 리사이즈 (성능 최적화)
         if max(image.size) > 640:
             new_w = 640
             new_h = int(image.height * (640 / image.width))
@@ -450,7 +454,7 @@ def extract_ui_skeleton(image_path: str, config: Optional[Dict] = None) -> Dict:
     """UI 스켈레톤 추출 편의 함수"""
     if config is None:
         config = {
-            'som_model_path': 'weights/icon_detect/model.pt',
+            'som_model_path': 'weights/icon_detect/model_hf.pt',
             'caption_model_name': 'florence2',
             'caption_model_path': 'weights/icon_caption_florence',
             'BOX_TRESHOLD': 0.05,
