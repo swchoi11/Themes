@@ -25,12 +25,10 @@ paddle_ocr = PaddleOCR(
 import time
 import base64
 
-import os
-import ast
 import torch
 from typing import Tuple, List, Union
 from torchvision.ops import box_convert
-import re
+
 from torchvision.transforms import ToPILImage
 import supervision as sv
 import torchvision.transforms as T
