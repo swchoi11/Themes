@@ -471,7 +471,7 @@ if __name__ == "__main__":
     image_path = "../resource/sample/com.android.settings_SubSettings_20250509_160428_settings_checkbox_cut_Default_xuka.png"
     filename = os.path.splitext(os.path.basename(image_path))[0]
     BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    OUT_DIR = os.path.join(BASE_DIR, 'output')
+    OUT_DIR = os.path.join(BASE_DIR, 'output/json')
     os.makedirs(OUT_DIR, exist_ok=True)
     config = {
         'som_model_path': os.path.join(BASE_DIR, 'weights/icon_detect/model.pt'),

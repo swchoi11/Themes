@@ -44,22 +44,22 @@ class Visualizer():
         original_image = image.copy()
 
         # 1. 전체 스켈레톤 구조 시각화
-        self._visualize_all_elements(image, result, os.path.join(output_dir, 'skeleton_full.png'))
+        self._visualize_all_elements(image, result, os.path.join(output_dir, '01.skeleton_full.png'))
 
         # 2. 레이아웃 영역별 시각화
-        self._visualize_layout_regions(original_image.copy(), result, os.path.join(output_dir, 'layout_regions.png'))
+        self._visualize_layout_regions(original_image.copy(), result, os.path.join(output_dir, '02.layout_regions.png'))
 
         # 3. 요소 타입별 시각화
-        self._visualize_element_types(original_image.copy(), result, os.path.join(output_dir, 'element_types.png'))
+        self._visualize_element_types(original_image.copy(), result, os.path.join(output_dir, '03.element_types.png'))
 
         # 4. 계층 구조 시각화
-        self._visualize_hierarchy(original_image.copy(), result, os.path.join(output_dir, 'hierarchy.png'))
+        self._visualize_hierarchy(original_image.copy(), result, os.path.join(output_dir, '04.hierarchy.png'))
 
         # 5. 상세 정보 매트릭스 생성
-        self._create_info_matrix(result, os.path.join(output_dir, 'info_matrix.png'))
+        self._create_info_matrix(result, os.path.join(output_dir, '05.info_matrix.png'))
 
         # 6. 네비게이션 및 폼 구조 시각화
-        self._visualize_navigation_and_forms(original_image.copy(), result, os.path.join(output_dir, 'nav_forms.png'))
+        self._visualize_navigation_and_forms(original_image.copy(), result, os.path.join(output_dir, '06.nav_forms.png'))
 
         print(f"시각화 결과가 {output_dir}에 저장되었습니다.")
 
@@ -389,24 +389,28 @@ class Visualizer():
 # 편의 함수
 def visualize_ui_skeleton_result(image_path: str, result_path: str, output_dir: str):
     """UI 스켈레톤 결과 시각화 편의 함수"""
+
+    save_dir = f'{output_dir}/{os.path.basename(image_path)}'
+    os.makedirs(save_dir, exist_ok=True)
+
     visualizer = Visualizer()
-    visualizer.visualize_skeleton_result(image_path, result_path, output_dir)
+    visualizer.visualize_skeleton_result(image_path, result_path, save_dir)
 
     # 상세 분석 리포트 생성
     with open(result_path, 'r', encoding='utf-8') as f:
         result = json.load(f)
 
-    report_path = os.path.join(output_dir, 'detailed_analysis.txt')
+    report_path = os.path.join(save_dir, 'detailed_analysis.txt')
     visualizer.export_detailed_analysis(result, report_path)
 
-    print(f"시각화 완료! 결과는 {output_dir}에서 확인하세요.")
+    print(f"시각화 완료: 결과는 {save_dir}에서 확인하세요.")
     print("생성된 파일:")
-    print("- skeleton_full.png: 전체 스켈레톤 구조")
-    print("- layout_regions.png: 레이아웃 영역별 시각화")
-    print("- element_types.png: 요소 타입별 분포")
-    print("- hierarchy.png: 계층 구조")
-    print("- info_matrix.png: 분석 요약 매트릭스")
-    print("- nav_forms.png: 네비게이션 및 폼 구조")
+    print("- 01.skeleton_full.png: 전체 스켈레톤 구조")
+    print("- 02.layout_regions.png: 레이아웃 영역별 시각화")
+    print("- 03.element_types.png: 요소 타입별 분포")
+    print("- 04.hierarchy.png: 계층 구조")
+    print("- 05.info_matrix.png: 분석 요약 매트릭스")
+    print("- 06.nav_forms.png: 네비게이션 및 폼 구조")
     print("- detailed_analysis.txt: 상세 분석 리포트")
 
 
@@ -417,5 +421,4 @@ if __name__ == "__main__":
     result_path = "../output/json/com.android.settings_SubSettings_20250509_160428_settings_checkbox_cut_Default_xuka.json"
     output_dir = "../output/visualization"
 
-    os.makedirs(output_dir, exist_ok=True)
     visualize_ui_skeleton_result(image_path, result_path, output_dir)
