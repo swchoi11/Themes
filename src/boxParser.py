@@ -63,21 +63,7 @@ def _hex_to_bgr(hex_color: str) -> Tuple[int, int, int]:
 def _layout_list(image_dir):    
     return glob.glob(f"{image_dir}/*/")
 
-def mask_images(image_dir):
-    image_list = glob.glob(f"{image_dir}/*.png")
-    image_base_dir = os.path.dirname(image_dir).split("/")[-1]
-    print(image_base_dir)
-    for image_path in image_list:
-        image = cv2.imread(image_path)
-        masked_image, rows = hex_items_detect(image, hex_color="#00ff00")
-        
-        image_name = os.path.basename(image_path).replace(".png", "")
-        os.makedirs(f"./output/xml-bbox/{image_base_dir}", exist_ok=True)
-        save_path = os.path.join(f"./output/xml-bbox/{image_base_dir}", f"masked_{image_name}.png")
-        cv2.imwrite(save_path, masked_image)
-        print(f"마스킹된 이미지 저장됨: {save_path}")
-
-def hex_items_detect(image, hex_color="#00ff00"):
+def _hex_items_detect(image, hex_color="#00ff00"):
     """
     이미지에서 특정 색상 영역을 검출하고 해당 영역의 바운딩 박스 정보를 반환합니다.
     
@@ -131,7 +117,21 @@ def hex_items_detect(image, hex_color="#00ff00"):
             })
         
     return masked_image, rows
-    
+
+def mask_images(image_dir):
+    image_list = glob.glob(f"{image_dir}/*.png")
+    image_base_dir = os.path.dirname(image_dir).split("/")[-1]
+    print(image_base_dir)
+    for image_path in image_list:
+        image = cv2.imread(image_path)
+        masked_image, rows = _hex_items_detect(image, hex_color="#00ff00")
+        
+        image_name = os.path.basename(image_path).replace(".png", "")
+        os.makedirs(f"./output/xml-bbox/{image_base_dir}", exist_ok=True)
+        save_path = os.path.join(f"./output/xml-bbox/{image_base_dir}", f"masked_{image_name}.png")
+        cv2.imwrite(save_path, masked_image)
+        print(f"마스킹된 이미지 저장됨: {save_path}")
+
 def compare_layouts(image1, image2, threshold=0.95):
     """
     두 이미지의 레이아웃 유사도를 비교합니다.
@@ -170,6 +170,7 @@ def compare_layouts(image1, image2, threshold=0.95):
 def layout_classification(image_dir):
     """
     디렉토리 내의 이미지들을 레이아웃 유사도에 따라 분류합니다.
+    모든 이미지 쌍의 유사도를 계산한 후, 가장 유사한 쌍부터 그룹핑합니다.
     
     Args:
         image_path (str): 이미지들이 저장된 디렉토리 경로
@@ -178,58 +179,112 @@ def layout_classification(image_dir):
         Dict[str, List[str]]: 레이아웃 그룹별 이미지 목록
             - key: 그룹 이름
             - value: 해당 그룹에 속한 이미지 파일명 리스트
-    
-        output:
-          output/xml-bbox/ratio_width_height/layout_group_1_image_1.png
-          output/xml-bbox/ratio_width_height/layout_group_1_image_2.png
-          ...
-          output/xml-bbox/layout_classified.xlsx
     """
     image_list = glob.glob(f"{image_dir}/*.png")
+    n_images = len(image_list)
     
-    # 이미지 그룹을 저장할 딕셔너리
-    layout_groups = {}
-    # 이미 처리된 이미지를 추적
-    processed_images = set()
+    # 1. 모든 이미지 쌍의 유사도 계산
+    similarity_matrix = np.zeros((n_images, n_images))
+    for i in range(n_images):
+        for j in range(i+1, n_images):
+            result = compare_layouts(image_list[i], image_list[j])
+            similarity_matrix[i][j] = similarity_matrix[j][i] = result['similarity_score']
     
-    for i, base_image in enumerate(image_list):
-        base_image_dir = os.path.dirname(base_image).split("/")[-1]
-        if base_image in processed_images:
+    # 2. 유사도가 높은 순서대로 정렬된 이미지 쌍 생성
+    pairs = []
+    for i in range(n_images):
+        for j in range(i+1, n_images):
+            pairs.append((similarity_matrix[i][j], i, j))
+    pairs.sort(reverse=True)  # 유사도 높은 순으로 정렬
+    
+    # 3. 그룹핑
+    groups = []  # 각 그룹의 대표 이미지 인덱스와 멤버 인덱스 리스트
+    group_representatives = {}  # 각 이미지가 속한 그룹의 대표 이미지 인덱스
+    
+    for similarity, i, j in pairs:
+        if similarity < 0.95:  # threshold
             continue
             
-        base_image_path = os.path.join(base_image)
-        current_group = [base_image]
-        processed_images.add(base_image)
+        # i와 j가 모두 아직 그룹에 속하지 않은 경우
+        if i not in group_representatives and j not in group_representatives:
+            groups.append([i, [i, j]])
+            group_representatives[i] = i
+            group_representatives[j] = i
+        # i만 그룹에 속한 경우
+        elif i in group_representatives and j not in group_representatives:
+            rep_i = group_representatives[i]
+            # j와 i의 대표 이미지와의 유사도 확인
+            if similarity_matrix[j][rep_i] >= 0.95:
+                for group in groups:
+                    if group[0] == rep_i:
+                        group[1].append(j)
+                        group_representatives[j] = rep_i
+                        break
+        # j만 그룹에 속한 경우
+        elif j in group_representatives and i not in group_representatives:
+            rep_j = group_representatives[j]
+            # i와 j의 대표 이미지와의 유사도 확인
+            if similarity_matrix[i][rep_j] >= 0.95:
+                for group in groups:
+                    if group[0] == rep_j:
+                        group[1].append(i)
+                        group_representatives[i] = rep_j
+                        break
+        # i와 j가 다른 그룹에 속한 경우
+        elif i in group_representatives and j in group_representatives:
+            rep_i = group_representatives[i]
+            rep_j = group_representatives[j]
+            if rep_i != rep_j:
+                # 두 그룹의 대표 이미지 간 유사도 확인
+                if similarity_matrix[rep_i][rep_j] >= 0.95:
+                    # 그룹 병합
+                    for group in groups:
+                        if group[0] == rep_j:
+                            groups.remove(group)
+                            for member in group[1]:
+                                group_representatives[member] = rep_i
+                            for g in groups:
+                                if g[0] == rep_i:
+                                    g[1].extend(group[1])
+                                    break
+                            break
+    
+    # 4. 그룹에 속하지 않은 이미지들은 각각 새로운 그룹으로
+    for i in range(n_images):
+        if i not in group_representatives:
+            groups.append([i, [i]])
+            group_representatives[i] = i
+    
+    # 5. 파일 이름 변경 및 결과 저장
+    layout_groups = {}
+    for group_idx, (rep_idx, members) in enumerate(groups):
+        group_name = f"layout_{group_idx}"
+        for member_idx in members:
+            img = image_list[member_idx]
+            img_name = os.path.basename(img)
+            new_name = f"{group_name}_{img_name}"
+            new_path = os.path.join(os.path.dirname(img), new_name)
+            os.rename(img, new_path)
         
-        # 현재 이미지와 나머지 이미지들을 비교
-        for compare_image in image_list[i+1:]:
-            if compare_image in processed_images:
-                continue
-                
-            compare_image_path = os.path.join(compare_image)
-            result = compare_layouts(base_image_path, compare_image_path)
-            
-            if result['is_same_layout']:
-                current_group.append(compare_image)
-                processed_images.add(compare_image)
-        
-        # 그룹에 이미지가 있으면 저장
-        if current_group:
-            # 이미지들을 해당 그룹 디렉토리로 복사
-            for img in current_group:
-                os.rename(base_image, f"{image_dir}/layout_{len(layout_groups)}_{img}")
-            
-            layout_groups[f"layout_{len(layout_groups)}"] = current_group
-            print(f"레이아웃 {len(layout_groups)} 생성됨: {len(current_group)}개 이미지")
+        layout_groups[group_name] = [os.path.basename(image_list[idx]) for idx in members]
+        print(f"레이아웃 {group_name} 생성됨: {len(members)}개 이미지")
     
     return layout_groups
 
 
 if __name__ == "__main__":
+    ## 이미지 비율에 따른 분류
     # split_by_ratio("./resource/xml-bbox/")
+    
+    # ## box 영역 검출 -> 마스킹 이미지 생성
     # layout_list = _layout_list("./resource/xml-bbox/")
     # for layout in layout_list:
     #     mask_images(layout)
-    output_layout_list = _layout_list("./output/xml-bbox/")
-    for layout in output_layout_list:
-        layout_classification(layout)
+    
+    # ## 마스킹 이미지 비교 -> 레이아웃 분류
+    # output_layout_list = _layout_list("./output/xml-bbox/")
+    # for layout in output_layout_list:
+    #     layout_classification(layout)
+
+    result = compare_layouts("./output/xml-bbox/ratio_1080_2340/layout_0_masked_com.samsung.android.messaging_ContactPickerActivity_20250508_173054_Message_selected button_Poor_Kim_boxed.png", "./output/xml-bbox/ratio_748_720/layout_0_masked_com.android.systemui_SubHomeActivity_20250508_173640_Cover_AOD mode_Clock number_poor_Joe_boxed.png")
+    print(result)
