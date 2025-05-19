@@ -3,8 +3,8 @@ Extracts Skeleton UI Layout from Samsung Themes using GUIParser
 """
 import os
 
-import sys
-print(sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))))
+os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+os.environ['OMP_NUM_THREADS'] = '1'
 
 import cv2
 import numpy as np
@@ -79,7 +79,7 @@ class SkeletonUIExtractor:
         elif isinstance(image, np.ndarray):
             image = Image.fromarray(image)
 
-        # ✅ 이미지 리사이즈 (성능 최적화)
+        # 이미지 리사이즈 (성능 최적화)
         if max(image.size) > 640:
             new_w = 640
             new_h = int(image.height * (640 / image.width))
@@ -454,7 +454,7 @@ def extract_ui_skeleton(image_path: str, config: Optional[Dict] = None) -> Dict:
     """UI 스켈레톤 추출 편의 함수"""
     if config is None:
         config = {
-            'som_model_path': 'weights/icon_detect/model.pt',
+            'som_model_path': 'weights/icon_detect/model_hf.pt',
             'caption_model_name': 'florence2',
             'caption_model_path': 'weights/icon_caption_florence',
             'BOX_TRESHOLD': 0.05,
@@ -471,9 +471,10 @@ if __name__ == "__main__":
     # image_path = "../resource/sample/com.android.settings_SubSettings_20250509_160428_settings_checkbox_cut_Default_xuka.png"
     image_path = "../preprocess/sorted_clusters-2/2/com.sec.android.app.launcher_LauncherActivity_20250508_170024_Media output_unselected radio button_default_Zany_1.png"
     filename = os.path.splitext(os.path.basename(image_path))[0]
-    # BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    BASE_DIR = "../output"
-    OUT_DIR = os.path.join(BASE_DIR, 'test')
+    # BASE_DIR = "../output"
+    # OUT_DIR = os.path.join(BASE_DIR, 'test')
+    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    OUT_DIR = os.path.join(BASE_DIR, 'output/json')
     os.makedirs(OUT_DIR, exist_ok=True)
     config = {
         'som_model_path': os.path.join(BASE_DIR, 'weights/icon_detect/model.pt'),

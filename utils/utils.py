@@ -1,4 +1,4 @@
-# from ultralytics import YOLO
+    # from ultralytics import YOLO
 import os
 import io
 import base64
@@ -13,6 +13,9 @@ import easyocr
 from paddleocr import PaddleOCR
 reader = easyocr.Reader(['en', 'ko'])
 paddle_ocr = PaddleOCR(
+    det_model_dir='../weights/en_PP-OCRv3_det_infer',
+    rec_model_dir='../weights/en_PP-OCRv3_rec_infer',
+    cls_model_dir='../weights/ch_ppocr_mobile_v2.0_cls_infer',
     lang='en',  # other lang also available
     use_angle_cls=False,
     use_gpu=False,  # using cuda will conflict with pytorch in the same process
@@ -25,12 +28,10 @@ paddle_ocr = PaddleOCR(
 import time
 import base64
 
-import os
-import ast
 import torch
 from typing import Tuple, List, Union
 from torchvision.ops import box_convert
-import re
+
 from torchvision.transforms import ToPILImage
 import supervision as sv
 import torchvision.transforms as T
