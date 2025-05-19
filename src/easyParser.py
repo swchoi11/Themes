@@ -2,6 +2,10 @@
 Extracts Skeleton UI Layout from Samsung Themes using GUIParser
 """
 import os
+
+import sys
+print(sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))))
+
 import cv2
 import numpy as np
 import torch
@@ -464,10 +468,12 @@ def extract_ui_skeleton(image_path: str, config: Optional[Dict] = None) -> Dict:
 # 사용 예제
 if __name__ == "__main__":
     # 설정
-    image_path = "../resource/sample/com.android.settings_SubSettings_20250509_160428_settings_checkbox_cut_Default_xuka.png"
+    # image_path = "../resource/sample/com.android.settings_SubSettings_20250509_160428_settings_checkbox_cut_Default_xuka.png"
+    image_path = "../preprocess/sorted_clusters-2/2/com.sec.android.app.launcher_LauncherActivity_20250508_170024_Media output_unselected radio button_default_Zany_1.png"
     filename = os.path.splitext(os.path.basename(image_path))[0]
-    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    OUT_DIR = os.path.join(BASE_DIR, 'output')
+    # BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    BASE_DIR = "../output"
+    OUT_DIR = os.path.join(BASE_DIR, 'test')
     os.makedirs(OUT_DIR, exist_ok=True)
     config = {
         'som_model_path': os.path.join(BASE_DIR, 'weights/icon_detect/model.pt'),
