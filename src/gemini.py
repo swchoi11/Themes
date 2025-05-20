@@ -1,62 +1,100 @@
-from common.prompt import PROMPT
-from common.logger import logger
+from google import genai
+from google.genai import types
+from src.prompt import Prompt
+import glob
+import os
+import time
 
-MAX_RETRIES = 5
-INITIAL_DELAY = 1
-MODEL = 'gemini-2.0-flash-001'
 
-prompt = PROMPT.visibility_prompt()
-image = client.files.upload(file=image_path)
+class Gemini:
+    def __init__(self):
+        self.client = genai.Client(api_key='AIzaSyC48SqgmhDt9jPvqjPdqNTiJpADIwtX1CI')
+        self.model = 'gemini-2.0-flash-001'
+        self.max_retries = 5  
+        self.initial_delay = 1
 
-response_schema = {
-    "type": "array",
-    "items": {
-        "type": "object",
-        "required": [],
-        "properties": {
-            "": {"type": ""},
+    def retry_with_delay(func):
+        def wrapper(self, *args, **kwargs):
+            delay = self.initial_delay
+            for attempt in range(self.max_retries):
+                try:
+                    return func(self, *args, **kwargs)
+                except Exception as e:
+                    if attempt == self.max_retries - 1:
+                        raise e
+                    time.sleep(delay)
+                    delay *= 2
+        return wrapper
+        
+    def _extract_issues(self, cluster_id):
+
+        image_list = glob.glob(f"./output/{cluster_id}/*.png")
+
+        rows = ''
+
+        for image_path in image_list:
+            rows += os.path.basename(image_path) + ','
+
+        rows = rows.replace('default', '')
+        rows = rows.replace('Default', '')
+        
+        rows = rows.replace('preview', '')
+        rows = rows.replace('Preview', '')
+
+        return rows
+    
+    @retry_with_delay
+    def relevant_issues(self, rows):
+        prompt = Prompt.relevant_issues_prompt()
+
+        response_schema = {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ['issue_type'],
+                "properties": {
+                    "issue_type": {"type": "string"},
+                }
+            }
         }
-    }
-}
 
-logger.info("Gemini API 호출 시작")
-for attempt in range(MAX_RETRIES + 1):
-    try:
-        response = client.models.generate_content(
-            model=MODEL,
+        response = self.client.models.generate_content(
+            model=self.model,
             contents=[
                 prompt,
-                image
+                rows
             ],
             config=types.GenerateContentConfig(
                 response_mime_type="application/json",
                 response_schema=response_schema
             )
         )
-        logger.info("Gemini API 호출 완료")
-        break
-    except  errors.ServerError as e:
-        logger.warning(f"Gemini API 서버 오류 (시도 {attempt + 1}/{MAX_RETRIES + 1}): {e}")
-        if attempt < MAX_RETRIES:
-            delay = INITIAL_DELAY * (2 ** attempt)
-            logger.info(f"다음 시도까지 {delay}초 대기...")
-            time.sleep(delay)
-        else:
-            logger.error("Gemini API 호출 실패 (최대 재시도 횟수 초과)")
-            raise
-    except errors.APIError as e:
-        logger.error(f"Gemini API 클라이언트 오류: {e}")
-        raise
-    except Exception as e:
-        logger.error(f"예상치 못한 오류 발생: {e}")
-        raise
-    else:
-        pass
 
-    if 'response' not in locals():
-        logger.error("Gemini API 응답을 받지 못했습니다.")
+        return response.text
 
-    if 'response' in locals() and response:
-        pass
+    @retry_with_delay
+    def generate_description(self, target_image_dir, cluster_main_image, relevant_issues):
+        prompt = Prompt.generate_description_prompt()
 
-result = json.loads(response.text)
+        response_schema = {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ['issue_type'],
+            }
+        }
+        response = self.client.models.generate_content(
+            model=self.model,
+            contents=[
+                prompt,
+                target_image_dir,
+                cluster_main_image,
+                relevant_issues
+            ],
+            config=types.GenerateContentConfig(
+                response_mime_type="application/json",
+                response_schema=response_schema
+            )
+        )
+
+        return response.text
