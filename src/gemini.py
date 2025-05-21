@@ -4,14 +4,17 @@ from src.prompt import Prompt
 import glob
 import os
 import time
-
+from dotenv import load_dotenv
 
 class Gemini:
     def __init__(self):
-        self.client = genai.Client(api_key='AIzaSyC48SqgmhDt9jPvqjPdqNTiJpADIwtX1CI')
+        load_dotenv()
+        self.client = genai.Client(api_key=os.getenv('API_KEY'))
         self.model = 'gemini-2.0-flash-001'
         self.max_retries = 5  
         self.initial_delay = 1
+        raw_issues = open('./resource/raw_issues.txt', 'r').read()
+        self.raw_issues = raw_issues.split('\n')
 
     def retry_with_delay(func):
         def wrapper(self, *args, **kwargs):
@@ -25,7 +28,7 @@ class Gemini:
                     time.sleep(delay)
                     delay *= 2
         return wrapper
-        
+            
     def _extract_issues(self, cluster_id):
 
         image_list = glob.glob(f"./output/{cluster_id}/*.png")
@@ -73,21 +76,29 @@ class Gemini:
         return response.text
 
     @retry_with_delay
-    def generate_description(self, target_image_dir, cluster_main_image, relevant_issues):
+    def generate_description(self, target_image_dir, cluster_main_image_dir, relevant_issues):
         prompt = Prompt.generate_description_prompt()
+        target_image = self.client.files.upload(file=target_image_dir)
+        cluster_main_image = self.client.files.upload(file=cluster_main_image_dir)
 
         response_schema = {
             "type": "array",
             "items": {
                 "type": "object",
-                "required": ['issue_type'],
+                "required": ['application','function', 'issue', 'detail'],
+                "properties": {
+                    "application": {"type": "string"},
+                    "function": {"type": "string"},
+                    "issue": {"type": "string"},
+                    "detail": {"type": "string"},
+                }
             }
         }
         response = self.client.models.generate_content(
             model=self.model,
             contents=[
                 prompt,
-                target_image_dir,
+                target_image,
                 cluster_main_image,
                 relevant_issues
             ],
@@ -97,4 +108,18 @@ class Gemini:
             )
         )
 
+        return response.text
+    
+    @retry_with_delay
+    def only_visibility(self, target_image_dir):
+        prompt = Prompt.only_visibility_prompt()
+        target_image = self.client.files.upload(file=target_image_dir)
+
+        response = self.client.models.generate_content(
+            model=self.model,
+            contents=[
+                prompt,
+                target_image
+            ])
+        
         return response.text

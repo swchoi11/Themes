@@ -11,15 +11,23 @@ if __name__ == "__main__":
     # run_postprocess('./resource/image.png')
     
     
-    masker = Mask()
-    target_image_dir = './resource/'
-    main_frame_dir = './output/main/'
+    # masker = Mask()
+    # target_image_dir = './resource/'
+    # main_frame_dir = './output/main/'
 
     
-    masker.mask_directory_images(target_image_dir, is_gray=True)
-    masker.mask_directory_images(main_frame_dir, is_gray=True)
+    # masker.mask_directory_images(target_image_dir, is_gray=True)
+    # masker.mask_directory_images(main_frame_dir, is_gray=True)
 
 
-    classifier = Classification('./resource/test.png')
-    result = classifier.layout_classification('./resource/test.png')
+    # classifier = Classification('./resource/test.png')
+    # result = classifier.layout_classification('./resource/test.png')
+    # print(result)
+
+    gemini = Gemini()
+    result = gemini.only_visibility('./resource/testd.png')
     print(result)
+    # rows = gemini.relevant_issues(gemini.raw_issues)
+    # # print(rows)
+    # result = gemini.generate_description('./resource/Slide 2.jpg', './output/main/Slide 2.jpg', rows)
+    # print(result)
