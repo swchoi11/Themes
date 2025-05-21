@@ -1,4 +1,8 @@
 .env
 /weights/*
-/weights/icon_detect/
 /output/*
+/resource/*
+/cluster_data/*
+/raw/*
+/sample/*
+

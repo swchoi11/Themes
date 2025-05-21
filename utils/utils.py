@@ -12,10 +12,14 @@ from matplotlib import pyplot as plt
 import easyocr
 from paddleocr import PaddleOCR
 reader = easyocr.Reader(['en', 'ko'])
+
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+print(BASE_DIR)
+
 paddle_ocr = PaddleOCR(
-    det_model_dir='../weights/en_PP-OCRv3_det_infer',
-    rec_model_dir='../weights/en_PP-OCRv3_rec_infer',
-    cls_model_dir='../weights/ch_ppocr_mobile_v2.0_cls_infer',
+    det_model_dir='./src/weights/en_PP-OCRv3_det_infer',
+    rec_model_dir='./src/weights/en_PP-OCRv3_rec_infer',
+    cls_model_dir='./src/weights/ch_ppocr_mobile_v2.0_cls_infer',
     lang='en',  # other lang also available
     use_angle_cls=False,
     use_gpu=False,  # using cuda will conflict with pytorch in the same process
@@ -495,7 +499,7 @@ def get_xywh_yolo(input):
     x, y, w, h = int(x), int(y), int(w), int(h)
     return x, y, w, h
 
-def check_ocr_box(image_source: Union[str, Image.Image], display_img = True, output_bb_format='xywh', goal_filtering=None, easyocr_args=None, use_paddleocr=False):
+def check_ocr_box(image_source: Union[str, Image.Image], display_img = True, output_bb_format='xywh', goal_filtering=None, easyocr_args=None, use_paddleocr=True):
     if isinstance(image_source, str):
         image_source = Image.open(image_source)
     if image_source.mode == 'RGBA':
@@ -508,6 +512,7 @@ def check_ocr_box(image_source: Union[str, Image.Image], display_img = True, out
             text_threshold = 0.5
         else:
             text_threshold = easyocr_args['text_threshold']
+        
         result = paddle_ocr.ocr(image_np, cls=False)[0]
         coord = [item[0] for item in result if item[1][1] > text_threshold]
         text = [item[1][0] for item in result if item[1][1] > text_threshold]

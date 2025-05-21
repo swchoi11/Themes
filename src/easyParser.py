@@ -1,23 +1,24 @@
 """
 Extracts Skeleton UI Layout from Samsung Themes using GUIParser
 """
+
 import os
 
-os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-os.environ['OMP_NUM_THREADS'] = '1'
+# 폴더명에 한글이 있을 때 지정해주면 해결
+# import sys
+# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import cv2
-import numpy as np
-import torch
-from PIL import Image
+import glob
 import json
+import cv2
+import torch
+import numpy as np
+from PIL import Image
 from typing import Dict, List, Tuple, Optional, Union
 from dataclasses import dataclass, asdict
 
 from utils.utils import get_som_labeled_img, get_caption_model_processor, get_yolo_model, check_ocr_box
-from utils.box_annotator import BoxAnnotator
-import supervision as sv
-import torchvision.transforms as T
+from src.visualizer import visualize_ui_skeleton_result
 
 @dataclass
 class UIElement:
@@ -36,7 +37,6 @@ class UIElement:
         if self.children is None:
             self.children = []
 
-
 @dataclass
 class LayoutStructure:
     """레이아웃 구조 정보"""
@@ -46,26 +46,18 @@ class LayoutStructure:
     layout_regions: Dict[str, Dict]
 
 class SkeletonUIExtractor:
-    """스켈레톤 UI 구조 추출기"""
-
+    """스켈레톤 UI 구조 추출"""
     def __init__(self, config: Dict):
         self.config = config
         # device = 'cuda' if torch.cuda.is_available() else 'cpu'
         device = 'cpu'
-        # 모델 초기화
-
-        model_path = os.path.abspath(config.get('som_model_path'))
-        print("모델 경로:", model_path)
-        print("존재 여부:", os.path.exists(model_path))
-
-        self.som_model = get_yolo_model(model_path=model_path)
+        self.som_model = get_yolo_model(model_path=config['som_model_path'])
         self.caption_model_processor = get_caption_model_processor(
             model_name=config.get('caption_model_name', 'florence2'),
-            model_name_or_path=os.path.abspath(config.get('caption_model_path')),
+            model_name_or_path=config.get('caption_model_path'),
             device=device
         )
-
-        # 레이아웃 분석 매개변수
+        # 레이아웃 분석 매개변수(
         self.layout_detector = LayoutDetector()
         self.hierarchy_builder = HierarchyBuilder()
 
@@ -88,26 +80,26 @@ class SkeletonUIExtractor:
         image = image.convert("RGB")
         w, h = image.size
 
-        # 2. OCR로 텍스트 요소 추출
+        # OCR로 텍스트 요소 추출
         ocr_result, _ = check_ocr_box(
             image,
             display_img=False,
             output_bb_format='xyxy',
             easyocr_args={'text_threshold': 0.8, 'paragraph': False},
-            use_paddleocr=False
+            use_paddleocr=True
         )
         text_list, ocr_bbox = ocr_result
 
-        # 3. YOLO로 아이콘/버튼 검출
+        # YOLO로 아이콘/버튼 검출
         ui_elements = self._detect_ui_elements(image, ocr_bbox, text_list, w, h)
 
-        # 4. 레이아웃 영역 분할
+        # 레이아웃 영역 분할
         layout_regions = self.layout_detector.detect_layout_regions(image, ui_elements)
 
-        # 5. 계층 구조 분석
+        # 계층 구조 분석
         hierarchy = self.hierarchy_builder.build_hierarchy(ui_elements, layout_regions)
 
-        # 6. 스켈레톤 구조 반환
+        # 스켈레톤 구조 반환
         return LayoutStructure(
             structure_type=self._determine_structure_type(layout_regions),
             elements=ui_elements,
@@ -274,7 +266,6 @@ class LayoutDetector:
                 ))
 
         return containers
-
 
 class HierarchyBuilder:
     """UI 계층 구조 생성기"""
@@ -449,59 +440,60 @@ class LayoutAwareParser:
         }
 
 
-# 편의 함수
-def extract_ui_skeleton(image_path: str, config: Optional[Dict] = None) -> Dict:
-    """UI 스켈레톤 추출 편의 함수"""
-    if config is None:
-        config = {
-            'som_model_path': 'weights/icon_detect/model_hf.pt',
+class EasyParserRunner:
+    def __init__(self, base_dir: str, cluster_base_dir: str, json_output_dir: str, 
+                 visual_output_dir: str, num_cluster: int):
+        self.base_dir = base_dir
+        self.cluster_base_dir = cluster_base_dir
+        self.json_output_dir = json_output_dir
+        self.visual_output_dir = visual_output_dir
+        self.num_cluster = num_cluster
+        self.config = {
+            'som_model_path': os.path.join(base_dir, 'src', 'weights', 'icon_detect', 'model.pt'),
             'caption_model_name': 'florence2',
-            'caption_model_path': 'weights/icon_caption_florence',
+            'caption_model_path': os.path.join(base_dir, 'src', 'weights', 'icon_caption_florence'),
             'BOX_TRESHOLD': 0.05,
-            'iou_threshold': 0.7
+            'iou_threshold': 0.4
         }
+        self.parser = LayoutAwareParser(self.config)
 
-    parser = LayoutAwareParser(config)
-    return parser.parse_by_layout(image_path)
+    def run(self):
+        
+        for cluster_id in range(self.num_cluster):
+            cluster_dir = os.path.join(self.cluster_base_dir, f"cluster{cluster_id:02d}")
+            print(f"\n[INFO] 클러스터 {cluster_id:02d} 처리 중...")
 
+            cluster_images = sorted(glob.glob(os.path.join(cluster_dir, "*.png")))
+            print(f"[INFO] 클러스터 {cluster_id:02d} | 이미지 수: {len(cluster_images)}")
 
-# 사용 예제
-if __name__ == "__main__":
-    # 설정
-    # image_path = "../resource/sample/com.android.settings_SubSettings_20250509_160428_settings_checkbox_cut_Default_xuka.png"
-    image_path = "../preprocess/sorted_clusters-2/2/com.sec.android.app.launcher_LauncherActivity_20250508_170024_Media output_unselected radio button_default_Zany_1.png"
-    filename = os.path.splitext(os.path.basename(image_path))[0]
-    # BASE_DIR = "../output"
-    # OUT_DIR = os.path.join(BASE_DIR, 'test')
-    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    OUT_DIR = os.path.join(BASE_DIR, 'output/json')
-    os.makedirs(OUT_DIR, exist_ok=True)
-    config = {
-        'som_model_path': os.path.join(BASE_DIR, 'weights/icon_detect/model.pt'),
-        'caption_model_name': 'florence2',
-        'caption_model_path': os.path.join(BASE_DIR, 'weights/icon_caption_florence'),
-        'BOX_TRESHOLD': 0.05,
-        'iou_threshold': 0.7
-    }
+            for image_path in cluster_images:
+                filename = os.path.splitext(os.path.basename(image_path))[0]
 
-    # 파서 생성
-    parser = LayoutAwareParser(config)
-    result = parser.parse_by_layout(image_path)
+                cluster_json_dir = os.path.join(self.json_output_dir, f"cluster{cluster_id:02d}")
+                os.makedirs(cluster_json_dir, exist_ok=True)
+                json_path = os.path.join(cluster_json_dir, f"{filename}.json")
 
-    with open(f"{OUT_DIR}/{filename}.json", "w", encoding="utf-8") as f:
-        json.dump(result, f, ensure_ascii=False, indent=2)
+                print(f"[PROCESSING] {image_path}")
 
-    # 결과 출력
-    print("=== UI 스켈레톤 구조 ===")
-    print(f"구조 타입: {result['skeleton']['structure_type']}")
-    print(f"총 요소 수: {len(result['skeleton']['elements'])}")
+                try:
+                    result = self.parser.parse_by_layout(image_path)
+                    with open(json_path, "w", encoding="utf-8") as f:
+                        json.dump(result, f, ensure_ascii=False, indent=2)
+                    print(f"[INFO] 분석 결과: {json_path}")
+                except Exception as e:
+                    print(f"[ERROR] 분석 실패: {e}")
+                    continue
 
-    print("\n=== 레이아웃 영역별 정보 ===")
-    for region_name, region_info in result['layout_regions'].items():
-        if region_info['elements']:
-            print(f"{region_name}: {len(region_info['elements'])}개 요소")
+                try:
+                    visual_path = os.path.join(self.visual_output_dir, f"cluster{cluster_id:02d}", f"{filename}.png")
+                    os.makedirs(os.path.dirname(visual_path), exist_ok=True)
 
-    print("\n=== 네비게이션 구조 ===")
-    if result['navigation']:
-        print(f"타입: {result['navigation']['type']}")
-        print(f"요소 수: {len(result['navigation']['elements'])}")
+                    visualize_ui_skeleton_result(
+                        image_path=image_path,
+                        result_path=json_path,
+                        output_dir=self.visual_output_dir,
+                        cluster_output_name=visual_path
+                    )
+                except Exception as e:
+                    print(f"[ERROR] 시각화 실패: {e}")
+                    continue
