@@ -34,7 +34,7 @@ def init_logger(
         reset=True,
         log_colors={
             'DEBUG': 'cyan',
-            'INFO': 'green',
+            'INFO': 'green', 
             'WARNING': 'yellow',
             'ERROR': 'red',
             'CRITICAL': 'bold_red',

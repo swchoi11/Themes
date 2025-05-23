@@ -1,6 +1,6 @@
 from google import genai
 from google.genai import types
-from src.Prompt import Prompt
+from common.Prompt import Prompt
 import glob
 import os
 import time

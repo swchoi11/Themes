@@ -36,13 +36,6 @@ class Mask:
             
             # 현재 색상의 마스크 생성
             mask = np.all(img == bgr_array, axis=-1).astype(np.uint8) * 255
-            contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-            
-            if not contours:
-                continue
-            
-            # 면적이 0보다 큰 컨투어만 필터링
-            valid_contours = [cnt for cnt in contours if cv2.contourArea(cnt) > 0]
             
             # 현재 색상의 마스크를 3채널로 변환
             mask_3ch = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
@@ -51,21 +44,12 @@ class Mask:
             np.copyto(masked_image, img, where=(mask_3ch == [255, 255, 255]))
             
             # 현재 색상의 상자 정보 저장
-            for cnt in valid_contours:
-                x, y, w, h = cv2.boundingRect(cnt)
-                all_rows.append({
-                    "x": x,
-                    "y": y,
-                    "width": w,
-                    "height": h,
-                    "color": hex_color  # 색상 정보도 함께 저장
-                })
         
-        return masked_image, all_rows
+        return masked_image
 
     def mask_directory_images(self, image_dir: str, is_gray: bool) -> None:
         """
-        input: 메인 프레임 이미지 디렉토리, 흑백 변환 여부
+        input: 이미지 디렉토리, 흑백 변환 여부
         output: None
         """
 
@@ -75,15 +59,15 @@ class Mask:
             image_name = os.path.basename(image_path)
             
             img = cv2.imread(image_path)
-            masked_img, rows = self.mask_image(img)
+            masked_img = self.mask_image(img)
             
             if not is_gray:
-                cv2.imwrite(image_path, masked_img)
+                cv2.imwrite(f"{image_dir}/masked_{image_name}", masked_img)
                 print(f"마스킹된 이미지 저장됨: {image_path}")
             # 흑백으로 변환
             else:
                 gray_img = cv2.cvtColor(masked_img, cv2.COLOR_BGR2GRAY)
-                cv2.imwrite(image_path, gray_img)
+                cv2.imwrite(f"{image_dir}/masked_gray_{image_name}", gray_img)
                 print(f"흑백 이미지 저장됨: {image_path}")
             
 
