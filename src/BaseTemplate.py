@@ -170,13 +170,13 @@ class make_base_template():
 class BaseTemplateGenerator:
     def __init__(self, min_box_size: int, iou_threshold: float, cluster_dir: str,
                  output_dir: str, condition_output_dir: str,
-                 image_exts: List[str], cluster_prefix: str = "cluster"):
+                 image_extensions: List[str], cluster_prefix: str = "cluster"):
         
         self.template_maker = make_base_template(min_box_size, iou_threshold)
         self.cluster_dir = cluster_dir
         self.output_dir = output_dir
         self.condition_output_dir = condition_output_dir
-        self.image_exts = image_exts
+        self.image_extensions = image_extensions
         self.cluster_prefix = cluster_prefix
 
     def run(self):

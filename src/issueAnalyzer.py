@@ -23,7 +23,7 @@ class ThemeIssue:
     component_id: str
     component_type: str
     severity: float  # 0.0 ~ 1.0
-    bbox: List[float]
+    bbox: List[float] 
     description: str
     screenshot_region: Optional[np.ndarray] = None
 
