@@ -14,10 +14,6 @@ class Gemini:
  
         self.max_retries = 5  
         self.initial_delay = 1
-        
-    # 디자인 가이드라인 위반 여부 검증
-    # 자동화 모듈이 검출한 이슈에 대한 2차 검증 및 설명 강화
-
 
     def retry_with_delay(func):
         def wrapper(self, *args, **kwargs):
