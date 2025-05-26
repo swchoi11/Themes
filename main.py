@@ -176,33 +176,3 @@ if __name__ == "__main__":
     # 5-5. 결과물 출력
 
 
-
-
-    # 레이아웃과 이미지를 비교해 cut off, visibility 이슈 확인
-    ## 타겟 이미지와 베이스 템플릿을 비교 
-    # map components , calculate iou
-    # print(theme_layout.skeleton.elements)
-    
-    theme_elements = theme_layout.skeleton.elements
-    default_elements = default_layout.skeleton.elements
-
-    compare = Compare()
-    result = compare._map_components(default_elements, theme_elements)
-    for box in result.values():
-        iou = compare._calculate_iou(box['default'].bbox, box['themed'].bbox)
-        print(f"iou: {iou}")
-
-    ## 타겟 이미지와 디폴트 이미지를 비교
-    # detect_cut_off_issue, calculate_contrast
-    # default_image_path, default_score = classify.get_default(target_image_path, cluster, method='orb')
-    # print(f"디폴트 이미지: {default_image_path}")
-    # print(f"디폴트 점수: {default_score}")
-
-
-    # Gemini를 통한 visibility 및 디자인 이슈 확인
-    ## 타겟 이미지와 이슈 목록을 제공하여 이슈를 확인합니다.
-
-
-    # 결과 산출
-
-

@@ -1,6 +1,9 @@
-# 디폴트 이미지 & 이미지의 json / 테마 이미지 & 이미지의 json 비교
+import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils.model import Layout, UIElement, Issue# 디폴트 이미지 & 이미지의 json / 테마 이미지 & 이미지의 json 비교
 import json
-from src.model import Layout, UIElement, Issue
+# from utils.model import Layout, UIElement, Issue
 from typing import Dict, List, Optional
 from skimage.metrics import structural_similarity as ssim
 import cv2
@@ -18,30 +21,29 @@ class Compare:
     def __init__(self):
         pass
     
-    def analyze_layout(self, theme: Layout, default: Layout) -> List[LayoutIssue]:
+    def analyze_layout(self, theme: Layout, default: Layout) -> List[Issue]:
         """레이아웃 분석 수행"""
         issues = []
         
         # 컴포넌트 매핑
-        component_mapping = self._map_components(
+        component_mapping = self.map_components(
             default.elements,
             theme.elements
         )
         
-        
-
+        print(component_mapping)
         # 각 검사 수행
-        issues.extend(self._check_element_sort(theme, default, component_mapping))
-        issues.extend(self._check_element_brightness(theme, default, component_mapping))
-        issues.extend(self._check_element_interaction(theme, default, component_mapping))
-        issues.extend(self._check_element_icon(theme, default, component_mapping))
-        issues.extend(self._check_element_text(theme))
-        issues.extend(self._check_element_calendar(theme))
-        issues.extend(self._check_element_highlight(theme))
+        issues.extend(self.check_element_sort(theme, default, component_mapping))
+        # issues.extend(self._check_element_brightness(theme, default, component_mapping))
+        # issues.extend(self._check_element_interaction(theme, default, component_mapping))
+        # issues.extend(self._check_element_icon(theme, default, component_mapping))
+        # issues.extend(self._check_element_text(theme))
+        # issues.extend(self._check_element_calendar(theme))
+        # issues.extend(self._check_element_highlight(theme))
 
-        return issues
+        return component_mapping
 
-    def _map_components(self,
+    def map_components(self,
                         default_elements,
                         themed_elements):
         """두 이미지 간 동일한 컴포넌트 매핑"""
@@ -112,8 +114,7 @@ class Compare:
 
         return intersection_area / union_area
 
-
-    def _check_element_sort(self, theme: Layout, default: Layout, component_mapping: Dict) -> List[LayoutIssue]:
+    def check_element_sort(self, theme: Layout, default: Layout, component_mapping: Dict) -> List[Issue]:
         """요소 정렬 기준 일치 여부 확인"""
         issues = []
         
@@ -121,19 +122,18 @@ class Compare:
             default_elem = mapping['default']
             themed_elem = mapping['themed']
             
-            # 정렬 기준 비교 (예: 수직/수평 정렬, 간격 등)
-            if default_elem.alignment != themed_elem.alignment:
-                issues.append(LayoutIssue(
-                    issue_type='sort',
-                    component_id=component_id,
-                    component_type=themed_elem.type,
-                    severity=0.7,
-                    bbox=themed_elem.bbox,
-                    description=f"정렬 기준 불일치 (원본: {default_elem.alignment}, 테마: {themed_elem.alignment})"
-                ))
-        
         return issues
 
+    def check_element_visibility(self, theme: Layout, default: Layout, component_mapping: Dict) -> List[Issue]:
+        """상호작용 가능한 요소가 시각적으로 명확하게 구분되지 않음"""
+        issues = []
+
+        for component_id, mapping in component_mapping.items():
+            default_elem = mapping['default']
+            themed_elem = mapping['themed']
+            
+        return issues
+    
     # def _check_element_brightness(self, theme: Layout, default: Layout, component_mapping: Dict) -> List[LayoutIssue]:
     #     """텍스트/아이콘과 배경 간 명도 대비 확인"""
     #     issues = []
@@ -283,7 +283,7 @@ class Compare:
 
 
 # 이미지 자체의 결함 분석
-class Alone(Issue):
+class Single(Issue):
     def __init__(self, theme_layout: Layout):
         self.layout = theme_layout
         
@@ -310,17 +310,15 @@ class Alone(Issue):
 
 
 if __name__ == "__main__":
-    parser = LayoutAwareParser(config={
-        'visibility_threshold': 0.3,
-        'cut_off_threshold': 0.2,
-        'design_threshold': 0.4
-    })
-    theme_layout = parser.json_parser('./resource/test.json')
-    default_layout = parser.json_parser('./resource/test.json')
-    
-    issues = parser.analyze_layout(theme_layout.skeleton, default_layout)
-    print(issues)
-    for issue in issues:
-        print(issue.issue_type)
-        print(issue.description)
+
+
+    parser = Compare()
+    theme_layout = json_parser('./resource/test.json')
+    default_layout = json_parser('./resource/test.json')
+
+    theme_elem = theme_layout.skeleton
+    default_elem = default_layout.skeleton
+
+    issues = parser.analyze_layout(theme_elem, default_elem)
+    print(issues['text_0'])
 
