@@ -29,10 +29,6 @@ import hdbscan
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-print(BASE_DIR)
-
 class HDBSCAN:
 
     def __init__(self, image_dir: str, output_csv: str, size_filter_mode: str,
@@ -42,9 +38,9 @@ class HDBSCAN:
         
         # 경로 지정
         self.ocr = PaddleOCR(
-            det_model_dir='../src/weights/en_PP-OCRv3_det_infer',
-            rec_model_dir='../src/weights/en_PP-OCRv3_rec_infer',
-            cls_model_dir='../src/weights/ch_ppocr_mobile_v2.0_cls_infer',
+            det_model_dir='./src/weights/en_PP-OCRv3_det_infer',
+            rec_model_dir='./src/weights/en_PP-OCRv3_rec_infer',
+            cls_model_dir='./src/weights/ch_ppocr_mobile_v2.0_cls_infer',
             lang='en',  # other lang also available
             use_angle_cls=False,
             use_gpu=False,  # using cuda will conflict with pytorch in the same process
