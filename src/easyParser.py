@@ -9,16 +9,17 @@ import os
 # sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 import glob
-import json
+import json 
 import cv2
+import sys
 import torch
 import numpy as np
 from PIL import Image
 from typing import Dict, List, Tuple, Optional, Union
 from dataclasses import dataclass, asdict
 
-from utils.utils import get_som_labeled_img, get_caption_model_processor, get_yolo_model, check_ocr_box
-from src.visualizer import visualize_ui_skeleton_result
+# from utils.utils import get_som_labeled_img, get_caption_model_processor, get_yolo_model, check_ocr_box
+# from src.visualizer import visualize_ui_skeleton_result
 
 @dataclass
 class UIElement:
@@ -497,3 +498,24 @@ class EasyParserRunner:
                 except Exception as e:
                     print(f"[ERROR] 시각화 실패: {e}")
                     continue
+
+if __name__ == "__main__":
+    sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+    from utils.utils import get_som_labeled_img, get_caption_model_processor, get_yolo_model, check_ocr_box
+    from visualizer import visualize_ui_skeleton_result
+
+    base_dir = os.path.abspath("..")
+    cluster_base_dir = os.path.join(base_dir, "resource", "cluster_data")
+    json_output_dir = os.path.join(base_dir, "output", "json") 
+    visual_output_dir = os.path.join(base_dir, "output", "visualization")  
+    num_cluster = 10
+
+    runner = EasyParserRunner(
+        base_dir=base_dir,
+        cluster_base_dir=cluster_base_dir,
+        json_output_dir=json_output_dir,
+        visual_output_dir=visual_output_dir,
+        num_cluster=num_cluster
+    )
+
+    runner.run()

@@ -17,7 +17,7 @@ from typing import List, Tuple
 
 from preproc.clustering import HDBSCAN
 from preproc.cluster_organizer import ClusterOrganizer
-from src.easyParser import EasyParserRunner
+from Themes.src.easyParser import EasyParserRunner
 from src.BaseTemplate import BaseTemplateGenerator
 
 

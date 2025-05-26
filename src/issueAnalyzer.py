@@ -14,7 +14,7 @@ from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass, asdict
 from skimage.metrics import structural_similarity as ssim
 
-from easyParser import SkeletonUIExtractor, LayoutAwareParser, UIElement
+from Themes.src.easyParser import SkeletonUIExtractor, LayoutAwareParser, UIElement
 
 @dataclass
 class ThemeIssue:
