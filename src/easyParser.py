@@ -4,9 +4,8 @@ Extracts Skeleton UI Layout from Samsung Themes using GUIParser
 
 import os
 
-# 폴더명에 한글이 있을 때 지정해주면 해결
-# import sys
-# sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+os.chdir(ROOT_DIR)
 
 import glob
 import json
@@ -1391,7 +1390,7 @@ class EasyParserRunner:
 
 if __name__ == "__main__":
 
-    image_path = "../resource/sample/com.android.settings_SubSettings_20250509_160428_settings_checkbox_cut_Default_xuka.png"
+    image_path = "./resource/sample/com.android.settings_SubSettings_20250509_160428_settings_checkbox_cut_Default_xuka.png"
     filename = os.path.splitext(os.path.basename(image_path))[0]
     BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     OUT_DIR = os.path.join(BASE_DIR, 'output/json')
