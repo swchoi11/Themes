@@ -1,16 +1,26 @@
+import os
+import glob
+import time
+import json
+from typing import Optional, List
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from common.Prompt import Prompt
-import glob
+
 import os
-import time
-from dotenv import load_dotenv
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from common.prompt import Prompt
+from common.logger import init_logger
+from utils.model import Issue
+
+logger = init_logger()
 
 class Gemini:
-    def __init__(self):
+    def __init__(self):        
         load_dotenv()
         self.client = genai.Client(api_key=os.getenv('API_KEY'))
-        self.model = 'gemini-2.0-flash-001'
+        self.model = 'gemini-2.0-flash'
  
         self.max_retries = 5  
         self.initial_delay = 1
@@ -24,101 +34,85 @@ class Gemini:
                 except Exception as e:
                     if attempt == self.max_retries - 1:
                         raise e
+                    logger.error(f"gemini 호출 {attempt + 1}번째 실패: {e}")
                     time.sleep(delay)
                     delay *= 2
         return wrapper
 
-    def _clean(self, image_path: str, remove_words: list[str]) -> str:
-        image_path = os.path.basename(image_path)
-        for word in remove_words:
-            image_path = image_path.replace(word, '')
-        return image_path
-    
-    def extract_issues(self, cluster_id, remove_words: list[str]):
-        """
-        클러스터 아이디에 해당하는 이미지 목록을 추출하고, 이미지 이름을 쉼표로 구분하여 문자열로 반환합니다.
-        """
-        image_list = glob.glob(f"./output/{cluster_id}/*.png")
-
-        remove_words.append(cluster_id)
-
-        rows = set(self._clean(image_path, remove_words) for image_path in image_list)
-
-        return rows
-    
     @retry_with_delay
-    def relavant_issues(self, rows):
-        prompt = Prompt.relevant_issues_prompt(rows)
+    def _call_gemini_image(self, prompt, image) -> Issue:
+        target_image = self.client.files.upload(file=image)
+        logger.info(f"image 업로드 완료: {image}")
 
-        response_schema = {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "required": ['issue_type'],
-                "properties": {
-                    "issue_type": {"type": "string"},
-                }
-            }
-        }
-
-        response = self.client.models.generate_content(
-            model=self.model,
-            contents=[
-                prompt
-                ],
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=response_schema
-            )
-        )
-
-        return response.text
-
-    @retry_with_delay
-    def generate_description(self, target_image_dir, cluster_main_image_dir, relevant_issues):
-        prompt = Prompt.generate_description_prompt()
-        target_image = self.client.files.upload(file=target_image_dir)
-        cluster_main_image = self.client.files.upload(file=cluster_main_image_dir)
-
-        response_schema = {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "required": ['application','function', 'issue', 'detail'],
-                "properties": {
-                    "application": {"type": "string"},
-                    "function": {"type": "string"},
-                    "issue": {"type": "string"},
-                    "detail": {"type": "string"},
-                }
-            }
-        }
+        logger.info(f"gemini 호출 시작")
         response = self.client.models.generate_content(
             model=self.model,
             contents=[
                 prompt,
                 target_image,
-                cluster_main_image,
-                relevant_issues
             ],
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=response_schema
-            )
+            config={
+                "response_mime_type": "application/json",
+                "response_schema": Issue.model_json_schema(),
+            }
         )
+        logger.info(f"gemini 호출 완료")
 
-        return response.text
-    
+        # JSON 문자열을 파싱하여 Issue 객체로 변환
+        return Issue.model_validate(json.loads(response.text))
+
     @retry_with_delay
-    def only_visibility(self, target_image_dir):
-        prompt = Prompt.only_visibility_prompt()
-        target_image = self.client.files.upload(file=target_image_dir)
+    def _call_gemini_image_text(self, prompt, image, text) -> Issue:
+        target_image = self.client.files.upload(file=image)
+        logger.info(f"image 업로드 완료: {image}")
 
+        logger.info(f"gemini 호출 시작")
         response = self.client.models.generate_content(
             model=self.model,
             contents=[
                 prompt,
-                target_image
-            ])
+                target_image,
+                text,
+            ],
+            config={
+                "response_mime_type": "application/json",
+                "response_schema": Issue.model_json_schema(),
+            }
+        )
+        logger.info(f"gemini 호출 완료")
+
+        # JSON 문자열을 파싱하여 Issue 객체로 변환
+        return Issue.model_validate(json.loads(response.text))
+
+    def generate_response(self, prompt, image, text: Optional[str] = None) -> Issue:
+        if text:
+            return self._call_gemini_image_text(prompt, image, text)
+        else:
+            return self._call_gemini_image(prompt, image)
         
-        return response.text
+    def detect_all_issues(self, image) -> List[Issue]:
+        issues = []
+        prompts = [
+            Prompt.calender_text_issue(),
+            Prompt.calender_date_issue(),
+            Prompt.clock_issue(),
+            Prompt.highlight_issue(),
+            Prompt.interaction_issue(),
+        ]
+        for prompt in prompts:
+            response = self.generate_response(prompt, image)
+            issues.append(response)
+        
+        return issues
+    
+    def sort_issues(self, image, text) -> Issue:
+        prompt = Prompt.sort_detected_issues_prompt()
+        response = self.generate_response(prompt, image, text)
+        return response
+
+if __name__ == "__main__":
+    gemini = Gemini()
+    issues = gemini.detect_all_issues(
+        image="./resource/setting icon same back button.jpg",
+    )
+    print(issues)
