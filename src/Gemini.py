@@ -113,6 +113,6 @@ class Gemini:
 if __name__ == "__main__":
     gemini = Gemini()
     issues = gemini.detect_all_issues(
-        image="./resource/setting icon same back button.jpg",
+        image="./resource/com.android.intentresolver_ChooserActivityLauncher_20250514_153317.png",
     )
     print(issues)
