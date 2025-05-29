@@ -1,3 +1,58 @@
+
+
+
+
+
+import glob
+import os
+import re
+import pandas as pd
+import shutil
+
+def clean(filename):
+    filename = re.sub(r'\d+', '', filename)
+    filename = re.sub('__','',filename)
+    return filename
+
+
+def theme_issues(theme_dir):
+    theme_id = os.path.dirname(theme_dir).split('/')[-1]
+    image_list = os.listdir(theme_dir)
+    issue_list = set()
+    for image_path in image_list:
+        image_name = os.path.splitext(os.path.basename(image_path))[0]
+        image_name = clean(image_name)
+        issue_list.add(image_name)
+    return theme_id, list(issue_list)
+
+def move_image(resource_dirs, output_dir):
+    issue_dict = {}
+    for resource_dir in resource_dirs:
+        for theme_id in os.listdir(resource_dir):
+            theme_path = os.path.join(resource_dir, theme_id)
+            if not os.path.isdir(theme_path):
+                continue
+            for img_file in os.listdir(theme_path):
+                img_path = os.path.join(theme_path, img_file)
+                issue = clean(img_file)
+                if issue not in issue_dict:
+                    issue_dict[issue] = []
+                save_name = f"{theme_id}_{img_file}"
+                issue_dict[issue].append((img_path, save_name))
+
+    for issue, files in issue_dict.items():
+        issue_folder = os.path.join(output_dir, issue)
+        os.makedirs(issue_folder, exist_ok=True)
+        for src_path, save_name in files:
+            dst_path = os.path.join(issue_folder, save_name)
+            shutil.copy2(src_path, dst_path)
+        
+
+if __name__ == "__main__":
+    resource_dirs = ["./resource/pass", "./resource/default"]
+    output_dir = "./output"
+    move_image(resource_dirs, output_dir)
+
 import re
 import cv2
 import xml.etree.ElementTree as ET
@@ -140,10 +195,39 @@ def radio_button_defect(radio_button_image):
 
 
 if __name__ == "__main__":
-    image_name = "com.android.settings_SubSettings_20250520_074420"
-    radio_buttons = find_radio_button(image_name)
-    print(radio_buttons)
-    crop_radio_button(f"./resource/{image_name}.png", radio_buttons)
-    for i in range(8):
-        result = radio_button_defect(f"./output/radio_button_{i}.png")
-        print(result)
+    # xml_class_crop("Fail_V2_com.sec.android.app.launcher_LauncherActivity_20250522_164450")
+    xml_visualize("Fail_V2_com.sec.android.app.launcher_LauncherActivity_20250522_164450")
+
+import cv2
+import json
+import numpy as np
+
+def same_icon_detect(image_path, elements):
+    img = cv2.imread(image_path)
+    icon_list = []
+    for element in elements:
+        if element["type"] == "icon":
+            x1 = int(element["bbox"]["x1"])
+            y1 = int(element["bbox"]["y1"])
+            x2 = int(element["bbox"]["x2"])
+            y2 = int(element["bbox"]["y2"])
+            icon_list.append(img[y1:y2, x1:x2])
+
+    for i in range(len(icon_list)):
+        for j in range(i+1, len(icon_list)):
+            icon = icon_list[i]
+            other_icon = icon_list[j]
+            # 크기 맞추기
+            if icon.shape == other_icon.shape:
+                res = cv2.matchTemplate(icon, other_icon, cv2.TM_CCOEFF_NORMED)
+                print(res.max())
+                if res.max() > 0.9:
+                    print(f"동일한 아이콘 발견: {i}와 {j}")
+                    cv2.imshow("icon", icon)
+                    cv2.imshow("other_icon", other_icon)
+                    cv2.waitKey(0)
+                    cv2.destroyAllWindows()
+            else:
+                # 크기가 다르면 스킵 또는 리사이즈
+                continue
+
