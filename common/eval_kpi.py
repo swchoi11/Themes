@@ -17,6 +17,7 @@ class EvalKPI:
         'B': 'ImageButton'      # 이미지로 된 버튼
     }
 
+    #2. 9 분위 영역
     LOCATION = {
         '0': 'TL',  # Top Left
         '1': 'TC',  # Top Center
@@ -29,6 +30,7 @@ class EvalKPI:
         '8': 'BR'   # Bottom Right
     }
 
+    # 3. Issue Representative Description
     Description = {
         '0': "텍스트, 아이콘과 배경 간 대비가 낮아 가독성이 떨어짐",
         '1': "하이라이트된 항목, 텍스트와 배경 간 대비가 낮아 가독성이 떨어짐",
