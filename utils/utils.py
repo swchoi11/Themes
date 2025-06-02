@@ -54,7 +54,12 @@ def get_caption_model_processor(model_name, model_name_or_path="Salesforce/blip2
             model_name_or_path, device_map=None, torch_dtype=torch.float16
         ).to(device)
     elif model_name == "florence2":
-        from transformers import AutoProcessor, AutoModelForCausalLM 
+
+        ## windows 에서만 ....
+        #### pip install https://github.com/bdashore3/flash-attention/releases/download/v2.7.1.post1/flash_attn-2.7.1.post1+cu124torch2.4.0cxx11abiFALSE-cp311-cp311-win_amd64.whl
+
+        from transformers import AutoProcessor, AutoModelForCausalLM
+
         processor = AutoProcessor.from_pretrained("microsoft/Florence-2-base", trust_remote_code=True)
         if device == 'cpu':
             model = AutoModelForCausalLM.from_pretrained(model_name_or_path, torch_dtype=torch.float32, trust_remote_code=True)
@@ -509,10 +514,16 @@ def check_ocr_box(image_source: Union[str, Image.Image], display_img = True, out
             text_threshold = 0.5
         else:
             text_threshold = easyocr_args['text_threshold']
-        
+
         result = paddle_ocr.ocr(image_np, cls=False)[0]
-        coord = [item[0] for item in result if item[1][1] > text_threshold]
-        text = [item[1][0] for item in result if item[1][1] > text_threshold]
+        coord =[]
+        text = []
+        if not result is None:
+            for item in result:
+                if item[1][1] > text_threshold:
+                    coord.append(item[0])
+                    text.append(item[1][0])
+
     else:  # EasyOCR
         if easyocr_args is None:
             easyocr_args = {}

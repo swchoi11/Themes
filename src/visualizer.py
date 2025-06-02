@@ -4,6 +4,9 @@ UI 스켈레톤 결과 시각화 도구:  캡셔닝 이미지와 분석 결과 �
 import os
 from PIL import Image, ImageDraw, ImageFont
 import json
+import glob
+
+from tqdm import tqdm
 from typing import Dict
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
@@ -350,7 +353,57 @@ class Visualizer():
             rows = grid_structure.get('rows', 0)
             cell_size = grid_structure.get('cell_size', {})
 
-            # 그리드 라인 그리기
+            # 그리드 라인 그리기if __name__ == "__main__":
+            #    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+            #
+            #    # 디렉토리 설정
+            #    ROOT_DIR = "./resource/0530_theme_img_xml_labeled"
+            #    JSON_OUTPUT_DIR = os.path.join(BASE_DIR, 'output/json')
+            #    VISUAL_OUTPUT_DIR = os.path.join(BASE_DIR, 'output/visualization')
+            #
+            #    # 모든 JSON 파일 찾기
+            #    json_paths = glob.glob(f"{JSON_OUTPUT_DIR}/**/*.json", recursive=True)
+            #    print(f"총 {len(json_paths)}개의 JSON 파일을 시각화합니다.")
+            #
+            #    for json_path in tqdm(json_paths, desc="Creating visualizations"):
+            #        try:
+            #            # JSON 파일에서 원본 이미지 경로 찾기
+            #            json_filename = os.path.splitext(os.path.basename(json_path))[0]
+            #
+            #            # 상대 경로 계산 (JSON 기준)
+            #            json_relative_path = os.path.relpath(json_path, JSON_OUTPUT_DIR)
+            #            json_subdir = os.path.dirname(json_relative_path)
+            #
+            #            # 원본 이미지 경로 구성
+            #            if json_subdir:
+            #                image_path = os.path.join(ROOT_DIR, json_subdir, f"{json_filename}.png")
+            #            else:
+            #                image_path = os.path.join(ROOT_DIR, f"{json_filename}.png")
+            #
+            #            # 이미지 파일 존재 확인
+            #            if not os.path.exists(image_path):
+            #                print(f"[SKIP] 이미지 파일 없음: {image_path}")
+            #                continue
+            #
+            #            # 시각화 출력 경로
+            #            if json_subdir:
+            #                visual_output_subdir = os.path.join(VISUAL_OUTPUT_DIR, json_subdir)
+            #            else:
+            #                visual_output_subdir = VISUAL_OUTPUT_DIR
+            #
+            #            os.makedirs(visual_output_subdir, exist_ok=True)
+            #            print(f"[PROCESSING] {json_relative_path}")
+            #
+            #            # 시각화 생성
+            #            visualize_ui_skeleton_result(image_path, json_path, visual_output_subdir)
+            #            print(f"[VISUAL SAVED] {visual_output_subdir}")
+            #
+            #        except Exception as e:
+            #            print(f"[ERROR] {json_path}: {e}")
+            #            continue
+            #
+            #    print(f"\n시각화 완료!!!!!!!!!!!!!!!")
+            #    print(f"결과 저장 위치: {VISUAL_OUTPUT_DIR}")
             if columns > 0 and rows > 0:
                 cell_width = cell_size.get('width', 0) * w
                 cell_height = cell_size.get('height', 0) * h
@@ -644,8 +697,39 @@ def visualize_ui_skeleton_result(image_path: str, result_path: str, output_dir: 
 
 if __name__ == "__main__":
 
-    image_path = "../resource/sample/com.android.settings_SubSettings_20250509_160428_settings_checkbox_cut_Default_xuka.png"
-    result_path = "../output/json/com.android.settings_SubSettings_20250509_160428_settings_checkbox_cut_Default_xuka.json"
-    output_dir = "../output/visualization"
+    BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    ROOT_DIR = os.path.join(BASE_DIR, "resource", "0530_theme_img_xml_labeled")
+    JSON_OUTPUT_DIR = os.path.join(BASE_DIR, 'output', 'json')
+    VISUAL_OUTPUT_DIR = os.path.join(BASE_DIR, 'output', 'visualization')
 
-    visualize_ui_skeleton_result(image_path, result_path, output_dir)
+    print("이미지 파일 매핑 생성 중...")
+    image_map = {}
+
+    for root, dirs, files in os.walk(ROOT_DIR):
+        for file in files:
+            if file.endswith('.png'):
+                filename_without_ext = os.path.splitext(file)[0]
+                full_path = os.path.join(root, file)
+                image_map[filename_without_ext] = full_path
+
+    # JSON 파일 처리
+    json_paths = glob.glob(os.path.join(JSON_OUTPUT_DIR, "*.json"))
+    for json_path in tqdm(json_paths, desc="Creating visualizations"):
+        try:
+            json_filename = os.path.splitext(os.path.basename(json_path))[0]
+            if json_filename not in image_map:
+                print(f"[SKIP] 이미지 파일 없음: {json_filename}.png")
+                continue
+
+            image_path = image_map[json_filename]
+            print(f"매칭된 이미지: {image_path}")
+
+            visual_output = os.path.join(VISUAL_OUTPUT_DIR, json_filename)
+            os.makedirs(visual_output, exist_ok=True)
+
+            visualize_ui_skeleton_result(image_path, json_path, visual_output)
+            print(f"[VISUAL SAVED] {visual_output}")
+
+        except Exception as e:
+            print(f"[ERROR] {json_path}: {e}")
+            continue

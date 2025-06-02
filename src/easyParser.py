@@ -3,20 +3,25 @@ Extracts Skeleton UI Layout from Samsung Themes using GUIParser
 """
 
 import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 os.chdir(ROOT_DIR)
 
 import glob
 import json
-import cv2
+
 import torch
+import cv2
+
 import numpy as np
 from PIL import Image
 from typing import Dict, List, Tuple, Optional, Union
 from dataclasses import dataclass, asdict
 from collections import defaultdict
 import math
+import pandas as pd
+from tqdm import tqdm
 
 from utils.utils import get_som_labeled_img, get_caption_model_processor, get_yolo_model, check_ocr_box
 from src.visualizer import visualize_ui_skeleton_result
@@ -56,8 +61,9 @@ class SkeletonUIExtractor:
     """스켈레톤 UI 구조 추출"""
     def __init__(self, config: Dict):
         self.config = config
-        # device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        device = 'cpu'
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        print(device)
+
         # 모델 초기화
         self.som_model = get_yolo_model(model_path=config['som_model_path'])
         self.caption_model_processor = get_caption_model_processor(
@@ -191,9 +197,17 @@ class SkeletonUIExtractor:
             caption_model_processor=self.caption_model_processor,
             ocr_text=text_list,
             use_local_semantics=True,
-            iou_threshold=self.config.get('iou_threshold', 0.5),
+            iou_threshold=self.config.get('iou_threshold', 0.05),
             batch_size=16
         )
+
+        if self.config.get('debug'):
+            df = pd.DataFrame(parsed_content_list)
+            bbox_df = pd.DataFrame(df['bbox'].tolist(), columns=['bbox_0', 'bbox_1', 'bbox_2', 'bbox_3'])
+            df = pd.concat([df.drop(columns='bbox'), bbox_df], axis=1)
+            out_dir = './output/csv'
+            os.makedirs(out_dir, exist_ok=True)
+            df.to_csv(os.path.join(out_dir, f"{self.config.get('filename')}.csv"), index=False, encoding='utf-8-sig')
 
         # 파싱된 내용을 UIElement로 변환
         for i, parsed_item in enumerate(parsed_content_list):
@@ -981,6 +995,7 @@ class LayoutAwareParser:
         """레이아웃별로 파싱 수행"""
 
         if isinstance(image, str):
+            self.filenmae = os.path.basename(image).split('.')[0]
             image = Image.open(image)
 
         # 1. 스켈레톤 구조 추출
@@ -1252,43 +1267,74 @@ class LayoutAwareParser:
 
     def _calculate_complexity_score(self, elements: List[UIElement]) -> float:
         """UI 복잡도 점수 계산"""
-        # 요소 수 기반 점수
-        element_score = min(len(elements) / 50, 1.0)
+        try:
+            # 요소 수 기반 점수
+            element_score = min(len(elements) / 50, 1.0)
 
-        # 타입 다양성 점수
-        unique_types = len(set(e.type for e in elements))
-        type_score = min(unique_types / 10, 1.0)
+            # 타입 다양성 점수
+            unique_types = len(set(e.type for e in elements))
+            type_score = min(unique_types / 10, 1.0)
 
-        # 계층 깊이 점수
-        max_depth = self._calculate_max_depth(elements)
-        depth_score = min(max_depth / 5, 1.0)
+            # 계층 깊이 점수
+            try:
+                max_depth = self._calculate_max_depth(elements)
+                depth_score = min(max_depth / 5, 1.0)
+            except RecursionError:
+                print("RecursionError in depth calculation, using default")
+                depth_score = 0.5  # 기본값
 
-        # 종합 점수
-        complexity = (element_score + type_score + depth_score) / 3
+            # 종합 점수
+            complexity = (element_score + type_score + depth_score) / 3
+            return round(complexity, 2)
 
-        return round(complexity, 2)
+        except Exception as e:
+            print(f"Error in complexity calculation: {e}")
+            return 0.5
 
     def _calculate_max_depth(self, elements: List[UIElement]) -> int:
         """최대 계층 깊이 계산"""
         depths = {}
 
-        def get_depth(elem_id: str) -> int:
+        def get_depth(elem_id: str, visited: Optional[set] = None) -> int:
+            if visited is None:
+                visited = set()
+
+            # 이미 계산된 깊이가 있으면 반환
             if elem_id in depths:
                 return depths[elem_id]
 
-            elem = next((e for e in elements if e.id == elem_id), None)
-            if not elem or not elem.parent_id:
+            if elem_id in visited:
+                print(f"순환 참조 감지: {elem_id}")
                 depths[elem_id] = 0
                 return 0
 
-            parent_depth = get_depth(elem.parent_id)
-            depths[elem_id] = parent_depth + 1
-            return depths[elem_id]
+            visited.add(elem_id)
+
+            # 원소 찾기
+            elem = next((e for e in elements if e.id == elem_id), None)
+            if not elem or not hasattr(elem, 'parent_id') or elem.parent_id is None:
+                depths[elem_id] = 0
+                return 0
+
+            # 부모의 깊이 계산
+            try:
+                parent_depth = get_depth(elem.parent_id, visited.copy())
+                depth = parent_depth + 1
+            except RecursionError:
+                print(f"RecursionError for parent {elem.parent_id}")
+                depth = 0
+
+            depths[elem_id] = depth
+            return depth
 
         max_depth = 0
         for elem in elements:
-            depth = get_depth(elem.id)
-            max_depth = max(max_depth, depth)
+            try:
+                depth = get_depth(elem.id)
+                max_depth = max(max_depth, depth)
+            except Exception as e:
+                print(f"Error calculating depth for {elem.id}: {e}")
+                continue
 
         return max_depth
 
@@ -1323,7 +1369,7 @@ def extract_ui_skeleton(image_path: str, config: Optional[Dict] = None) -> Dict:
             'caption_model_name': 'florence2',
             'caption_model_path': 'weights/icon_caption_florence',
             'BOX_TRESHOLD': 0.02,
-            'iou_threshold': 0.5
+            'iou_threshold': 0.02
         }
 
     parser = LayoutAwareParser(config)
@@ -1390,8 +1436,6 @@ class EasyParserRunner:
 
 if __name__ == "__main__":
 
-    image_path = "./resource/sample/com.android.settings_SubSettings_20250509_160428_settings_checkbox_cut_Default_xuka.png"
-    filename = os.path.splitext(os.path.basename(image_path))[0]
     BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     OUT_DIR = os.path.join(BASE_DIR, 'output/json')
     os.makedirs(OUT_DIR, exist_ok=True)
@@ -1399,26 +1443,36 @@ if __name__ == "__main__":
         'som_model_path': os.path.join(BASE_DIR, 'src/weights/icon_detect/model.pt'),
         'caption_model_name': 'florence2',
         'caption_model_path': os.path.join(BASE_DIR, 'src/weights/icon_caption_florence'),
-        'BOX_TRESHOLD': 0.02,
-        'iou_threshold': 0.5
+        'BOX_TRESHOLD': 0.01,
+        'iou_threshold': 0.01,
+        'debug': True,
     }
 
     parser = LayoutAwareParser(config)
-    result = parser.parse_by_layout(image_path)
 
-    with open(f"{OUT_DIR}/{filename}.json", "w", encoding="utf-8") as f:
-        json.dump(result, f, ensure_ascii=False, indent=2)
+    rootDir = "./resource/0530_theme_img_xml_labeled"
 
-    print("=== UI 스켈레톤 구조 ===")
-    print(f"구조 타입: {result['skeleton']['structure_type']}")
-    print(f"총 요소 수: {len(result['skeleton']['elements'])}")
+    img_paths = glob.glob(f"{rootDir}/**/*.png", recursive=True)
 
-    print("\n=== 레이아웃 영역별 정보 ===")
-    for region_name, region_info in result['layout_regions'].items():
-        if region_info['elements']:
-            print(f"{region_name}: {len(region_info['elements'])}개 요소")
+    for image_path in tqdm(img_paths):
+        filename = os.path.splitext(os.path.basename(image_path))[0]
+        config['filename'] = filename
 
-    print("\n=== 네비게이션 구조 ===")
-    if result['navigation']:
-        print(f"타입: {result['navigation']['type']}")
-        print(f"요소 수: {len(result['navigation']['elements'])}")
+        result = parser.parse_by_layout(image_path)
+
+        with open(f"{OUT_DIR}/{filename}.json", "w", encoding="utf-8") as f:
+            json.dump(result, f, ensure_ascii=False, indent=2)
+
+        print("=== UI 스켈레톤 구조 ===")
+        print(f"   구조 타입: {result['skeleton']['structure_type']}")
+        print(f"   총 요소 수: {len(result['skeleton']['elements'])}")
+
+        print("\n=== 레이아웃 영역별 정보 ===")
+        for region_name, region_info in result['layout_regions'].items():
+            if region_info['elements']:
+                print(f"   {region_name}: {len(region_info['elements'])}개 요소")
+
+        print("\n=== 네비게이션 구조 ===")
+        if result['navigation']:
+            print(f"   타입: {result['navigation']['type']}")
+            print(f"   요소 수: {len(result['navigation']['elements'])}")
