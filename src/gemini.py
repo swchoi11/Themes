@@ -1,62 +1,123 @@
-from common.prompt import PROMPT
-from common.logger import logger
+import os
+import glob
+import time
+import json
+from typing import Optional, List
+from dotenv import load_dotenv
+from google import genai
+from google.genai import types
 
-MAX_RETRIES = 5
-INITIAL_DELAY = 1
-MODEL = 'gemini-2.0-flash-001'
+import os
+import sys
 
-prompt = PROMPT.visibility_prompt()
-image = client.files.upload(file=image_path)
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from common.prompt import Prompt
+from common.logger import init_logger
+from utils.schemas import Issue
 
-response_schema = {
-    "type": "array",
-    "items": {
-        "type": "object",
-        "required": [],
-        "properties": {
-            "": {"type": ""},
-        }
-    }
-}
+logger = init_logger()
 
-logger.info("Gemini API 호출 시작")
-for attempt in range(MAX_RETRIES + 1):
-    try:
-        response = client.models.generate_content(
-            model=MODEL,
+class Gemini:
+    def __init__(self):
+        load_dotenv()
+        self.client = genai.Client(api_key=os.getenv('API_KEY'))
+        self.model = 'gemini-2.0-flash'
+
+        self.max_retries = 5
+        self.initial_delay = 1
+
+    def retry_with_delay(func):
+        def wrapper(self, *args, **kwargs):
+            delay = self.initial_delay
+            for attempt in range(self.max_retries):
+                try:
+                    return func(self, *args, **kwargs)
+                except Exception as e:
+                    if attempt == self.max_retries - 1:
+                        raise e
+                    logger.error(f"gemini 호출 {attempt + 1}번째 실패: {e}")
+                    time.sleep(delay)
+                    delay *= 2
+
+        return wrapper
+
+    @retry_with_delay
+    def _call_gemini_image(self, prompt, image) -> Issue:
+        target_image = self.client.files.upload(file=image)
+        logger.info(f"image 업로드 완료: {image}")
+
+        logger.info(f"gemini 호출 시작")
+        response = self.client.models.generate_content(
+            model=self.model,
             contents=[
                 prompt,
-                image
+                target_image,
             ],
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=response_schema
-            )
+            config={
+                "response_mime_type": "application/json",
+                "response_schema": Issue.model_json_schema(),
+            }
         )
-        logger.info("Gemini API 호출 완료")
-        break
-    except  errors.ServerError as e:
-        logger.warning(f"Gemini API 서버 오류 (시도 {attempt + 1}/{MAX_RETRIES + 1}): {e}")
-        if attempt < MAX_RETRIES:
-            delay = INITIAL_DELAY * (2 ** attempt)
-            logger.info(f"다음 시도까지 {delay}초 대기...")
-            time.sleep(delay)
+        logger.info(f"gemini 호출 완료")
+        return Issue.model_validate(json.loads(response.text))
+
+    @retry_with_delay
+    def _call_gemini_image_text(self, prompt, image, text) -> Issue:
+        target_image = self.client.files.upload(file=image)
+        logger.info(f"image 업로드 완료: {image}")
+
+        logger.info(f"gemini 호출 시작")
+        response = self.client.models.generate_content(
+            model=self.model,
+            contents=[
+                prompt,
+                target_image,
+                text,
+            ],
+            config={
+                "response_mime_type": "application/json",
+                "response_schema": Issue.model_json_schema(),
+            }
+        )
+        logger.info(f"gemini 호출 완료")
+        return Issue.model_validate(json.loads(response.text))
+
+    def generate_response(self, prompt, image, text: Optional[str] = None) -> Issue:
+        if not text is None:
+            return self._call_gemini_image_text(prompt, image, text)
         else:
-            logger.error("Gemini API 호출 실패 (최대 재시도 횟수 초과)")
-            raise
-    except errors.APIError as e:
-        logger.error(f"Gemini API 클라이언트 오류: {e}")
-        raise
-    except Exception as e:
-        logger.error(f"예상치 못한 오류 발생: {e}")
-        raise
-    else:
-        pass
+            return self._call_gemini_image(prompt, image)
 
-    if 'response' not in locals():
-        logger.error("Gemini API 응답을 받지 못했습니다.")
+    def detect_all_issues(self, image) -> List[Issue]:
+        issues = []
+        prompts = [
+            Prompt.calender_text_issue(),
+            Prompt.calender_date_issue(),
+            Prompt.clock_issue(),
+            Prompt.highlight_issue(),
+            Prompt.interaction_issue(),
+        ]
+        for prompt in prompts:
+            response = self.generate_response(prompt, image)
+            issues.append(response)
 
-    if 'response' in locals() and response:
-        pass
+        return issues
 
-result = json.loads(response.text)
+    def sort_issues(self, image, issue1, issue2_dir, result_path) -> Issue:
+        prompt = Prompt.sort_detected_issues_prompt()
+        issue2_path = os.path.join(issue2_dir, "issue")
+        with open(issue2_path, "r", encoding="utf-8") as f:
+            issue2 = f.read()
+        text = issue1 + issue2
+        response = self.generate_response(prompt, image, text)
+        with open(result_path, "w", encoding="utf-8") as f:
+            json.dump(response, f, ensure_ascii=False, indent=2)
+        return response
+
+
+# if __name__ == "__main__":
+#     gemini = Gemini()
+#     issues = gemini.detect_all_issues(
+#         image="./resource/setting icon same back button.jpg",
+#     )
+#     print(issues)

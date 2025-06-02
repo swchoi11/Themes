@@ -13,9 +13,6 @@ import easyocr
 from paddleocr import PaddleOCR
 reader = easyocr.Reader(['en', 'ko'])
 
-BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-print(BASE_DIR)
-
 paddle_ocr = PaddleOCR(
     det_model_dir='./src/weights/en_PP-OCRv3_det_infer',
     rec_model_dir='./src/weights/en_PP-OCRv3_rec_infer',
