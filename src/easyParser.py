@@ -15,7 +15,7 @@ import torch
 import cv2
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageFile
 from typing import Dict, List, Tuple, Optional, Union
 from dataclasses import dataclass, asdict
 from collections import defaultdict
@@ -1434,6 +1434,16 @@ class EasyParserRunner:
                     print(f"[ERROR] 시각화 실패: {e}")
                     continue
 
+
+ImageFile.LOAD_TRUNCATED_IMAGES = False
+def is_image_valid(image_path):
+    try:
+        with Image.open(image_path) as img:
+            img.verify()
+        return False
+    except Exception:
+        return True
+
 if __name__ == "__main__":
 
     BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -1449,17 +1459,24 @@ if __name__ == "__main__":
     }
 
     parser = LayoutAwareParser(config)
-
     rootDir = "./resource/0530_theme_img_xml_labeled"
 
     img_paths = glob.glob(f"{rootDir}/**/*.png", recursive=True)
-
+    broken_files = []
     for image_path in tqdm(img_paths):
         filename = os.path.splitext(os.path.basename(image_path))[0]
         config['filename'] = filename
 
-        result = parser.parse_by_layout(image_path)
+        if os.path.isfile(f"{OUT_DIR}/{filename}.json"):
+            print(f"해당 파일은 존재 합니다.:{OUT_DIR}/{filename}.json")
+            continue
 
+        print(f"\n\n image path: {image_path} * -------------------------------------------------------------------- ")
+        if is_image_valid(image_path):
+            broken_files.append(os.path.basename(image_path))
+            print(f"해당 파일은 손상 되었습니다.: {image_path}")
+            continue
+        result = parser.parse_by_layout(image_path)
         with open(f"{OUT_DIR}/{filename}.json", "w", encoding="utf-8") as f:
             json.dump(result, f, ensure_ascii=False, indent=2)
 
@@ -1476,3 +1493,7 @@ if __name__ == "__main__":
         if result['navigation']:
             print(f"   타입: {result['navigation']['type']}")
             print(f"   요소 수: {len(result['navigation']['elements'])}")
+
+    df = pd.DataFrame(broken_files, columns=["filename"])
+    df.to_csv("broken_images.csv", index=False, encoding="utf-8")
+    print(f"[완료] 손상된 이미지 {len(df)}개")

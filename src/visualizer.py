@@ -702,9 +702,7 @@ if __name__ == "__main__":
     JSON_OUTPUT_DIR = os.path.join(BASE_DIR, 'output', 'json')
     VISUAL_OUTPUT_DIR = os.path.join(BASE_DIR, 'output', 'visualization')
 
-    print("이미지 파일 매핑 생성 중...")
     image_map = {}
-
     for root, dirs, files in os.walk(ROOT_DIR):
         for file in files:
             if file.endswith('.png'):
@@ -722,10 +720,13 @@ if __name__ == "__main__":
                 continue
 
             image_path = image_map[json_filename]
-            print(f"매칭된 이미지: {image_path}")
-
             visual_output = os.path.join(VISUAL_OUTPUT_DIR, json_filename)
-            os.makedirs(visual_output, exist_ok=True)
+
+            if os.path.exists(visual_output):
+                print(f"해당 컴포넌트 UI 파일은 존재 합니다.: {visual_output}")
+                continue
+            else:
+                os.makedirs(visual_output, exist_ok=True)
 
             visualize_ui_skeleton_result(image_path, json_path, visual_output)
             print(f"[VISUAL SAVED] {visual_output}")
