@@ -81,7 +81,12 @@ class Issue(BaseModel):
     issue_type: int
     component_id: str
     component_type: str
+    ui_component_id: str        # EvalKPI.UI_COMPONENT.keys()
+    ui_component_type : str     # EvalKPI.UI_COMPONENT.value()
     severity: float
+    location_id: str            # EvalKPI.LOCATION.keys()
+    location_type: str          # EvalKPI.LOCATION.value()
     bbox: List[float]
-    description: str
+    description_id: str         # EvalKPI.DESCRIPTION.keys()
+    description_type: str       # EvalKPI.DESCRIPTION.value()
     suggestion: str
