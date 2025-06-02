@@ -3,7 +3,9 @@ import re
 import xml.etree.ElementTree as ET
 import os
 import random
-from utils.utils import get_bounds
+from src.utils import get_bounds
+import numpy as np
+
 
 class Visual:
     def __init__(self, file_path: str):
@@ -44,6 +46,7 @@ class Visual:
 
         return components
     
+    @staticmethod
     def xml_visualize(self, output_path: str=None):
         if not os.path.exists(self.xml_path):
             print(f"xml 파일이 존재하지 않습니다. {self.xml_path}")
@@ -87,12 +90,7 @@ class Visual:
                 cv2.rectangle(img, (x1, y1), (x2, y2), random_color, 2)
                 cv2.putText(img, node.attrib.get('class'), (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, random_color, 2)
         cv2.imwrite(file_name, img)    
-        
-    def draw_components(components, image_path, file_name='output.png'):
-        img = cv2.imread(image_path)
-        for component in components:
-            random_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
-            cv2.rectangle(img, (component[0], component[1]), (component[2], component[3]), random_color, 2)
-        cv2.imwrite(file_name, img)
+    
+    
 
         

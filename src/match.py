@@ -4,7 +4,7 @@ import cv2
 import glob
 from tqdm import tqdm
 import os
-from utils.utils import calculate_xml_similarity
+from src.utils import calculate_xml_similarity
 
 class Match:
     def __init__(self, file_path: str):

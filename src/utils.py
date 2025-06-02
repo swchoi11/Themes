@@ -3,6 +3,8 @@ from difflib import SequenceMatcher
 from typing import Tuple
 import cv2
 import re
+import random
+
 
 def normalize_xml_content(xml_path: str) -> str:
     """
@@ -54,3 +56,9 @@ def get_nodes_same_level(node, level, result):
     for child in node.findall('node'):
         get_nodes_same_level(child, level+1, result)
 
+def draw_components(components, image_path, file_name='output.png'):
+    img = cv2.imread(image_path)
+    for component in components:
+        random_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        cv2.rectangle(img, (component[0], component[1]), (component[2], component[3]), random_color, 2)
+    cv2.imwrite(file_name, img)

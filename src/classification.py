@@ -21,7 +21,7 @@ from difflib import SequenceMatcher
 from tqdm import tqdm
 import concurrent.futures
 from typing import List, Tuple, Dict
-from utils.utils import normalize_xml_content, calculate_xml_similarity
+from src.utils import normalize_xml_content, calculate_xml_similarity
 
 class ImageXMLClassifier:
     """이미지-XML 파일 쌍을 자동으로 분류하는 클래스"""

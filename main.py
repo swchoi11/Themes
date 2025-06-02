@@ -16,19 +16,31 @@ resource/defect/ : 이슈
 '''
 from src.classification import ImageXMLClassifier
 from src.match import Match
+from src.issue.visibility import Visibility
+from src.detect import Detect
+from src.visualize import Visual
+# classifier = ImageXMLClassifier()
+# classifier.run_classification() 
 
-classifier = ImageXMLClassifier()
-classifier.run_classification() 
+target_file = './resource/test/fail2.png'
+# match = Match(target_file)
+# print(match.select_group())
+# result =(29.305655517254444, './output/com.samsung.android.app.dressroom_EditMainActivity/group_0/')
 
-match = Match('./resource/test/test1.png')
-print(match.select_group())
+# # 컴포넌트 분리 및 이슈 할당
 
+from src.utils import draw_components
 
-
-
+detect = Detect(target_file)
+# 정렬 확인
+from src.issue.alignment import get_grid
+print(get_grid(detect.get_valid_components(filter_type="all")))
 
 
 # 가시성 확인
+# visibility = Visibility(target_file, filter_type="text")
+# print(visibility.run_visibility_check())
+
 
 # 다이얼러 텍스트 확인
 
