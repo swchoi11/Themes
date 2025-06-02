@@ -103,8 +103,9 @@ class Gemini:
 
         return issues
 
-    def sort_issues(self, image, text) -> Issue:
+    def sort_issues(self, image, issue1, issue2) -> Issue:
         prompt = Prompt.sort_detected_issues_prompt()
+        text = issue1 + issue2
         response = self.generate_response(prompt, image, text)
         return response
 
