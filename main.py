@@ -23,7 +23,10 @@ classifier.run_classification()
 match = Match('./resource/test/test1.png')
 print(match.select_group())
 
-# 정렬 확인
+
+
+
+
 
 # 가시성 확인
 
