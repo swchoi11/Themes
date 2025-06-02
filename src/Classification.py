@@ -1,6 +1,7 @@
 import os
 import cv2
 import glob
+import shutils
 import numpy as np
 from skimage.metrics import structural_similarity as ssim
 from common.logger import init_logger, timefn
@@ -167,6 +168,23 @@ class Classification:
         candidate_image_dir = f'./output/{cluster_id}/'
         result = self.most_similar_image(target_image_path, candidate_image_dir, method=method)
         return result['image_path'], result['similarity_score']
+        
+    def run(self, target_image_dir: str):
+        image_list = glob.glob(f"{target_image_dir}/*.png")
+
+        index = 0
+        for target_image_path in image_list:
+            cluster, score = self.get_cluster(target_image_path)
+            default_image_path, score = self.get_default(target_image_path, cluster)
+
+            output_path = f"./output/default/default_{index}_{default_image_path}"
+            os.makedirs("./output/default", exist_ok=True)
+
+            shutils.copy2(default_image_path, output_path)
+            index += 1
+
+
+            
 
 
 
