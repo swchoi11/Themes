@@ -125,9 +125,8 @@ class MakeBaseTemplate:
     # 겹친 이미지 기준으로 threshold 없이 많이 겹친 영역 추출
     def compute_overlap_heatmap(self, all_boxes: List[List[Tuple[int, int, int, int]]],
                                 image_shape: Tuple[int, int],
-                                min_overlap_count: int=2,
-                                heatmap_save_path: str = None) -> List[Tuple[int, int, int, int]]:
-
+                                min_overlap_count: int) -> List[Tuple[int, int, int, int]]:
+ 
         # 초기화된 누적 히트맵
         heatmap = np.zeros(image_shape, dtype=np.uint16)
         for box_list in all_boxes:
@@ -139,19 +138,30 @@ class MakeBaseTemplate:
         # 특정 겹침 수 이상만 남김
         thresholded = (heatmap >= min_overlap_count).astype(np.uint8) * 255
 
-        # 디버깅용 히트맵 저장
-        if heatmap_save_path:
-            norm = cv2.normalize(heatmap, None, 0, 255, cv2.NORM_MINMAX).astype(np.uint8)
-            cv2.imwrite(heatmap_save_path, norm)
-
         # contour -> box 추출
-        contours, _ = cv2.findContours(thresholded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        final_boxes = []
-        for cnt in contours:
-            x, y, w, h = cv2.boundingRect(cnt)
-            if self.MIN_BOX_SIZE <= w <= self.MAX_BOX_SIZE and self.MIN_BOX_SIZE <= h <= self.MAX_BOX_SIZE:
-                final_boxes.append((x, y, x + w, y + h))
-        return final_boxes
+        # contours, _ = cv2.findContours(thresholded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        # final_boxes = []
+        # for cnt in contours:
+        #     x, y, w, h = cv2.boundingRect(cnt)
+        #     if self.MIN_BOX_SIZE <= w <= self.MAX_BOX_SIZE and self.MIN_BOX_SIZE <= h <= self.MAX_BOX_SIZE:
+        #         final_boxes.append((x, y, x + w, y + h))
+
+        return thresholded #final_boxes
+
+    def visualize_heatmap(self, heatmap: np.ndarray, save_path: str):
+        if heatmap.ndim == 2:
+            heatmap_rgb = cv2.cvtColor(heatmap, cv2.COLOR_GRAY2BGR)
+        else:
+            heatmap_rgb = heatmap
+
+        ext = os.path.splitext(save_path)[-1]
+        success, encoded_image = cv2.imencode(ext, heatmap_rgb)
+        if success:
+            with open(save_path, mode='wb') as f:
+                f.write(encoded_image.tobytes())
+            print(f"[INFO] 히트맵 이미지 저장 성공: {save_path}")
+        else:
+            print(f"[ERROR] 히트맵 이미지 저장 실패: {save_path}")
 
     def visualize_boxes(self, image_shape: Tuple[int, int], boxes: List[Tuple[int, int, int, int]], save_path: str):
         canvas = np.zeros((image_shape[0], image_shape[1], 3), dtype=np.uint8)
@@ -175,12 +185,11 @@ class MakeBaseTemplate:
 
 class BaseTemplateGenerator:
     def __init__(self, min_box_size: int, iou_threshold: float, cluster_dir: str,
-                 output_dir: str, condition_output_dir: str, image_extensions: List[str],
+                 output_dir: str, image_extensions: List[str],
                  cluster_prefix: str = "cluster", max_workers: int = 4):
         self.template_maker = MakeBaseTemplate(min_box_size=min_box_size, iou_threshold=iou_threshold)
         self.cluster_dir = cluster_dir
         self.output_dir = output_dir
-        self.condition_output_dir = condition_output_dir
         self.image_extensions = image_extensions
         self.cluster_prefix = cluster_prefix
         self.max_workers = max_workers
@@ -188,10 +197,8 @@ class BaseTemplateGenerator:
     def process_single_image(self, image_path: str) -> Optional[List[Tuple[int, int, int, int]]]:
         """
         단일 이미지에서 박스를 추출하는 메서드
-        
         Args:
             image_path (str): 처리할 이미지 경로
-            
         Returns:
             Optional[List[Tuple[int, int, int, int]]]: 추출된 박스 리스트 또는 None (실패 시)
         """
@@ -204,7 +211,7 @@ class BaseTemplateGenerator:
         except Exception as e:
             print(f"[ERROR] 이미지 처리 실패 {image_path}: {e}")
             return None
-
+ 
     def run(self):
         for cluster_folder in sorted(os.listdir(self.cluster_dir)):
             if not cluster_folder.startswith(self.cluster_prefix):
@@ -220,11 +227,26 @@ class BaseTemplateGenerator:
                     os.path.splitext(f)[1].lower() in self.image_extensions)
             ]
 
-            if len(image_paths) < 2:
-                print(f"[WARN] {cluster_folder}: 이미지 부족")
+            # 단일 이미지 처리
+            if len(image_paths) == 1:
+                single_img = MakeBaseTemplate.safe_imread(image_paths[0])
+                single_boxes = self.process_single_image(image_paths[0])
+                if single_img is None or single_boxes is None:
+                    print(f"[ERROR] 이미지 없음: {image_paths[0]}")
+                    continue
+
+                output_path = os.path.join(self.output_dir, f"{cluster_folder}_base_image.png")
+
+                thresholded = np.zeros(single_img.shape[:2], dtype=np.uint8)
+                for x1, y1, x2, y2 in single_boxes:
+                    cv2.rectangle(thresholded, (x1, y1), (x2, y2), 255, thickness=-1)
+
+                self.template_maker.visualize_heatmap(thresholded, output_path)
+
+                print(f"[INFO] 저장 완료: {output_path}")
                 continue
 
-            # # 병렬로 상자 추출
+            # 다중 이미지 처리
             all_boxes  = []
             failed_count = 0
             with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
@@ -247,34 +269,13 @@ class BaseTemplateGenerator:
 
             print(f"[INFO] 처리 중: {cluster_folder} ({len(image_paths)}개 이미지)")
 
-            # for p in image_paths:
-            #     img = MakeBaseTemplate.safe_imread(p)
-            #     if img is None:
-            #         print(f"[WARN] 이미지 로드 실패: {p}")
-            #         continue
-            #     all_images.append(img)
-            #
-            # all_boxes = [self.template_maker.extract_boxes(img) for img in all_images]
             sample_img = MakeBaseTemplate.safe_imread(image_paths[0])
+            heatmap_save_path=os.path.join(self.output_dir, f"{cluster_folder}_base_image.png")
 
-            # common_boxes = self.template_maker.filter_common_boxes(all_boxes)  # [basic]
-            # common_boxes = self.template_maker.compute_mask_intersection(all_boxes,
-            #       sample_img.shape[:2], mask_save_path=os.path.join(condition_output_dir, f"{cluster_folder}_mask.png")  # [mask]
             common_boxes = self.template_maker.compute_overlap_heatmap(all_boxes, sample_img.shape[:2], 
-                    heatmap_save_path=os.path.join(self.condition_output_dir, f"{cluster_folder}_heatmap.png"))  # [heatmap]
+                    min_overlap_count=2)  # [heatmap]
 
             output_path = os.path.join(self.output_dir, f"{cluster_folder}_base_image.png")
-            self.template_maker.visualize_boxes(sample_img.shape[:2], common_boxes, output_path)
-            print(f"[INFO] 저장 완료: {output_path}")
+            self.template_maker.visualize_heatmap(common_boxes, output_path)
 
-# if __name__ == "__main__":
-#     # 기본 설정
-#     generator = BaseTemplateGenerator(
-#         min_box_size=10,
-#         iou_threshold=0.5,
-#         cluster_dir="./clusters",
-#         output_dir="./output",
-#         condition_output_dir="./debug",
-#         image_extensions=['.png', '.jpg', '.jpeg'],
-#         max_workers=4
-#     )
+            print(f"[INFO] 저장 완료: {heatmap_save_path}")

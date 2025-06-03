@@ -3,21 +3,25 @@ Extracts Skeleton UI Layout from Samsung Themes using GUIParser
 """
 
 import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
-# ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-# os.chdir(ROOT_DIR)
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+os.chdir(ROOT_DIR)
 
 import glob
-import json 
-import cv2
-import sys
+import json
+
 import torch
+import cv2
+
 import numpy as np
 from PIL import Image, ImageFile
 from typing import Dict, List, Tuple, Optional, Union
 from dataclasses import dataclass, asdict
 from collections import defaultdict
 import math
+import pandas as pd
+from tqdm import tqdm
 
 from utils.utils import get_som_labeled_img, get_caption_model_processor, get_yolo_model, check_ocr_box
 from src.visualizer import visualize_ui_skeleton_result
@@ -57,8 +61,9 @@ class SkeletonUIExtractor:
     """스켈레톤 UI 구조 추출"""
     def __init__(self, config: Dict):
         self.config = config
-        # device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        device = 'cpu'
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        print(device)
+
         # 모델 초기화
         self.som_model = get_yolo_model(model_path=config['som_model_path'])
         self.caption_model_processor = get_caption_model_processor(
@@ -98,10 +103,6 @@ class SkeletonUIExtractor:
             easyocr_args={'text_threshold': 0.8, 'paragraph': False},
             use_paddleocr=True
         )
-        
-        if not ocr_result or ocr_result[0] is None or ocr_result[1] is None:
-            raise ValueError("OCR 결과가 None입니다")
-
         text_list, ocr_bbox = ocr_result
 
         # 2. YOLO로 아이콘/버튼 검출
@@ -196,9 +197,17 @@ class SkeletonUIExtractor:
             caption_model_processor=self.caption_model_processor,
             ocr_text=text_list,
             use_local_semantics=True,
-            iou_threshold=self.config.get('iou_threshold', 0.5),
+            iou_threshold=self.config.get('iou_threshold', 0.05),
             batch_size=16
         )
+
+        if self.config.get('debug'):
+            df = pd.DataFrame(parsed_content_list)
+            bbox_df = pd.DataFrame(df['bbox'].tolist(), columns=['bbox_0', 'bbox_1', 'bbox_2', 'bbox_3'])
+            df = pd.concat([df.drop(columns='bbox'), bbox_df], axis=1)
+            out_dir = './output/csv'
+            os.makedirs(out_dir, exist_ok=True)
+            df.to_csv(os.path.join(out_dir, f"{self.config.get('filename')}.csv"), index=False, encoding='utf-8-sig')
 
         # 파싱된 내용을 UIElement로 변환
         for i, parsed_item in enumerate(parsed_content_list):
@@ -986,6 +995,7 @@ class LayoutAwareParser:
         """레이아웃별로 파싱 수행"""
 
         if isinstance(image, str):
+            self.filenmae = os.path.basename(image).split('.')[0]
             image = Image.open(image)
 
         # 1. 스켈레톤 구조 추출
@@ -1257,43 +1267,74 @@ class LayoutAwareParser:
 
     def _calculate_complexity_score(self, elements: List[UIElement]) -> float:
         """UI 복잡도 점수 계산"""
-        # 요소 수 기반 점수
-        element_score = min(len(elements) / 50, 1.0)
+        try:
+            # 요소 수 기반 점수
+            element_score = min(len(elements) / 50, 1.0)
 
-        # 타입 다양성 점수
-        unique_types = len(set(e.type for e in elements))
-        type_score = min(unique_types / 10, 1.0)
+            # 타입 다양성 점수
+            unique_types = len(set(e.type for e in elements))
+            type_score = min(unique_types / 10, 1.0)
 
-        # 계층 깊이 점수
-        max_depth = self._calculate_max_depth(elements)
-        depth_score = min(max_depth / 5, 1.0)
+            # 계층 깊이 점수
+            try:
+                max_depth = self._calculate_max_depth(elements)
+                depth_score = min(max_depth / 5, 1.0)
+            except RecursionError:
+                print("RecursionError in depth calculation, using default")
+                depth_score = 0.5  # 기본값
 
-        # 종합 점수
-        complexity = (element_score + type_score + depth_score) / 3
+            # 종합 점수
+            complexity = (element_score + type_score + depth_score) / 3
+            return round(complexity, 2)
 
-        return round(complexity, 2)
+        except Exception as e:
+            print(f"Error in complexity calculation: {e}")
+            return 0.5
 
     def _calculate_max_depth(self, elements: List[UIElement]) -> int:
         """최대 계층 깊이 계산"""
         depths = {}
 
-        def get_depth(elem_id: str) -> int:
+        def get_depth(elem_id: str, visited: Optional[set] = None) -> int:
+            if visited is None:
+                visited = set()
+
+            # 이미 계산된 깊이가 있으면 반환
             if elem_id in depths:
                 return depths[elem_id]
 
-            elem = next((e for e in elements if e.id == elem_id), None)
-            if not elem or not elem.parent_id:
+            if elem_id in visited:
+                print(f"순환 참조 감지: {elem_id}")
                 depths[elem_id] = 0
                 return 0
 
-            parent_depth = get_depth(elem.parent_id)
-            depths[elem_id] = parent_depth + 1
-            return depths[elem_id]
+            visited.add(elem_id)
+
+            # 원소 찾기
+            elem = next((e for e in elements if e.id == elem_id), None)
+            if not elem or not hasattr(elem, 'parent_id') or elem.parent_id is None:
+                depths[elem_id] = 0
+                return 0
+
+            # 부모의 깊이 계산
+            try:
+                parent_depth = get_depth(elem.parent_id, visited.copy())
+                depth = parent_depth + 1
+            except RecursionError:
+                print(f"RecursionError for parent {elem.parent_id}")
+                depth = 0
+
+            depths[elem_id] = depth
+            return depth
 
         max_depth = 0
         for elem in elements:
-            depth = get_depth(elem.id)
-            max_depth = max(max_depth, depth)
+            try:
+                depth = get_depth(elem.id)
+                max_depth = max(max_depth, depth)
+            except Exception as e:
+                print(f"Error calculating depth for {elem.id}: {e}")
+                continue
 
         return max_depth
 
@@ -1328,21 +1369,21 @@ def extract_ui_skeleton(image_path: str, config: Optional[Dict] = None) -> Dict:
             'caption_model_name': 'florence2',
             'caption_model_path': 'weights/icon_caption_florence',
             'BOX_TRESHOLD': 0.02,
-            'iou_threshold': 0.5
+            'iou_threshold': 0.02
         }
 
     parser = LayoutAwareParser(config)
     return parser.parse_by_layout(image_path)
 
-
 class EasyParserRunner:
     def __init__(self, base_dir: str, cluster_base_dir: str, json_output_dir: str,
-                 visual_output_dir: str, num_cluster: int):
+                 visual_output_dir: str, num_cluster: int, extensions=['jpeg', 'jpg', 'png']):
         self.base_dir = base_dir
         self.cluster_base_dir = cluster_base_dir
         self.json_output_dir = json_output_dir
         self.visual_output_dir = visual_output_dir
         self.num_cluster = num_cluster
+        self.extensions = extensions
         self.config = {
             'som_model_path': os.path.join(base_dir, 'src', 'weights', 'icon_detect', 'model.pt'),
             'caption_model_name': 'florence2',
@@ -1358,25 +1399,17 @@ class EasyParserRunner:
         # cluster_dirs 가 없는 경우 = target_data 의 경우
         if not cluster_dirs:
             print("[INFO] Target Data 처리 중...")
-            cluster_dirs = [self.cluster_base_dir]
-            is_cluster_mode = False
-        else:
-            is_cluster_mode = True
-
-        for idx, cluster_dir in enumerate(cluster_dirs):
-            cluster_id = idx if is_cluster_mode else 0
-            print(f"\n[INFO] 클러스터 {cluster_id:02d} 처리 중...")
-
-            cluster_images = sorted(glob.glob(os.path.join(cluster_dir, "*.png")))
-            print(f"[INFO] 클러스터 {cluster_id:02d} | 이미지 수: {len(cluster_images)}")
-
-            for image_path in cluster_images:
-                filename = os.path.splitext(os.path.basename(image_path))[0]
+            image_dirs = cluster_dirs
+            
+            image_paths = []
+            for ext in self.extensions :
+                image_paths.extend(glob.glob(os.path.join(image_dirs, f"*.{ext}")))
+            
+            for idx, image_path in enumerate(image_paths):
+                print(f"\n[INFO] Image {idx} 번째 처리 중...")
 
                 # json 출력
-                cluster_json_dir = os.path.join(self.json_output_dir, f"cluster{cluster_id:02d}")
-                os.makedirs(cluster_json_dir, exist_ok=True)
-                json_path = os.path.join(cluster_json_dir, f"{filename}.json")
+                json_path = os.path.join(self.json_output_dir, f"{filename}.json")
 
                 print(f"[PROCESSING] {image_path}")
 
@@ -1391,53 +1424,58 @@ class EasyParserRunner:
                     continue
 
                 try:
-                    visual_path = os.path.join(self.visual_output_dir, f"cluster{cluster_id:02d}", f"{filename}.png")
-                    os.makedirs(os.path.dirname(visual_path), exist_ok=True)
-
                     visualize_ui_skeleton_result(
                         image_path=image_path,
                         result_path=json_path,
                         output_dir=self.visual_output_dir,
-                        cluster_output_name=visual_path
+                        cluster_output_name=f"{filename}.png"
                     )
                 except Exception as e:
                     print(f"[ERROR] 시각화 실패: {e}")
                     continue
 
+        # cluster_dirs 가 있는 경우 = cluster data 인 경우
+        else:
+            for cluster_id, cluster_dir in enumerate(cluster_dirs):
+
+                # cluster_id = idx  
+                print(f"\n[INFO] 클러스터 {cluster_id:02d} 처리 중...")
+
+                cluster_images = sorted(glob.glob(os.path.join(cluster_dir, "*.png")))
+                print(f"[INFO] 클러스터 {cluster_id:02d} | 이미지 수: {len(cluster_images)}")
+
+                for image_path in cluster_images:
+                    filename = os.path.splitext(os.path.basename(image_path))[0]
+
+                    # json 출력
+                    cluster_json_dir = os.path.join(self.json_output_dir, f"cluster{cluster_id:02d}")
+                    os.makedirs(cluster_json_dir, exist_ok=True)
+                    json_path = os.path.join(cluster_json_dir, f"{filename}.json")
+
+                    print(f"[PROCESSING] {image_path}")
+
+                    try:
+                        result = self.parser.parse_by_layout(image_path)
+                        print(f"[DEBUG] 현재 이미지: {image_path}")
+                        with open(json_path, "w", encoding="utf-8") as f:
+                            json.dump(result, f, ensure_ascii=False, indent=2)
+                        print(f"[INFO] 분석 결과: {json_path}")
+                    except Exception as e:
+                        print(f"[ERROR] 분석 실패: {e}")
+                        continue
+
+                    try:
+                        visual_path = os.path.join(self.visual_output_dir, f"cluster{cluster_id:02d}", f"{filename}.png")
+                        os.makedirs(os.path.dirname(visual_path), exist_ok=True)
+
+                        visualize_ui_skeleton_result(
+                            image_path=image_path,
+                            result_path=json_path,
+                            output_dir=self.visual_output_dir,
+                            cluster_output_name=visual_path
+                        )
+                    except Exception as e:
+                        print(f"[ERROR] 시각화 실패: {e}")
+                        continue
 
 
-# # 단위 테스트
-# if __name__ == "__main__":
-
-#     image_path = "./resource/sample/com.android.settings_SubSettings_20250509_160428_settings_checkbox_cut_Default_xuka.png"
-#     filename = os.path.splitext(os.path.basename(image_path))[0]
-#     BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-#     OUT_DIR = os.path.join(BASE_DIR, 'output/json')
-#     os.makedirs(OUT_DIR, exist_ok=True)
-#     config = {
-#         'som_model_path': os.path.join(BASE_DIR, 'src/weights/icon_detect/model.pt'),
-#         'caption_model_name': 'florence2',
-#         'caption_model_path': os.path.join(BASE_DIR, 'src/weights/icon_caption_florence'),
-#         'BOX_TRESHOLD': 0.02,
-#         'iou_threshold': 0.5
-#     }
-
-#     parser = LayoutAwareParser(config)
-#     result = parser.parse_by_layout(image_path)
-
-#     with open(f"{OUT_DIR}/{filename}.json", "w", encoding="utf-8") as f:
-#         json.dump(result, f, ensure_ascii=False, indent=2)
-
-#     print("=== UI 스켈레톤 구조 ===")
-#     print(f"구조 타입: {result['skeleton']['structure_type']}")
-#     print(f"총 요소 수: {len(result['skeleton']['elements'])}")
-
-#     print("\n=== 레이아웃 영역별 정보 ===")
-#     for region_name, region_info in result['layout_regions'].items():
-#         if region_info['elements']:
-#             print(f"{region_name}: {len(region_info['elements'])}개 요소")
-
-#     print("\n=== 네비게이션 구조 ===")
-#     if result['navigation']:
-#         print(f"타입: {result['navigation']['type']}")
-#         print(f"요소 수: {len(result['navigation']['elements'])}")
