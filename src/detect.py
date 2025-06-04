@@ -1,5 +1,5 @@
 from xml.etree import ElementTree as ET
-
+import cv2
 from src.utils import get_bounds
 
 
@@ -14,124 +14,181 @@ class Detect:
             
         self.file_name = self.image_path.replace('.png', '')
 
-
         tree = ET.parse(self.xml_path)
         self.root = tree.getroot().find('node')
-    
-    def get_valid_components(self, filter_type="all"):
-        # 모든 노드에서 bounds 추출
-        all_nodes = self._get_all_nodes(self.root)
-        components = []
-        
-        for node in all_nodes:
-            bounds_str = node.get('bounds')
-            class_name = node.get('class', '')
-            text_content = node.get('text', '')
-            
-            if bounds_str:
-                bounds = get_bounds(bounds_str)
-                if bounds:
-                    # 필터링 타입에 따른 컴포넌트 선별
-                    if self._should_include_component(class_name, text_content, filter_type):
-                        components.append(bounds)
-        
-        if len(components) <= 1:
-            return None
-        
-        valid_components = []
-        for component in components:
-            width = abs(component[2] - component[0])
-            height = abs(component[3] - component[1])
-            
-            # 화면 크기의 절반보다 작은 컴포넌트만 유효한 것으로 간주
-            if width < 1812 * 0.5 and height < 2176 * 0.5:
-                valid_components.append(component)
-        
-        # 겹치는 컴포넌트들 필터링
-        if valid_components:
-            valid_components = self.filter_components(valid_components)
-        
-        return valid_components if valid_components else None
-    
-    def _is_valid_text_content(self, text_content):
-        """
-        텍스트 내용이 유효한지 검증
-        
-        Args:
-            text_content (str): 검증할 텍스트 내용
-            
-        Returns:
-            bool: 유효한 텍스트이면 True, 아니면 False
-        """
-        if not text_content:
-            return False
-        
-        return True
-    
-    def _should_include_component(self, class_name, text_content, filter_type):
-        if filter_type == "all":
-            return True
-        
-        # 실제 XML에서 사용되는 텍스트 관련 클래스명들
-        text_classes = [
-            'android.widget.TextView',
-        ]
-        
-        # 실제 XML에서 사용되는 버튼 관련 클래스명들
-        button_classes = [
-            'android.widget.Button',
-            'android.widget.ImageButton', 
-            'android.widget.RadioButton',
-            'android.widget.CheckBox'
-        ]
-        
-        # 유효한 텍스트 내용이 있는지 확인 (더 엄격한 검증)
-        has_valid_text = self._is_valid_text_content(text_content)
-        is_text_class = any(text_class in class_name for text_class in text_classes)
-        is_button_class = any(button_class in class_name for button_class in button_classes)
-        
-        if filter_type == "text":
-            # 텍스트 필터의 경우: TextView 클래스이면서 유효한 텍스트가 있거나, 
-            # 다른 클래스라도 유효한 텍스트가 있으면 포함
-            return (is_text_class and has_valid_text) or (not is_text_class and has_valid_text)
-        elif filter_type == "button":
-            return is_button_class
-        elif filter_type == "text_and_button":
-            # 텍스트와 버튼 필터의 경우: 버튼 클래스이거나, 유효한 텍스트가 있는 경우
-            return is_button_class or has_valid_text
-        
-        return False
-    
-    def get_all_components(self):
-        all_nodes = self._get_all_nodes(self.root)
-        components = []
-        
-        for node in all_nodes:
-            bounds_str = node.get('bounds')
-            if bounds_str:
-                bounds = get_bounds(bounds_str)
-                if bounds:
-                    components.append(bounds)
-        
-        return components if components else None
-    
-    def _get_all_nodes(self, node):
+
+        self.image = cv2.imread(self.image_path)
+        self.image_width, self.image_height = self.image.shape[:2]
+
+    def _all_nodes(self, node):
         nodes = [node]
         for child in node.findall('node'):
-            nodes.extend(self._get_all_nodes(child))
+            nodes.extend(self._all_nodes(child))
         return nodes
     
-    def filter_components(self, components):
+    def get_class_components(self, class_names):
+        all_nodes = self._all_nodes(self.root)
+        components = []
+
+        for idx, node in enumerate(all_nodes):
+            if node.get('class') in class_names:
+                bounds_str = node.get('bounds')
+                if bounds_str:
+                    bounds = get_bounds(bounds_str)
+                    if bounds:
+                        component = {
+                            'index': idx,
+                            'type': node.get('class'),
+                            'content': node.get('text'),
+                            'resource_id': node.get('resource-id'),
+                            'bounds': bounds
+                        }
+                        components.append(component)
+
+        return components if components else None
+                
+    def _filter_text(self):
+        text_classes = [
+        'android.widget.TextView',
+        'android.widget.EditText'
+        ]
+        components = self.get_class_components(text_classes)
+        valid_components = self._text_content_filter(components)
+        return valid_components
+    
+    def _filter_button(self):
+        button_classes = [
+        'android.widget.Button',
+        'android.widget.ImageButton', 
+        'android.widget.RadioButton',
+        'android.widget.CheckBox'
+        ]
+        components = self.get_class_components(button_classes)
+        return components
+    
+    def _no_filter(self):
+        classes = [
+        'android.widget.TextView',
+        'android.widget.EditText',
+        'android.widget.Button',
+        'android.widget.ImageButton', 
+        ]
+        components = self.get_class_components(classes)
+        return components
+
+    def _is_contained_node(self, inner_node, outer_node):
+        """노드 간 포함관계 확인"""
+        inner_bounds_str = inner_node.get('bounds')
+        outer_bounds_str = outer_node.get('bounds')
+        
+        if not inner_bounds_str or not outer_bounds_str:
+            return False
+            
+        inner_bounds = get_bounds(inner_bounds_str)
+        outer_bounds = get_bounds(outer_bounds_str)
+        
+        if not inner_bounds or not outer_bounds:
+            return False
+        
+        inner_x1, inner_y1, inner_x2, inner_y2 = inner_bounds
+        outer_x1, outer_y1, outer_x2, outer_y2 = outer_bounds
+
+        return (inner_x1 >= outer_x1 and inner_y1 >= outer_y1 and
+                inner_x2 <= outer_x2 and inner_y2 <= outer_y2)
+
+    def _is_contained(self, inner, outer):
+        """컴포넌트 딕셔너리 간 포함관계 확인"""
+        inner_x1, inner_y1, inner_x2, inner_y2 = inner['bounds']
+        outer_x1, outer_y1, outer_x2, outer_y2 = outer['bounds']
+
+        return (inner_x1 >= outer_x1 and inner_y1 >= outer_y1 and
+                inner_x2 <= outer_x2 and inner_y2 <= outer_y2)
+
+    def _text_content_filter(self, components):
+        valid_components = []
+        if not components:
+            return valid_components
+            
+        for component in components:
+            content = component.get('content')
+            # None이 아니고, 빈 문자열이 아니고, 공백만 있는 것도 아닌 경우
+            if content and content.strip():
+                valid_components.append(component)
+        return valid_components
+
+    def get_valid_components(self):
+        all_components = self._all_nodes(self.root)
+
+        size_filtered_components = self._size_filter(all_components)
+        valid_components = self._include_filter(size_filtered_components)
+        return valid_components
+
+    def _size_filter(self, components):
+        valid_components = []
+        for idx, node in enumerate(components):
+            if node.get('bounds'):
+                bounds = get_bounds(node.get('bounds'))
+                if bounds:
+                    width = abs(bounds[2] - bounds[0])
+                    height = abs(bounds[3] - bounds[1])
+                    if width < self.image_width * 0.5 and height < self.image_height * 0.5:
+                        valid_component = {
+                            'index': idx,
+                            'type': node.get('class'),
+                            'content': node.get('text'),
+                            'resource_id': node.get('resource-id'),
+                            'bounds': bounds
+                        }
+                        valid_components.append(valid_component)
+        return valid_components
+    
+    def _include_filter(self, components):
         valid_components = []
         for i, comp in enumerate(components):
             contained = False
             for j, comp_b in enumerate(components):
-                if i != j and self.is_contained(comp, comp_b):
+                if i != j and self._is_contained(comp, comp_b):
                     contained = True
                     break
             if not contained:
                 valid_components.append(comp)
         return valid_components
     
-    def is_contained(self, comp, comp_b):
-        return comp[0] >= comp_b[0] and comp[1] >= comp_b[1] and comp[2] <= comp_b[2] and comp[3] <= comp_b[3]
+    def get_icon_components(self):
+        all_nodes = self._all_nodes(self.root)
+        # 먼저 아이콘 크기 조건에 맞는 컴포넌트들 추출
+        icon_components = []
+        for idx, node in enumerate(all_nodes):
+            bounds = get_bounds(node.get('bounds'))
+            if bounds:
+                width = abs(bounds[2] - bounds[0])
+                height = abs(bounds[3] - bounds[1])
+                if width <= 100 and height <= 100 and width >= 20 and height >= 20:  # 최소 크기 조건 추가
+                    icon_component = {
+                        'index': idx,
+                        'type': node.get('class'),
+                        'content': node.get('text'),
+                        'resource_id': node.get('resource-id'),
+                        'bounds': bounds
+                    }
+                    if icon_component not in icon_components:
+                        icon_components.append(icon_component)
+
+        # 바운딩박스가 동일한 경우에만 중복으로 처리하여 제거
+        unique_components = []
+        seen_bounds = set()
+        
+        for comp in icon_components:
+            bbox = tuple(comp['bounds'])  # 바운딩박스를 튜플로 변환
+            if bbox not in seen_bounds:
+                unique_components.append(comp)
+                seen_bounds.add(bbox)
+        
+        return unique_components
+    
+    def all_node_classes(self):
+        all_nodes = self._all_nodes(self.root)
+        classes = []
+        for node in all_nodes:
+            classes.append(node.get('class'))
+        return list(set(classes))

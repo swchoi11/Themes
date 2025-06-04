@@ -1,15 +1,14 @@
-from dataclasses import dataclass
 from typing import Optional
+from pydantic import BaseModel
 
-@dataclass
-class ResultModel:
+class ResultModel(BaseModel):
     image_path: str = ""
+    index: int = 0
     issue_type: str = ""
-    issue_location: list[int] = None
+    issue_location: list[int] = []
     issue_description: str = ""
 
-    def __post_init__(self):
-        if self.issue_location is None:
-            self.issue_location = []
-
+class Result(BaseModel):
+    issue_location: list[int] = []
+    issue_description: str = ""
     

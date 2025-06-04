@@ -40,3 +40,18 @@ class Match:
                 max_similarity = similarity
                 selected_group = group
         return max_similarity, selected_group
+    
+    def selct_default_image(self, selected_group: str):
+        # 98% 이상 유사한 디폴트 이미지 선택
+        max_similarity = 0.99
+        selected_image = ""
+
+        xml_list = glob.glob(f"{selected_group}/*.xml")
+        for xml in tqdm(xml_list, desc="디폴트 이미지 비교중"):
+            _, _, similarity = calculate_xml_similarity((self.xml_path, xml))
+            if similarity > max_similarity:
+                max_similarity = similarity
+                selected_xml = xml
+        return selected_xml
+
+

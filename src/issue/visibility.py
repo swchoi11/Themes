@@ -1,35 +1,38 @@
 import cv2
+import os
 import numpy as np
 from sklearn.cluster import KMeans
+from tqdm import tqdm
 from src.result import ResultModel
 from src.detect import Detect
+from common.logger import init_logger
 
+logger = init_logger()
 
 class Visibility():
-    def __init__(self, file_path: str, filter_type: str = 'all'):
+    def __init__(self, file_path: str, filter_type: str = 'text'):
+        
         if file_path.endswith(".xml"):
             self.image_path = file_path.replace(".xml", ".png")
-            self.xml_path = file_path
         else:
             self.image_path = file_path
-            self.xml_path = file_path.replace(".png", ".xml")
         self.file_name = self.image_path.replace('.png', '')
         
         self.num_colors = 3
         
-        # component_bbox가 제공되지 않으면 자동으로 추출
         detect = Detect(file_path)
-        self.component_bbox = detect.get_valid_components(filter_type) or []
+        
+        match filter_type:
+            case 'text':
+                self.components = detect._filter_text()
+            case 'button':
+                self.components = detect._filter_button()
+            case 'all':
+                self.components = detect._no_filter()
         
         self.img = cv2.imread(self.image_path)
 
-    @staticmethod
-    def _hsv_color(self, component_img: np.ndarray):
-        if len(component_img.shape) == 3:
-            img_rgb = cv2.cvtColor(component_img, cv2.COLOR_BGR2RGB)
-        else:
-            img_rgb = component_img
-
+    def _hsv_color(self, img_rgb: np.ndarray):
         img_hsv = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2HSV)
 
         # h channel main color
@@ -67,13 +70,7 @@ class Visibility():
         
         return colors[:self.num_colors]
 
-    @staticmethod
-    def _lab_color(self, component_img: np.ndarray):
-        if len(component_img.shape) == 3:
-            img_rgb = cv2.cvtColor(component_img, cv2.COLOR_BGR2RGB)
-        else:
-            img_rgb = component_img
-
+    def _lab_color(self, img_rgb):
         # lab
         img_lab = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2LAB)
 
@@ -124,6 +121,57 @@ class Visibility():
 
         return colors[:self.num_colors]
     
+    def _simple_color_extraction(self, img_rgb):
+        """검정-흰색 같은 무채색 고대비 조합을 위한 간단한 색상 추출"""
+        # 픽셀 밝기 기준으로 클러스터링
+        gray = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2GRAY)
+        
+        # 어두운 픽셀과 밝은 픽셀의 대표 색상 찾기
+        colors = []
+        
+        # 매우 어두운 영역 (0~60)
+        very_dark_mask = gray < 60
+        if np.any(very_dark_mask):
+            dark_pixels = img_rgb[very_dark_mask]
+            dark_color = np.mean(dark_pixels, axis=0).astype(int)
+            colors.append(dark_color.tolist())
+        
+        # 매우 밝은 영역 (200~255)
+        very_bright_mask = gray > 200
+        if np.any(very_bright_mask):
+            bright_pixels = img_rgb[very_bright_mask]
+            bright_color = np.mean(bright_pixels, axis=0).astype(int)
+            colors.append(bright_color.tolist())
+        
+        # 중간 어두운 영역 (60~120)
+        if len(colors) < self.num_colors:
+            mid_dark_mask = (gray >= 60) & (gray <= 120)
+            if np.any(mid_dark_mask):
+                mid_dark_pixels = img_rgb[mid_dark_mask]
+                mid_dark_color = np.mean(mid_dark_pixels, axis=0).astype(int)
+                colors.append(mid_dark_color.tolist())
+        
+        # 중간 밝은 영역 (150~200)
+        if len(colors) < self.num_colors:
+            mid_bright_mask = (gray >= 150) & (gray <= 200)
+            if np.any(mid_bright_mask):
+                mid_bright_pixels = img_rgb[mid_bright_mask]
+                mid_bright_color = np.mean(mid_bright_pixels, axis=0).astype(int)
+                colors.append(mid_bright_color.tolist())
+        
+        # 여전히 부족하면 KMeans 사용
+        if len(colors) < 2:  # 최소 2개 색상은 있어야 대비 계산 가능
+            #print("KMeans로 색상 보완")
+            pixels_reshaped = img_rgb.reshape(-1, 3)
+            kmeans = KMeans(n_clusters=max(2, self.num_colors), random_state=42, n_init=10)
+            kmeans.fit(pixels_reshaped)
+            
+            colors = []
+            for center in kmeans.cluster_centers_:
+                colors.append(center.astype(int).tolist())
+        
+        return colors[:self.num_colors]
+    
     def color_extraction(self, component_img: np.ndarray):
         if len(component_img.shape) == 3:
             img_rgb = cv2.cvtColor(component_img, cv2.COLOR_BGR2RGB)
@@ -136,20 +184,40 @@ class Visibility():
 
         # 채도와 명도의 분산 계산
         saturation_var = np.var(s)
+        value_var = np.var(v)  # 명도 분산 추가
 
-        # 고채도 픽셀 비율
-        high_saturation_ratio = np.sum(s > 50) / s.size
-
-        print(f"이미지 크기: {component_img.shape}")
-        
-        if high_saturation_ratio < 0.3:
-            print("LAB 색공간 사용")
-            colors = self._lab_color(component_img)
+        # 수정된 고채도 픽셀 비율 - 명도가 충분히 높은 픽셀만 고려
+        bright_pixels_mask = v > 80  # 명도가 80 이상인 픽셀만
+        if np.any(bright_pixels_mask):
+            bright_s = s[bright_pixels_mask]
+            high_saturation_ratio = np.sum(bright_s > 30) / bright_s.size
         else:
-            print("HSV 색공간 사용")
-            colors = self._hsv_color(component_img)
+            high_saturation_ratio = 0.0  # 밝은 픽셀이 없으면 채도 0으로 간주
         
-        print(f"추출된 색상 개수: {len(colors)}")
+        # 명도 대비 분석 (검정-흰색 조합 감지)
+        low_value_ratio = np.sum(v < 80) / v.size  # 어두운 픽셀 비율
+        high_value_ratio = np.sum(v > 180) / v.size  # 밝은 픽셀 비율
+        has_high_value_contrast = (low_value_ratio > 0.2 and high_value_ratio > 0.2) or value_var > 3000
+        
+        # RGB 기반 색상 분산도 체크 (추가 검증)
+        rgb_std = np.std(img_rgb.reshape(-1, 3), axis=0)
+        is_grayscale = (rgb_std < 15).all()  # RGB 편차가 작으면 무채색
+        
+        #print(f"밝은 픽셀 기준 고채도 비율: {high_saturation_ratio:.3f}")
+        #print(f"명도 대비 존재: {has_high_value_contrast}")
+        #print(f"무채색 판단: {is_grayscale}, RGB 편차: {rgb_std}")
+        
+        # 검정-흰색 같은 무채색 고대비 조합 우선 감지
+        if (has_high_value_contrast and high_saturation_ratio <= 0.3) or is_grayscale:
+            #print("무채색 고대비 - 간단한 색상 추출 사용")
+            colors = self._simple_color_extraction(img_rgb)
+        elif high_saturation_ratio <= 0.4:  # 임계값 조정
+            #print("LAB 색공간 사용")
+            colors = self._lab_color(img_rgb)
+        else:
+            #print("HSV 색공간 사용")
+            colors = self._hsv_color(img_rgb)
+        
         return colors
 
     def _normalize_color(self, c):
@@ -168,12 +236,9 @@ class Visibility():
     
     def calculate_contrast(self, colors):
         if len(colors) < 2:
-            print("색상이 2개 미만이므로 대비 계산 불가")
+            #print("색상이 2개 미만이므로 대비 계산 불가")
             return False
-        
-        print(f"대비 계산 시작 - 색상 개수: {len(colors)}")
-        print(f"색상들: {colors}")
-        
+                
         max_contrast = 0
         contrast_results = []
         
@@ -187,62 +252,70 @@ class Visibility():
 
                 contrast = (lighter + 0.05) / (darker + 0.05)
                 max_contrast = max(max_contrast, contrast)
-                
-                contrast_results.append({
-                    'color1': colors[i],
-                    'color2': colors[j],
-                    'luminance1': luminance1,
-                    'luminance2': luminance2,
-                    'contrast': contrast,
-                    'sufficient': contrast >= 3.0
-                })
-                
-                print(f"색상 {colors[i]} vs {colors[j]}: 대비 {contrast:.2f} ({'충분' if contrast >= 3.0 else '부족'})")
-
+                                
                 # WCAG AA 기준 (4.5:1) 또는 더 관대한 기준 (3:1) 사용
-                if contrast >= 3.0:
-                    print(f"충분한 대비 발견! 대비값: {contrast:.2f}")
-                    return True
-        
-        print(f"최대 대비값: {max_contrast:.2f} - 모든 색상 쌍이 기준 미달")
-        
-        # 최대 대비가 3.0 이상이면 최소한의 가독성은 있다고 판단
-        return max_contrast >= 3.0
-    
-    def run_visibility_check(self):
-        issues = []
-        
-        try:
-            index = 0
-            for component_bbox in self.component_bbox:
-                # 컴포넌트 영역 추출
-                img_crop = self.img[component_bbox[1]:component_bbox[3], component_bbox[0]:component_bbox[2]]
+                if contrast >= 2.0:
+                    # #print(f"충분한 대비 발견! 대비값: {contrast:.2f}")
+                    contrast_results.append(True)
 
-                # 컴포넌트 영역의 주된 색상 추출                
+        return any(contrast_results), max_contrast
+    
+    def run_visibility_check(self):        
+        try:
+            logger.info(f"가독성 검사 시작: {self.image_path}")
+            issues = []
+            for component in tqdm(self.components, desc="가독성 검사 중"):
+                logger.info(f"가독성 검사 중: {component['index']}")
+
+                x1, y1, x2, y2 = component['bounds']
+                index = component['index']
+
+                img_crop = self.img[y1:y2, x1:x2]
+
+                # 컴포넌트 영역의 주된 색상 추출
                 colors = self.color_extraction(img_crop)
-                print(colors)
+                logger.info(f"컴포넌트 영역의 주된 색상 추출: {colors}")                
                 
                 if not colors:
-                    print(f"색상 추출 실패: {component_bbox}")
                     continue
                 
                 # 대비 검사
-                if not self.calculate_contrast(colors):
-                    issue = ResultModel(
-                        image_path=self.image_path,
-                        issue_type="visibility",
-                        issue_location=component_bbox,
-                        issue_description=f"컴포넌트 영역 {component_bbox}에서 가독성 이슈 발생 - 색상 대비 부족"
-                    )
-                    print(index)
-                    cv2.imwrite(f"{self.file_name}_issue_{index}.png", img_crop)
-                    issues.append(issue)
-                    index += 1
+                contrast_result, max_contrast =self.calculate_contrast(colors)
+                logger.info(f"대비 검사 결과: {contrast_result}, {max_contrast}")
+
+                if not contrast_result:
+                    logger.info(f"이슈 발견! 컴포넌트 정보: {component}")
+                    try:
+                        resource_id = component.get('resource-id', 'unknown')
+                        issue = ResultModel(
+                            image_path=self.image_path,
+                            index=index,
+                            issue_type=f"visibility_{component['type']}",
+                            issue_location=component['bounds'],
+                            issue_description=f"{component['type']}, {resource_id}에서 가독성 이슈 발생 - 색상 대비 부족:{max_contrast}"
+                        )
+                        issues.append(issue)
+                        logger.info(f"이슈 추가 완료: {issue.issue_description}")
+                    except Exception as e:
+                        logger.error(f"이슈 생성 중 오류: {e}")
+                        logger.error(f"컴포넌트 데이터: {component}")
+            
+            # 가장 낮은 대비 값을 가지는 이슈를 저장
+            if issues:
+                min_contrast = min(issues, key=lambda x: x.issue_description.split(":")[-1])
+                logger.info(f"가독성 검사 완료. 검출된 이슈 {len(issues)+1}개 중 가장 낮은 대비 값을 가지는 이슈를 저장합니다.")
+
+                file_name = os.path.basename(self.image_path)
+                output_path = f"./output/{file_name}"
+
+                cv2.rectangle(self.img, (min_contrast.issue_location[0], min_contrast.issue_location[1]), (min_contrast.issue_location[2], min_contrast.issue_location[3]), (0, 255, 0), 2)
+                cv2.putText(self.img, f"contrast: {min_contrast.issue_description.split(':')[-1]}", (min_contrast.issue_location[0], min_contrast.issue_location[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                cv2.imwrite(output_path, self.img)
                 
 
-            return issues
-            
+            return min_contrast
+            # return issues
         except Exception as e:
-            print(f"가독성 검사 중 오류 발생: {e}")
+            #print(f"가독성 검사 중 오류 발생: {e}")
             return []
     
