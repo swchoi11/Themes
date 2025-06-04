@@ -4,9 +4,9 @@ from xml.etree import ElementTree as ET
 import re
 from typing import List, Tuple, Dict, Optional
 from src.match import Match
-from src.utils import get_bounds
-from src.result import ResultModel
-from src.detect import Detect
+from src.utils.utils import get_bounds
+from src.utils.model import ResultModel
+from src.utils.detect import Detect
 
 
 class Align:

@@ -10,9 +10,9 @@ from google.genai import types
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from common.prompt import Prompt
-from common.logger import init_logger
-from src.result import ResultModel, Result
+from src.utils.prompt import Prompt
+from src.utils.logger import init_logger
+from src.utils.model import ResultModel, Result
 
 logger = init_logger()
 
@@ -123,7 +123,6 @@ class Gemini:
             (Prompt.calender_text_issue(), "calendar_text"),
             (Prompt.calender_date_issue(), "calendar_date"),
             (Prompt.clock_issue(), "clock"),
-            (Prompt.highlight_issue(), "highlight"),
             (Prompt.interaction_issue(), "interaction"),
         ]
         

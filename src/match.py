@@ -1,10 +1,8 @@
-# 3. 테마 이미지의 xml을 분류된 카테고리에 맞춰 분류
-# 3.1 테마 이미지가 폴드인 경우에만 사용
 import cv2
 import glob
 from tqdm import tqdm
 import os
-from src.utils import calculate_xml_similarity
+from src.utils.utils import calculate_xml_similarity
 
 class Match:
     def __init__(self, file_path: str):

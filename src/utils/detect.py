@@ -1,6 +1,6 @@
 from xml.etree import ElementTree as ET
 import cv2
-from src.utils import get_bounds
+from src.utils.utils import get_bounds
 
 
 class Detect:

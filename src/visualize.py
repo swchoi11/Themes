@@ -3,7 +3,7 @@ import re
 import xml.etree.ElementTree as ET
 import os
 import random
-from src.utils import get_bounds
+from src.utils.utils import get_bounds
 import numpy as np
 
 

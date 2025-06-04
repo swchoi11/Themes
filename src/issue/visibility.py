@@ -3,9 +3,9 @@ import os
 import numpy as np
 from sklearn.cluster import KMeans
 from tqdm import tqdm
-from src.result import ResultModel
-from src.detect import Detect
-from common.logger import init_logger
+from src.utils.model import ResultModel
+from src.utils.detect import Detect
+from src.utils.logger import init_logger
 
 logger = init_logger()
 

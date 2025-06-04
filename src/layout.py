@@ -1,9 +1,9 @@
-from src.detect import Detect
+from src.utils.detect import Detect
 from src.issue.visibility import Visibility
 from src.issue.cutoff import Cutoff
 from src.issue.icon import Icon
 from src.issue.alignment import Align, get_dial_alignment
-from common.logger import init_logger
+from src.utils.logger import init_logger
 import os
 
 logger = init_logger()

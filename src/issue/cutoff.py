@@ -1,9 +1,9 @@
 import numpy as np
 import cv2
 import os
-from src.detect import Detect
-from src.result import ResultModel
-from common.logger import init_logger
+from src.utils.detect import Detect
+from src.utils.model import ResultModel
+from src.utils.logger import init_logger
 
 logger = init_logger()
 

@@ -1,27 +1,10 @@
-"""
-이미지-XML 파일 쌍 분류 시스템
-
-목적:
-1. resource/pass/{theme_id}/*.png, resource/default/{theme_id}/*.png 구조의 파일들을 분류
-2. 파일명 기반 1차 분류 (숫자 제거 후 동일한 이름끼리 그룹화)
-3. XML 내용 유사도 기반 2차 분류 (세부 그룹화)
-4. 이미지와 XML 파일을 쌍으로 유지하며 자동 분류
-
-구조:
-- 입력: resource/pass/{theme_id}/*.{png,xml}, resource/default/{theme_id}/*.{png,xml}
-- 출력: output/{cleaned_filename}/group_{idx}/*.{png,xml}
-"""
-
-import glob
 import os
 import re
 import shutil
-import xml.etree.ElementTree as ET
-from difflib import SequenceMatcher
-from tqdm import tqdm
+
 import concurrent.futures
 from typing import List, Tuple, Dict
-from src.utils import normalize_xml_content, calculate_xml_similarity
+from src.utils.utils import calculate_xml_similarity
 
 class ImageXMLClassifier:
     """이미지-XML 파일 쌍을 자동으로 분류하는 클래스"""
