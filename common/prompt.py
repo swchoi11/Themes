@@ -67,27 +67,6 @@ class Prompt:
         """
 
     @staticmethod
-    def highlight_issue():
-        return """
-        다음 이미지는 핸드폰의 실제 사용 화면입니다.       
-        다음 이미지에서 하이라이트된 항목, 텍스트와 배경 간 대비가 낮아 가독성이 떨어지는 이슈가 있는지 확인해주세요.
-        예를 들면 이런 이슈가 있을 수 있습니다.
-        - 사이드바의 항목을 선택했는데 선택한 항목이 하이라이트되지 않음
-        - 작성한 메시지의 텍스트를 선택했는데 선택한 텍스트의 하이라이트가 배경과 구분되지 않음
-
-        이슈가 없는 경우 None을 반환해 주세요.
-        이슈가 있는 경우 이런 형식의 응답을 반환해 주세요. 이슈 번호는 12로 고정해 주세요.
-        
-        예시)
-        issue_type: 12
-        component_id: highlight_11
-        component_type: highlight
-        severity: 0.8
-        bbox: [0.01875, 0.014784, 0.15125, 0.038978]
-        description: 사이드 바의 항목을 선택했는데 선택한 항목이 하이라이트 되지 않음
-        """
-    
-    @staticmethod
     def interaction_issue():
         return """
         다음 이미지는 핸드폰의 실제 사용 화면입니다.       
