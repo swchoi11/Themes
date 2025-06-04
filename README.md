@@ -110,19 +110,23 @@
 │   ├── config.py
 │   ├── logger.py
 │   └── prompt.py
-├── src
+── src
+│   ├── utils
+│   │   ├── detect.py
+│   │   ├── logger.py
+│   │   ├── model.py
+│   │   ├── prompt.py
+│   │   └── utils.py
 │   ├── issue
 │   │   ├── alignment.py
 │   │   ├── cutoff.py
 │   │   ├── icon.py
 │   │   └── visibility.py
-│   ├── classification.py
-│   ├── detect.py
+│   ├── __init__.py
 │   ├── gemini.py
+│   ├── classification.py
 │   ├── layout.py
 │   ├── match.py
-│   ├── model.py
-│   ├── utils.py
 │   └── visualize.py
 └── main.py
 ```
