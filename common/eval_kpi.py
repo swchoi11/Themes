@@ -31,7 +31,7 @@ class EvalKPI:
     }
 
     # 3. Issue Representative Description
-    Description = {
+    DESCRIPTION = {
         '0': "텍스트, 아이콘과 배경 간 대비가 낮아 가독성이 떨어짐",
         '1': "하이라이트된 항목, 텍스트와 배경 간 대비가 낮아 가독성이 떨어짐",
         '2': "상호작용 가능한 요소가 시각적으로 명확히 구분되지 않음",

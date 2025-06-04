@@ -1,5 +1,4 @@
 import json
-
 from typing import Dict, List, Optional
 from dataclasses import dataclass
 import cv2
@@ -63,6 +62,8 @@ class LayoutAnalyzer(Gemini):
         self.icon_crop_threshold = 0.1
         self.highlight_contrast_threshold = 0.4
 
+        self.max_issues_per_type = 3
+
     def _calculate_iou(self, bbox1: List[float], bbox2: List[float]) -> float:
         """IoU 계산"""
         x1_1, y1_1, x2_1, y2_1 = bbox1
@@ -81,16 +82,59 @@ class LayoutAnalyzer(Gemini):
         return intersection / union if union > 0 else 0
 
     def _deduplicate_and_prioritize(self, issues: List[Issue]) -> List[Issue]:
-        """이슈를 중복 제거하고 심각도(severity)에 따라 내림차순 정렬.
-        tracked_issue_keys는 component_id와 issue_type의 조합 키를 저장해 중복 이슈를 방지."""
-        tracked_issue_keys = set()
-        unique_issues = []
+        """우선순위를 기반으로 이슈를 필터링하고 개수를 제한"""
+
+        # 이슈 타입별로 그룹화
+        issues_by_type = {}
         for issue in issues:
-            key = f"{issue.component_id}_{issue.issue_type}"
-            if key not in tracked_issue_keys:
-                tracked_issue_keys.add(key)
-                unique_issues.append(issue)
-        return sorted(unique_issues, key=lambda x: x.severity, reverse=True)
+            issue_type = issue.issue_type
+            if issue_type not in issues_by_type:
+                issues_by_type[issue_type] = []
+            issues_by_type[issue_type].append(issue)
+
+        # 각 이슈 타입별로 우선순위 정렬 및 개수 제한
+        final_issues = []
+        for issue_type, type_issues in issues_by_type.items():
+            sorted_issues = sorted(
+                type_issues,
+                key=lambda x: (x.severity, x.confidence),
+                reverse=True
+            )
+
+            # 해당 이슈 타입의 최대 개수만큼만 선택
+            max_count = self.max_issues_per_type  # 모든 타입에 동일하게 적용
+            final_issues.extend(sorted_issues[:max_count])
+
+        return final_issues
+
+    def _get_json_elements_with_confidence(self, layout_data: LayoutElement, issue_type: int) -> List[Dict]:
+
+        elements = layout_data.skeleton.get('elements', [])
+
+        # 이슈 타입에 따라 관련 요소만 선별
+        relevant_elements = []
+        for elem in elements:
+            if self._is_relevant_for_issue_type(elem, issue_type):
+                relevant_elements.append(elem)
+
+        return relevant_elements
+
+    def _is_relevant_for_issue_type(self, elem: Dict, issue_type: int) -> bool:
+        """특정 이슈 타입과 관련된 요소인지 확인"""
+        elem_type = elem.get('type', '')
+
+        if issue_type in [0, 1]:  # 대비 문제
+            return elem_type in ['text', 'icon', 'button']
+        elif issue_type == 2:  # 상호작용 요소
+            return elem.get('interactivity', False) and elem_type in ['button', 'input', 'toggle']
+        elif issue_type in [3, 4, 5]:  # 정렬 문제
+            return elem_type in ['button', 'icon', 'text', 'input']
+        elif issue_type == 6:  # 텍스트 잘림
+            return elem_type == 'text'
+        elif issue_type == 7:  # 아이콘 크롭
+            return elem_type == 'icon'
+
+        return True
 
     def _calc_location(self, bbox: List[float]) -> tuple:
         """Calculate location based on bbox coordinates using EvalKPI.LOCATION
@@ -137,8 +181,53 @@ class LayoutAnalyzer(Gemini):
         """Get description id and type for issue
         Returns (description_id, description_type) tuple"""
         description_id = issue_type
-        description_type = EvalKPI.Description.get(issue_type, "Unknown issue")
+        description_type = EvalKPI.DESCRIPTION.get(issue_type, "Unknown issue")
         return description_id, description_type
+
+    def _get_gemini_suggestion_reason(self, response: Dict, elem: Dict, issue_type: int) -> str:
+        """gemini가 이슈를 감지한 이유 추출"""
+        reason_parts = []
+
+        if 'reason' in response:
+            reason_parts.append(f"AI Analysis: {response['reason']}")
+
+        # Gemini 응답의 severity 추출 및 추가
+        severity = response.get('severity', 'unknown')
+        if severity != 'unknown':
+            reason_parts.append(f"AI Severity: {severity}")
+
+        # 요소별 구체적인 판단 근거
+        if issue_type in [0, 1]:  # 대비 문제
+            visual_features = elem.get('visual_features', {})
+            avg_color = visual_features.get('avg_color', [128, 128, 128])
+            edge_density = visual_features.get('edge_density', 0.5)
+            reason_parts.append(f"Color: {avg_color}, Edge density: {edge_density:.2f}")
+
+        elif issue_type == 2:  # 상호작용 요소
+            visual_features = elem.get('visual_features', {})
+            edge_density = visual_features.get('edge_density', 0.5)
+            reason_parts.append(f"Interactive element visibility: {edge_density:.2f} < {self.visibility_threshold}")
+
+        elif issue_type in [3, 4, 5]:  # 정렬 문제
+            bbox = elem.get('bbox', [0, 0, 0, 0])
+            reason_parts.append(f"Element position: {bbox}, threshold: {self.alignment_threshold}")
+
+        elif issue_type == 6:  # 텍스트 잘림
+            bbox = elem.get('bbox', [0, 0, 0, 0])
+            content = elem.get('content', '')
+            visual_features = elem.get('visual_features', {})
+            font_size = visual_features.get('font_size', 0.02)
+            text_width = len(content) * font_size
+            bbox_width = bbox[2] - bbox[0]
+            reason_parts.append(f"Text width {text_width:.3f} > Container width {bbox_width:.3f}")
+
+        elif issue_type == 7:  # 아이콘 크롭
+            bbox = elem.get('bbox', [0, 0, 0, 0])
+            margins = [bbox[0], bbox[1], 1.0 - bbox[2], 1.0 - bbox[3]]
+            min_margin = min(margins)
+            reason_parts.append(f"Min margin {min_margin:.3f} < threshold {self.icon_crop_threshold}")
+
+        return " | ".join(reason_parts)
 
 
 class CompareLayout(LayoutAnalyzer):
@@ -158,24 +247,22 @@ class CompareLayout(LayoutAnalyzer):
             response = dict(self.generate_response(prompt, themed_image))
             responses[issue_type] = response
 
-            if self.DEBUG:
-                image = cv2.imread(themed_image)
-                x1, y1, x2, y2 = response.get("bbox", [0, 0, 0, 0])
-                cv2.rectangle(image, (int(x1), int(y1)), (int(x2), int(y2)), color=(0, 255, 0), thickness=2)
-                description = response.get("description", "")
-                cv2.namedWindow(f"Issue {issue_type}:{description}", cv2.WINDOW_NORMAL)
-                cv2.imshow(f"Issue {issue_type}:{description}", image)
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
+        for issue_type in ['2', '3', '4', '5', '6']:
+            relevant_elements = self._get_json_elements_with_confidence(themed_layout, int(issue_type))
 
-        # Rule-based checks
-        for themed_id, match in mapping.items():
-            default_elem = match['default']
-            themed_elem = match['themed']
-            all_issues.extend(self._check_interactive_elements(themed_elem, responses.get('2')))
-            all_issues.extend(
-                self._check_alignment_issues(default_elem, themed_elem, responses.get('3'), responses.get('4'), responses.get('5')))
-            all_issues.extend(self._check_text_truncation(themed_elem, responses.get('6')))
+            for elem in relevant_elements:
+                if issue_type == '2':
+                    all_issues.extend(self._check_interactive_elements(elem, responses.get('2')))
+                elif issue_type in ['3', '4', '5']:
+                    # 매핑된 요소가 있는 경우에만 정렬 검사
+                    if elem['id'] in mapping:
+                        default_elem = mapping[elem['id']]['default']
+                        all_issues.extend(
+                            self._check_alignment_issues(default_elem, elem,
+                                                         responses.get('3'), responses.get('4'), responses.get('5'))
+                        )
+                elif issue_type == '6':
+                    all_issues.extend(self._check_text_truncation(elem, responses.get('6')))
 
         return self._deduplicate_and_prioritize(all_issues)
 
@@ -211,69 +298,24 @@ class CompareLayout(LayoutAnalyzer):
             default_x_center = (default_bbox[0] + default_bbox[2]) / 2
             themed_x_center = (themed_bbox[0] + themed_bbox[2]) / 2
             if abs(default_x_center - themed_x_center) > self.alignment_threshold:
-                ui_component_id, ui_component_type = self._calc_ui_component(elem_type)
-                location_id, location_type = self._calc_location(themed_bbox)
-                description_id, description_type = self._get_description('3')
-
-                issues.append(Issue(
-                    issue_type=3,
-                    component_id=themed_elem.get('id', 'unknown'),
-                    component_type=elem_type,
-                    ui_component_id=ui_component_id,
-                    ui_component_type=ui_component_type,
-                    severity=0.7,
-                    location_id=location_id,
-                    location_type=location_type,
-                    bbox=themed_bbox,
-                    description_id=description_id,
-                    description_type=description_type,
-                    suggestion=resp3.get('text', "Align elements consistently with the reference layout.")
-                ))
+                severity = resp3.get('severity')
+                issue = self._create_issue(themed_elem, issue_type=3, severity=severity, suggestion=resp3.get('text', EvalKPI.DESCRIPTION['3']))
+                issues.append(issue)
 
         # Issue 4: Non-uniform vertical/horizontal alignment
         default_y_center = (default_bbox[1] + default_bbox[3]) / 2
         themed_y_center = (themed_bbox[1] + themed_bbox[3]) / 2
         if abs(default_y_center - themed_y_center) > self.alignment_threshold:
-            ui_component_id, ui_component_type = self._calc_ui_component(elem_type)
-            location_id, location_type = self._calc_location(themed_bbox)
-            description_id, description_type = self._get_description('4')
-
-            issues.append(Issue(
-                issue_type=4,
-                component_id=themed_elem.get('id', 'unknown'),
-                component_type=elem_type,
-                ui_component_id=ui_component_id,
-                ui_component_type=ui_component_type,
-                severity=0.7,
-                location_id=location_id,
-                location_type=location_type,
-                bbox=themed_bbox,
-                description_id=description_id,
-                description_type=description_type,
-                suggestion=resp4.get('text', "Ensure uniform vertical/horizontal alignment.")
-            ))
+            severity = resp4.get('severity')
+            issue = self._create_issue(themed_elem, issue_type=4, severity=severity, suggestion=resp4.get('text', EvalKPI.DESCRIPTION['4']))
+            issues.append(issue)
 
         # Issue 5: Different alignment reference points
         if default_elem.get('layout_role') == themed_elem.get('layout_role'):
             if abs(default_bbox[0] - themed_bbox[0]) > self.alignment_threshold:
-                ui_component_id, ui_component_type = self._calc_ui_component(elem_type)
-                location_id, location_type = self._calc_location(themed_bbox)
-                description_id, description_type = self._get_description('5')
-
-                issues.append(Issue(
-                    issue_type=5,
-                    component_id=themed_elem.get('id', 'unknown'),
-                    component_type=elem_type,
-                    ui_component_id=ui_component_id,
-                    ui_component_type=ui_component_type,
-                    severity=0.7,
-                    location_id=location_id,
-                    location_type=location_type,
-                    bbox=themed_bbox,
-                    description_id=description_id,
-                    description_type=description_type,
-                    suggestion=resp5.get('text', "Use consistent alignment reference points for same-level elements.")
-                ))
+                severity = resp5.get('severity')
+                issue = self._create_issue(themed_elem, issue_type=5, severity=severity, suggestion=resp5.get('text', EvalKPI.DESCRIPTION['5']))
+                issues.append(issue)
 
         return issues
 
@@ -286,25 +328,11 @@ class CompareLayout(LayoutAnalyzer):
             visual_features = themed_elem.get('visual_features', {})
             text_width = len(content) * visual_features.get('font_size', 0.02)
             bbox_width = bbox[2] - bbox[0]
-            if text_width > bbox_width * 1.1:
-                ui_component_id, ui_component_type = self._calc_ui_component('text')
-                location_id, location_type = self._calc_location(bbox)
-                description_id, description_type = self._get_description('6')
 
-                issues.append(Issue(
-                    issue_type=6,
-                    component_id=themed_elem.get('id', 'unknown'),
-                    component_type='text',
-                    ui_component_id=ui_component_id,
-                    ui_component_type=ui_component_type,
-                    severity=0.6,
-                    location_id=location_id,
-                    location_type=location_type,
-                    bbox=bbox,
-                    description_id=description_id,
-                    description_type=description_type,
-                    suggestion=response.get('text', "Adjust text container size or reduce font size.")
-                ))
+            if text_width > bbox_width * 1.1:
+                severity = response.get('severity')
+                issue = self._create_issue(themed_elem, issue_type=6, severity=severity, suggestion=response.get('text', EvalKPI.DESCRIPTION['6']))
+                issues.append(issue)
         return issues
 
     def _check_interactive_elements(self, themed_elem: Dict, response: Dict) -> List[Issue]:
@@ -313,28 +341,35 @@ class CompareLayout(LayoutAnalyzer):
         if themed_elem.get('interactivity') and themed_elem.get('type') in ['button', 'input', 'toggle']:
             visual_features = themed_elem.get('visual_features', {})
             edge_density = visual_features.get('edge_density', 0.5)
-            if edge_density < self.visibility_threshold:
-                elem_type = themed_elem.get('type', 'unknown')
-                bbox = themed_elem.get('bbox', [0, 0, 0, 0])
-                ui_component_id, ui_component_type = self._calc_ui_component(elem_type)
-                location_id, location_type = self._calc_location(bbox)
-                description_id, description_type = self._get_description('2')
 
-                issues.append(Issue(
-                    issue_type=2,
-                    component_id=themed_elem.get('id', 'unknown'),
-                    component_type=elem_type,
-                    ui_component_id=ui_component_id,
-                    ui_component_type=ui_component_type,
-                    severity=0.8,
-                    location_id=location_id,
-                    location_type=location_type,
-                    bbox=bbox,
-                    description_id=description_id,
-                    description_type=description_type,
-                    suggestion=response.get('text', "Enhance visual distinction of interactive elements.")
-                ))
+            if edge_density < self.visibility_threshold:
+                severity = response.get('severity')
+                issue = self._create_issue(themed_elem, issue_type=2, severity=severity, suggestion=response.get('text', EvalKPI.DESCRIPTION['2']))
+                issues.append(issue)
         return issues
+
+    def _create_issue(self, elem: Dict, issue_type: int, severity: str, suggestion: str) -> Issue:
+        """이슈 객체 생성 헬퍼 함수"""
+        elem_type = elem.get('type', 'unknown')
+        bbox = elem.get('bbox', [0, 0, 0, 0])
+        ui_component_id, ui_component_type = self._calc_ui_component(elem_type)
+        location_id, location_type = self._calc_location(bbox)
+        description_id, description_type = self._get_description(str(issue_type))
+
+        return Issue(
+            issue_type=issue_type,
+            component_id=elem.get('id', 'unknown'),
+            component_type=elem_type,
+            ui_component_id=ui_component_id,
+            ui_component_type=ui_component_type,
+            severity=severity,
+            location_id=location_id,
+            location_type=location_type,
+            bbox=bbox,
+            description_id=description_id,
+            description_type=description_type,
+            suggestion=suggestion
+        )
 
 
 class SingleLayout(LayoutAnalyzer):
@@ -356,23 +391,14 @@ class SingleLayout(LayoutAnalyzer):
             response = dict(self.generate_response(prompt, image_path))
             responses[issue_type] = response
 
-            bbox = response.get("bbox", [0, 0, 0, 0])
-            if len(bbox) != 4 or any(not isinstance(x, (int, float)) or x < 0 for x in bbox):
-                print(f"Warning: Invalid bbox for Issue {issue_type}: {bbox}")
-                continue
+        for issue_type in ['0', '1', '7']:
+            relevant_elements = self._get_json_elements_with_confidence(layout_data, int(issue_type))
 
-            x1, y1, x2, y2 = map(int, bbox)
-            cv2.rectangle(image, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=2)
-            description = response.get("description", "")
-            if self.DEBUG:
-                cv2.namedWindow(f"Issue {issue_type}:{description}", cv2.WINDOW_NORMAL)
-                cv2.imshow(f"Issue {issue_type}:{description}", image)
-                cv2.waitKey(0)
-                cv2.destroyAllWindows()
-
-        for elem in layout_data.skeleton.get('elements', []):
-            all_issues.extend(self._check_contrast_issues(elem, responses.get('0'), responses.get('1')))
-            all_issues.extend(self._check_icon_cropping(elem, responses.get('7')))
+            for elem in relevant_elements:
+                if issue_type in ['0', '1']:
+                    all_issues.extend(self._check_contrast_issues(elem, responses.get('0'), responses.get('1')))
+                elif issue_type == '7':
+                    all_issues.extend(self._check_icon_cropping(elem, responses.get('7')))
 
         return self._deduplicate_and_prioritize(all_issues)
 
@@ -381,26 +407,12 @@ class SingleLayout(LayoutAnalyzer):
         issues = []
         if elem.get('type') == 'icon':
             bbox = elem.get('bbox', [0, 0, 0, 0])
+
             margin_left, margin_top, margin_right, margin_bottom = bbox[0], bbox[1], 1.0 - bbox[2], 1.0 - bbox[3]
             if min(margin_left, margin_top, margin_right, margin_bottom) < self.icon_crop_threshold:
-                ui_component_id, ui_component_type = self._calc_ui_component('icon')
-                location_id, location_type = self._calc_location(bbox)
-                description_id, description_type = self._get_description('7')
-
-                issues.append(Issue(
-                    issue_type=7,
-                    component_id=elem.get('id', 'unknown'),
-                    component_type='icon',
-                    ui_component_id=ui_component_id,
-                    ui_component_type=ui_component_type,
-                    severity=0.5,
-                    location_id=location_id,
-                    location_type=location_type,
-                    bbox=bbox,
-                    description_id=description_id,
-                    description_type=description_type,
-                    suggestion=response.get('text', "Adjust icon position or add margins.")
-                ))
+                severity = response.get('severity')
+                issue = self._create_issue(elem, issue_type=7, severity=severity, suggestion=response.get('text', EvalKPI.DESCRIPTION['7']))
+                issues.append(issue)
         return issues
 
     def _check_contrast_issues(self, elem: Dict, resp0: Dict, resp1: Dict) -> List[Issue]:
@@ -408,7 +420,6 @@ class SingleLayout(LayoutAnalyzer):
         issues = []
         elem_type = elem.get('type', 'unknown')
         visual_features = elem.get('visual_features', {})
-        bbox = elem.get('bbox', [0, 0, 0, 0])
 
         # Issue 0: Low text/icon contrast
         if elem_type in ['text', 'icon']:
@@ -417,24 +428,9 @@ class SingleLayout(LayoutAnalyzer):
                 gray_value = 0.299 * avg_color[0] + 0.587 * avg_color[1] + 0.114 * avg_color[2]
                 contrast = 1 - abs(gray_value - 128) / 128
                 if contrast < self.highlight_contrast_threshold:
-                    ui_component_id, ui_component_type = self._calc_ui_component(elem_type)
-                    location_id, location_type = self._calc_location(bbox)
-                    description_id, description_type = self._get_description('0')
-
-                    issues.append(Issue(
-                        issue_type=0,
-                        component_id=elem.get('id', 'unknown'),
-                        component_type=elem_type,
-                        ui_component_id=ui_component_id,
-                        ui_component_type=ui_component_type,
-                        severity=0.7,
-                        location_id=location_id,
-                        location_type=location_type,
-                        bbox=bbox,
-                        description_id=description_id,
-                        description_type=description_type,
-                        suggestion=resp0.get('text', "Adjust colors to improve contrast.")
-                    ))
+                    severity = resp0.get('severity')
+                    issue = self._create_issue(elem, issue_type=0, severity=severity, suggestion=resp0.get('text', EvalKPI.DESCRIPTION['0']))
+                    issues.append(issue)
 
         # Issue 1: Low highlight contrast
         if elem.get('layout_role') == 'main_content':
@@ -445,30 +441,37 @@ class SingleLayout(LayoutAnalyzer):
                 brightness = (r + g + b) / 3
                 contrast_estimate = visual_features.get('edge_density', 0.5) * (saturation + brightness / 255) / 2
                 if contrast_estimate < self.highlight_contrast_threshold:
-                    ui_component_id, ui_component_type = self._calc_ui_component(elem_type)
-                    location_id, location_type = self._calc_location(bbox)
-                    description_id, description_type = self._get_description('1')
-
-                    issues.append(Issue(
-                        issue_type=1,
-                        component_id=elem.get('id', 'unknown'),
-                        component_type=elem_type,
-                        ui_component_id=ui_component_id,
-                        ui_component_type=ui_component_type,
-                        severity=0.7,
-                        location_id=location_id,
-                        location_type=location_type,
-                        bbox=bbox,
-                        description_id=description_id,
-                        description_type=description_type,
-                        suggestion=resp1.get('text', "Adjust highlight colors to improve contrast.")
-                    ))
+                    severity = resp1.get('severity')
+                    issue = self._create_issue(elem, issue_type=1, severity=severity, suggestion=resp1.get('text', EvalKPI.DESCRIPTION['1']))
+                    issues.append(issue)
 
         return issues
 
+    def _create_issue(self, elem: Dict, issue_type: int, severity: float, suggestion: str) -> Issue:
+        """이슈 객체 생성"""
+        elem_type = elem.get('type', 'unknown')
+        bbox = elem.get('bbox', [0, 0, 0, 0])
+        ui_component_id, ui_component_type = self._calc_ui_component(elem_type)
+        location_id, location_type = self._calc_location(bbox)
+        description_id, description_type = self._get_description(str(issue_type))
+
+        return Issue(
+            issue_type=issue_type,
+            component_id=elem.get('id', 'unknown'),
+            component_type=elem_type,
+            ui_component_id=ui_component_id,
+            ui_component_type=ui_component_type,
+            severity=severity,
+            location_id=location_id,
+            location_type=location_type,
+            bbox=bbox,
+            description_id=description_id,
+            description_type=description_type,
+            suggestion=suggestion
+        )
+
 
 if __name__ == '__main__':
-
     try:
         # Load data
         theme_image_path = "../resource/0530_theme_img_xml_labeled/Visibility Issue/Fail_[042]_com.sec.android.app.launcher_LauncherActivity_20250521_173924.png"
@@ -487,7 +490,8 @@ if __name__ == '__main__':
         # CompareLayout analysis
         compare_analyzer = CompareLayout()
         default_layout_data = json_parser(default_json_path)
-        compare_issues = compare_analyzer.analyze_comparison(default_image_path, theme_image_path, default_layout_data, theme_layout_data)
+        compare_issues = compare_analyzer.analyze_comparison(default_image_path, theme_image_path, default_layout_data,
+                                                             theme_layout_data)
         print(f"\nCompare Layout: 총 {len(compare_issues)}개의 이슈가 발견 되었습니다:")
         for issue in compare_issues:
             print(f"- 이슈 {issue.issue_type}: {issue.description_type} (심각도: {issue.severity:.2f})")

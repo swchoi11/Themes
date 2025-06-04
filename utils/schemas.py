@@ -78,12 +78,12 @@ class Layout(BaseModel):
 
 class Issue(BaseModel):
     """검출된 이슈"""
-    issue_type: int
+    issue_type: str
     component_id: str
     component_type: str
     ui_component_id: str        # EvalKPI.UI_COMPONENT.keys()
     ui_component_type : str     # EvalKPI.UI_COMPONENT.value()
-    severity: float
+    severity: str
     location_id: str            # EvalKPI.LOCATION.keys()
     location_type: str          # EvalKPI.LOCATION.value()
     bbox: List[float]
