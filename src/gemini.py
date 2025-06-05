@@ -48,6 +48,30 @@ class Gemini:
         return wrapper
 
     @retry_with_delay
+    def _call_gemini_text(self, prompt, text, issue_type: str = "", index: int = 0) -> ResultModel:
+        response_schema = {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "bounds": {"type": "array", "items": {"type": "number"}},
+                    "aligned": {"type": "boolean"}
+                }
+            }
+        }
+        response = self.client.models.generate_content(
+            model=self.model,
+            contents=[prompt, text],
+            config={
+                "response_mime_type": "application/json",
+                "response_schema": response_schema
+            }
+        )
+        logger.info(f"gemini 호출 완료")
+
+        return response.text
+    
+    @retry_with_delay
     def _call_gemini_image(self, prompt, image, issue_type: str = "", index: int = 0) -> ResultModel:
         target_image = self.client.files.upload(file=image)
         logger.info(f"image 업로드 완료: {image}")
@@ -111,11 +135,15 @@ class Gemini:
             issue_description=result.issue_description
         )
 
-    def generate_response(self, prompt, image, text: Optional[str] = None, issue_type: str = "", index: int = 0) -> ResultModel:
-        if text:
+    def generate_response(self, prompt, image: Optional[str] = None, text: Optional[str] = None, issue_type: str = "", index: int = 0) -> ResultModel:
+        if image and text:
             return self._call_gemini_image_text(prompt, image, text, issue_type, index)
-        else:
+        elif text:
+            return self._call_gemini_text(prompt, text, issue_type, index)
+        elif image:
             return self._call_gemini_image(prompt, image, issue_type, index)
+        else:
+            raise ValueError("image 또는 text 중 하나는 반드시 제공되어야 합니다.")
         
     def detect_all_issues(self) -> List[ResultModel]:
         issues = []
