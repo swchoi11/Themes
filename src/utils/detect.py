@@ -156,19 +156,42 @@ class Detect:
     
     def get_icon_components(self):
         all_nodes = self._all_nodes(self.root)
-        # 먼저 아이콘 크기 조건에 맞는 컴포넌트들 추출
+        
+        # 아이콘 관련 클래스와 리소스 ID 패턴 정의
+        icon_classes = ['android.widget.ImageView']
+        icon_resource_patterns = [
+            'icon', 'Icon', 'ICON',
+            'badge', 'Badge', 'BADGE', 
+            'ic_', 'Ic_', 'IC_',
+        ]
+        
         icon_components = []
         for idx, node in enumerate(all_nodes):
             bounds = get_bounds(node.get('bounds'))
             if bounds:
                 width = abs(bounds[2] - bounds[0])
                 height = abs(bounds[3] - bounds[1])
-                if width <= 100 and height <= 100 and width >= 20 and height >= 20:  # 최소 크기 조건 추가
+                node_class = node.get('class')
+                resource_id = node.get('resource-id', '')
+                
+                # 조건 1: ImageView이면서 적절한 크기
+                is_imageview_icon = (node_class == 'android.widget.ImageView' and 
+                                   width <= 200 and height <= 200 and 
+                                   width >= 10 and height >= 10)
+                
+                # 조건 2: 리소스 ID에 아이콘 관련 패턴이 포함된 경우
+                has_icon_resource = any(pattern in resource_id for pattern in icon_resource_patterns)
+                
+                # 조건 3: 기존 크기 기반 조건 (백업용)
+                size_based_icon = (width <= 100 and height <= 100 and 
+                                 width >= 20 and height >= 20)
+                
+                if is_imageview_icon or has_icon_resource or size_based_icon:
                     icon_component = {
                         'index': idx,
-                        'type': node.get('class'),
+                        'type': node_class,
                         'content': node.get('text'),
-                        'resource_id': node.get('resource-id'),
+                        'resource_id': resource_id,
                         'bounds': bounds
                     }
                     if icon_component not in icon_components:

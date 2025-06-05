@@ -1,0 +1,1852 @@
+[
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 100,
+    "issue_type": "cutoff",
+    "issue_location": [
+      65,
+      1859,
+      155,
+      1949
+    ],
+    "issue_description": "컴포넌트 영역 (65, 576, 155, 666)(65, 753, 155, 843)(65, 911, 155, 1001)(65, 1069, 155, 1159)(65, 1227, 155, 1317)(65, 1385, 155, 1475)(65, 1543, 155, 1633)(65, 1701, 155, 1791)(65, 1859, 155, 1949)에서 컷오프 이슈 발생 : android.widget.RadioButton"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 36,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      922,
+      581,
+      1001,
+      660
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (922, 581, 1001, 660), 동일한 아이콘 위치들: [(922, 1232, 1001, 1311), (922, 1390, 1001, 1469), (922, 1548, 1001, 1627), (922, 1706, 1001, 1785), (922, 1864, 1001, 1943)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 67,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      922,
+      1232,
+      1001,
+      1311
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (922, 1232, 1001, 1311), 동일한 아이콘 위치들: [(922, 581, 1001, 660), (922, 1390, 1001, 1469), (922, 1548, 1001, 1627), (922, 1706, 1001, 1785), (922, 1864, 1001, 1943)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 77,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      922,
+      1390,
+      1001,
+      1469
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (922, 1390, 1001, 1469), 동일한 아이콘 위치들: [(922, 581, 1001, 660), (922, 1232, 1001, 1311), (922, 1548, 1001, 1627), (922, 1706, 1001, 1785), (922, 1864, 1001, 1943)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 87,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      922,
+      1548,
+      1001,
+      1627
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (922, 1548, 1001, 1627), 동일한 아이콘 위치들: [(922, 581, 1001, 660), (922, 1232, 1001, 1311), (922, 1390, 1001, 1469), (922, 1706, 1001, 1785), (922, 1864, 1001, 1943)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 97,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      922,
+      1706,
+      1001,
+      1785
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (922, 1706, 1001, 1785), 동일한 아이콘 위치들: [(922, 581, 1001, 660), (922, 1232, 1001, 1311), (922, 1390, 1001, 1469), (922, 1548, 1001, 1627), (922, 1864, 1001, 1943)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 107,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      922,
+      1864,
+      1001,
+      1943
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (922, 1864, 1001, 1943), 동일한 아이콘 위치들: [(922, 581, 1001, 660), (922, 1232, 1001, 1311), (922, 1390, 1001, 1469), (922, 1548, 1001, 1627), (922, 1706, 1001, 1785)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 39,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      753,
+      155,
+      843
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 753, 155, 843), 동일한 아이콘 위치들: [(65, 911, 155, 1001), (65, 1069, 155, 1159), (65, 1227, 155, 1317), (65, 1385, 155, 1475), (65, 1543, 155, 1633), (65, 1701, 155, 1791), (65, 1859, 155, 1949)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 46,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      911,
+      155,
+      1001
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 911, 155, 1001), 동일한 아이콘 위치들: [(65, 753, 155, 843), (65, 1069, 155, 1159), (65, 1227, 155, 1317), (65, 1385, 155, 1475), (65, 1543, 155, 1633), (65, 1701, 155, 1791), (65, 1859, 155, 1949)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 53,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      1069,
+      155,
+      1159
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 1069, 155, 1159), 동일한 아이콘 위치들: [(65, 753, 155, 843), (65, 911, 155, 1001), (65, 1227, 155, 1317), (65, 1385, 155, 1475), (65, 1543, 155, 1633), (65, 1701, 155, 1791), (65, 1859, 155, 1949)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 60,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      1227,
+      155,
+      1317
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 1227, 155, 1317), 동일한 아이콘 위치들: [(65, 753, 155, 843), (65, 911, 155, 1001), (65, 1069, 155, 1159), (65, 1385, 155, 1475), (65, 1543, 155, 1633), (65, 1701, 155, 1791), (65, 1859, 155, 1949)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 70,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      1385,
+      155,
+      1475
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 1385, 155, 1475), 동일한 아이콘 위치들: [(65, 753, 155, 843), (65, 911, 155, 1001), (65, 1069, 155, 1159), (65, 1227, 155, 1317), (65, 1543, 155, 1633), (65, 1701, 155, 1791), (65, 1859, 155, 1949)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 80,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      1543,
+      155,
+      1633
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 1543, 155, 1633), 동일한 아이콘 위치들: [(65, 753, 155, 843), (65, 911, 155, 1001), (65, 1069, 155, 1159), (65, 1227, 155, 1317), (65, 1385, 155, 1475), (65, 1701, 155, 1791), (65, 1859, 155, 1949)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 90,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      1701,
+      155,
+      1791
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 1701, 155, 1791), 동일한 아이콘 위치들: [(65, 753, 155, 843), (65, 911, 155, 1001), (65, 1069, 155, 1159), (65, 1227, 155, 1317), (65, 1385, 155, 1475), (65, 1543, 155, 1633), (65, 1859, 155, 1949)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 100,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      1859,
+      155,
+      1949
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 1859, 155, 1949), 동일한 아이콘 위치들: [(65, 753, 155, 843), (65, 911, 155, 1001), (65, 1069, 155, 1159), (65, 1227, 155, 1317), (65, 1385, 155, 1475), (65, 1543, 155, 1633), (65, 1701, 155, 1791)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": "There is no date information on the status bar, so I cannot check if the date on the calendar icon is different."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "There is no clock icon in this image. I only see icons for apps like Camera, Samsung Wallet, Torch, Magnifier, Voice Recorder, Samsung Notes, Samsung Capture, Modes and Routines, and Apps. Therefore, there is no way to check if the clock icon time matches the time at the top of the screen."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164300.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": "There are no interaction issues in the current screen. All the elements are properly displayed and visible."
+  }
+][][
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 100,
+    "issue_type": "cutoff",
+    "issue_location": [
+      65,
+      1859,
+      155,
+      1949
+    ],
+    "issue_description": "컴포넌트 영역 (65, 576, 155, 666)(65, 753, 155, 843)(65, 911, 155, 1001)(65, 1069, 155, 1159)(65, 1227, 155, 1317)(65, 1385, 155, 1475)(65, 1543, 155, 1633)(65, 1701, 155, 1791)(65, 1859, 155, 1949)에서 컷오프 이슈 발생 : android.widget.RadioButton"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 36,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      922,
+      581,
+      1001,
+      660
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (922, 581, 1001, 660), 동일한 아이콘 위치들: [(922, 1232, 1001, 1311), (922, 1390, 1001, 1469), (922, 1548, 1001, 1627), (922, 1706, 1001, 1785), (922, 1864, 1001, 1943)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 67,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      922,
+      1232,
+      1001,
+      1311
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (922, 1232, 1001, 1311), 동일한 아이콘 위치들: [(922, 581, 1001, 660), (922, 1390, 1001, 1469), (922, 1548, 1001, 1627), (922, 1706, 1001, 1785), (922, 1864, 1001, 1943)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 77,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      922,
+      1390,
+      1001,
+      1469
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (922, 1390, 1001, 1469), 동일한 아이콘 위치들: [(922, 581, 1001, 660), (922, 1232, 1001, 1311), (922, 1548, 1001, 1627), (922, 1706, 1001, 1785), (922, 1864, 1001, 1943)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 87,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      922,
+      1548,
+      1001,
+      1627
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (922, 1548, 1001, 1627), 동일한 아이콘 위치들: [(922, 581, 1001, 660), (922, 1232, 1001, 1311), (922, 1390, 1001, 1469), (922, 1706, 1001, 1785), (922, 1864, 1001, 1943)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 97,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      922,
+      1706,
+      1001,
+      1785
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (922, 1706, 1001, 1785), 동일한 아이콘 위치들: [(922, 581, 1001, 660), (922, 1232, 1001, 1311), (922, 1390, 1001, 1469), (922, 1548, 1001, 1627), (922, 1864, 1001, 1943)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 107,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      922,
+      1864,
+      1001,
+      1943
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (922, 1864, 1001, 1943), 동일한 아이콘 위치들: [(922, 581, 1001, 660), (922, 1232, 1001, 1311), (922, 1390, 1001, 1469), (922, 1548, 1001, 1627), (922, 1706, 1001, 1785)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 39,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      753,
+      155,
+      843
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 753, 155, 843), 동일한 아이콘 위치들: [(65, 911, 155, 1001), (65, 1069, 155, 1159), (65, 1227, 155, 1317), (65, 1385, 155, 1475), (65, 1543, 155, 1633), (65, 1701, 155, 1791), (65, 1859, 155, 1949)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 46,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      911,
+      155,
+      1001
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 911, 155, 1001), 동일한 아이콘 위치들: [(65, 753, 155, 843), (65, 1069, 155, 1159), (65, 1227, 155, 1317), (65, 1385, 155, 1475), (65, 1543, 155, 1633), (65, 1701, 155, 1791), (65, 1859, 155, 1949)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 53,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      1069,
+      155,
+      1159
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 1069, 155, 1159), 동일한 아이콘 위치들: [(65, 753, 155, 843), (65, 911, 155, 1001), (65, 1227, 155, 1317), (65, 1385, 155, 1475), (65, 1543, 155, 1633), (65, 1701, 155, 1791), (65, 1859, 155, 1949)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 60,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      1227,
+      155,
+      1317
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 1227, 155, 1317), 동일한 아이콘 위치들: [(65, 753, 155, 843), (65, 911, 155, 1001), (65, 1069, 155, 1159), (65, 1385, 155, 1475), (65, 1543, 155, 1633), (65, 1701, 155, 1791), (65, 1859, 155, 1949)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 70,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      1385,
+      155,
+      1475
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 1385, 155, 1475), 동일한 아이콘 위치들: [(65, 753, 155, 843), (65, 911, 155, 1001), (65, 1069, 155, 1159), (65, 1227, 155, 1317), (65, 1543, 155, 1633), (65, 1701, 155, 1791), (65, 1859, 155, 1949)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 80,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      1543,
+      155,
+      1633
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 1543, 155, 1633), 동일한 아이콘 위치들: [(65, 753, 155, 843), (65, 911, 155, 1001), (65, 1069, 155, 1159), (65, 1227, 155, 1317), (65, 1385, 155, 1475), (65, 1701, 155, 1791), (65, 1859, 155, 1949)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 90,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      1701,
+      155,
+      1791
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 1701, 155, 1791), 동일한 아이콘 위치들: [(65, 753, 155, 843), (65, 911, 155, 1001), (65, 1069, 155, 1159), (65, 1227, 155, 1317), (65, 1385, 155, 1475), (65, 1543, 155, 1633), (65, 1859, 155, 1949)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 100,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      65,
+      1859,
+      155,
+      1949
+    ],
+    "issue_description": "중복 아이콘 탐지: 8개의 동일한 아이콘이 발견됨. 현재 위치: (65, 1859, 155, 1949), 동일한 아이콘 위치들: [(65, 753, 155, 843), (65, 911, 155, 1001), (65, 1069, 155, 1159), (65, 1227, 155, 1317), (65, 1385, 155, 1475), (65, 1543, 155, 1633), (65, 1701, 155, 1791)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 40,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      194,
+      719,
+      318,
+      877
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (194, 719, 318, 877), 동일한 아이콘 위치들: [(194, 1193, 318, 1351), (194, 1351, 318, 1509)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 61,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      194,
+      1193,
+      318,
+      1351
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (194, 1193, 318, 1351), 동일한 아이콘 위치들: [(194, 719, 318, 877), (194, 1351, 318, 1509)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 71,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      194,
+      1351,
+      318,
+      1509
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (194, 1351, 318, 1509), 동일한 아이콘 위치들: [(194, 719, 318, 877), (194, 1193, 318, 1351)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 41,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      194,
+      758,
+      273,
+      837
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (194, 758, 273, 837), 동일한 아이콘 위치들: [(194, 1390, 273, 1469)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 72,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      194,
+      1390,
+      273,
+      1469
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (194, 1390, 273, 1469), 동일한 아이콘 위치들: [(194, 758, 273, 837)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": "There is no calendar icon in this image. Therefore, I cannot check for the specified issue. So, I will return None as requested."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": ""
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "There is no clock icon in the image, so there is no time mismatch issue."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250512_164142.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": "string"
+  }
+][][
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250524_181722.png",
+    "index": 93,
+    "issue_type": "cutoff",
+    "issue_location": [
+      966,
+      1587,
+      1050,
+      1671
+    ],
+    "issue_description": "컴포넌트 영역 (966, 540, 1050, 624)(966, 705, 1050, 789)(966, 852, 1050, 936)(966, 999, 1050, 1083)(966, 1146, 1050, 1230)(966, 1293, 1050, 1377)(966, 1440, 1050, 1524)(966, 1587, 1050, 1671)에서 컷오프 이슈 발생 : android.widget.RadioButton"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250524_181722.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250524_181722.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": "There is no date information on the status bar and calendar app to compare."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250524_181722.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250524_181722.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": "상호작용 가능한 요소가 시각적으로 명확히 구분되지 않는 이슈가 있는지 확인해 주세요.\n예를 들면 이런 이슈가 있을 수 있습니다. \n- 빠른 설정 화면에 와이파이 버튼이 표시되지 않음\n- 메시지로 보낸 하이퍼링크가 표시되지 않음\n\n이슈가 없는 경우 None을 반환해 주세요. 모든 이미지에 빠른 설정 화면이나 하이퍼링크, 텍스트 등이 있지 않습니다. 이런 요소가 있는 경우에만 판정하여야 합니다.\n이슈가 있는 경우 이런 형식의 응답을 반환해 주세요. 이슈 번호는 13로 고정해 주세요.\n거의 보이지 않는 경우에만 이슈가 있다고 판단해야 합니다. 거의 보이지 않는 경우란, 색상 대비값이 0.05 이하인 경우입니다."
+  }
+][
+  {
+    "image_path": "./resource/defect/Cut off issue/com.sec.android.app.launcher_LauncherActivity_20250522_082013.png",
+    "index": 20,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      87,
+      776,
+      177,
+      866
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (87, 776, 177, 866), 동일한 아이콘 위치들: [(87, 1221, 177, 1311)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.sec.android.app.launcher_LauncherActivity_20250522_082013.png",
+    "index": 25,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      87,
+      1221,
+      177,
+      1311
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (87, 1221, 177, 1311), 동일한 아이콘 위치들: [(87, 776, 177, 866)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.sec.android.app.launcher_LauncherActivity_20250522_082013.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.sec.android.app.launcher_LauncherActivity_20250522_082013.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": ""
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.sec.android.app.launcher_LauncherActivity_20250522_082013.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "There is no clock app icon in the provided image."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.sec.android.app.launcher_LauncherActivity_20250522_082013.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": ""
+  }
+][
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 93,
+    "issue_type": "cutoff",
+    "issue_location": [
+      966,
+      1587,
+      1050,
+      1671
+    ],
+    "issue_description": "컴포넌트 영역 (966, 540, 1050, 624)(966, 705, 1050, 789)(966, 852, 1050, 936)(966, 999, 1050, 1083)(966, 1146, 1050, 1230)(966, 1293, 1050, 1377)(966, 1440, 1050, 1524)(966, 1587, 1050, 1671)에서 컷오프 이슈 발생 : android.widget.RadioButton"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 39,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      705,
+      1050,
+      789
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (966, 705, 1050, 789), 동일한 아이콘 위치들: [(966, 852, 1050, 936), (966, 1293, 1050, 1377)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 46,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      852,
+      1050,
+      936
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (966, 852, 1050, 936), 동일한 아이콘 위치들: [(966, 705, 1050, 789), (966, 1293, 1050, 1377)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 73,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1293,
+      1050,
+      1377
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1293, 1050, 1377), 동일한 아이콘 위치들: [(966, 705, 1050, 789), (966, 852, 1050, 936)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 53,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      999,
+      1050,
+      1083
+    ],
+    "issue_description": "중복 아이콘 탐지: 4개의 동일한 아이콘이 발견됨. 현재 위치: (966, 999, 1050, 1083), 동일한 아이콘 위치들: [(966, 1146, 1050, 1230), (966, 1440, 1050, 1524), (966, 1587, 1050, 1671)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 63,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1146,
+      1050,
+      1230
+    ],
+    "issue_description": "중복 아이콘 탐지: 4개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1146, 1050, 1230), 동일한 아이콘 위치들: [(966, 999, 1050, 1083), (966, 1440, 1050, 1524), (966, 1587, 1050, 1671)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 83,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1440,
+      1050,
+      1524
+    ],
+    "issue_description": "중복 아이콘 탐지: 4개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1440, 1050, 1524), 동일한 아이콘 위치들: [(966, 999, 1050, 1083), (966, 1146, 1050, 1230), (966, 1587, 1050, 1671)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 93,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1587,
+      1050,
+      1671
+    ],
+    "issue_description": "중복 아이콘 탐지: 4개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1587, 1050, 1671), 동일한 아이콘 위치들: [(966, 999, 1050, 1083), (966, 1146, 1050, 1230), (966, 1440, 1050, 1524)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 60,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1004,
+      1739,
+      1078
+    ],
+    "issue_description": "중복 아이콘 탐지: 4개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1004, 1739, 1078), 동일한 아이콘 위치들: [(1665, 1151, 1739, 1225), (1665, 1298, 1739, 1372), (1665, 1445, 1739, 1519)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 70,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1151,
+      1739,
+      1225
+    ],
+    "issue_description": "중복 아이콘 탐지: 4개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1151, 1739, 1225), 동일한 아이콘 위치들: [(1665, 1004, 1739, 1078), (1665, 1298, 1739, 1372), (1665, 1445, 1739, 1519)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 80,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1298,
+      1739,
+      1372
+    ],
+    "issue_description": "중복 아이콘 탐지: 4개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1298, 1739, 1372), 동일한 아이콘 위치들: [(1665, 1004, 1739, 1078), (1665, 1151, 1739, 1225), (1665, 1445, 1739, 1519)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 90,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1445,
+      1739,
+      1519
+    ],
+    "issue_description": "중복 아이콘 탐지: 4개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1445, 1739, 1519), 동일한 아이콘 위치들: [(1665, 1004, 1739, 1078), (1665, 1151, 1739, 1225), (1665, 1298, 1739, 1372)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": "The image does not show date information on the top bar, and there's no calendar icon with a date on it. Therefore, there is no discrepancy to report."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_084823.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": ""
+  }
+][
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 93,
+    "issue_type": "cutoff",
+    "issue_location": [
+      966,
+      1587,
+      1050,
+      1671
+    ],
+    "issue_description": "컴포넌트 영역 (966, 540, 1050, 624)(966, 705, 1050, 789)(966, 852, 1050, 936)(966, 999, 1050, 1083)(966, 1146, 1050, 1230)(966, 1293, 1050, 1377)(966, 1440, 1050, 1524)(966, 1587, 1050, 1671)에서 컷오프 이슈 발생 : android.widget.RadioButton"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 36,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      545,
+      1739,
+      619
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 545, 1739, 619), 동일한 아이콘 위치들: [(1665, 1004, 1739, 1078), (1665, 1298, 1739, 1372)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 60,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1004,
+      1739,
+      1078
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1004, 1739, 1078), 동일한 아이콘 위치들: [(1665, 545, 1739, 619), (1665, 1298, 1739, 1372)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 80,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1298,
+      1739,
+      1372
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1298, 1739, 1372), 동일한 아이콘 위치들: [(1665, 545, 1739, 619), (1665, 1004, 1739, 1078)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 39,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      705,
+      1050,
+      789
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (966, 705, 1050, 789), 동일한 아이콘 위치들: [(966, 1146, 1050, 1230), (966, 1587, 1050, 1671)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 63,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1146,
+      1050,
+      1230
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1146, 1050, 1230), 동일한 아이콘 위치들: [(966, 705, 1050, 789), (966, 1587, 1050, 1671)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 93,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1587,
+      1050,
+      1671
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1587, 1050, 1671), 동일한 아이콘 위치들: [(966, 705, 1050, 789), (966, 1146, 1050, 1230)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 46,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      852,
+      1050,
+      936
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (966, 852, 1050, 936), 동일한 아이콘 위치들: [(966, 999, 1050, 1083), (966, 1440, 1050, 1524)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 53,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      999,
+      1050,
+      1083
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (966, 999, 1050, 1083), 동일한 아이콘 위치들: [(966, 852, 1050, 936), (966, 1440, 1050, 1524)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 83,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1440,
+      1050,
+      1524
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1440, 1050, 1524), 동일한 아이콘 위치들: [(966, 852, 1050, 936), (966, 999, 1050, 1083)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 70,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1151,
+      1739,
+      1225
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1151, 1739, 1225), 동일한 아이콘 위치들: [(1665, 1592, 1739, 1666)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 100,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1592,
+      1739,
+      1666
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1592, 1739, 1666), 동일한 아이콘 위치들: [(1665, 1151, 1739, 1225)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": "상단 바에는 날짜 정보가 없지만, Digital Wellbeing and parental controls 섹션의 하단에는 캘린더 앱 아이콘이 있고 날짜가 14일로 표시되어 있습니다. 따라서 이슈가 없습니다."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "There is no clock icon in the image. Therefore, there is no issue regarding the time displayed on the clock icon not matching the time displayed at the top of the screen."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250514_074306.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": "There are no issues with the visibility or distinguishability of interactive elements."
+  }
+][][
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 100,
+    "issue_type": "cutoff",
+    "issue_location": [
+      966,
+      1783,
+      1050,
+      1867
+    ],
+    "issue_description": "컴포넌트 영역 (966, 540, 1050, 624)(966, 730, 1050, 814)(966, 901, 1050, 985)(966, 1048, 1050, 1132)(966, 1195, 1050, 1279)(966, 1342, 1050, 1426)(966, 1489, 1050, 1573)(966, 1636, 1050, 1720)(966, 1783, 1050, 1867)에서 컷오프 이슈 발생 : android.widget.RadioButton"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 28,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      540,
+      1050,
+      624
+    ],
+    "issue_description": "중복 아이콘 탐지: 9개의 동일한 아이콘이 발견됨. 현재 위치: (966, 540, 1050, 624), 동일한 아이콘 위치들: [(966, 730, 1050, 814), (966, 901, 1050, 985), (966, 1048, 1050, 1132), (966, 1195, 1050, 1279), (966, 1342, 1050, 1426), (966, 1489, 1050, 1573), (966, 1636, 1050, 1720), (966, 1783, 1050, 1867)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 39,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      730,
+      1050,
+      814
+    ],
+    "issue_description": "중복 아이콘 탐지: 9개의 동일한 아이콘이 발견됨. 현재 위치: (966, 730, 1050, 814), 동일한 아이콘 위치들: [(966, 540, 1050, 624), (966, 901, 1050, 985), (966, 1048, 1050, 1132), (966, 1195, 1050, 1279), (966, 1342, 1050, 1426), (966, 1489, 1050, 1573), (966, 1636, 1050, 1720), (966, 1783, 1050, 1867)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 46,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      901,
+      1050,
+      985
+    ],
+    "issue_description": "중복 아이콘 탐지: 9개의 동일한 아이콘이 발견됨. 현재 위치: (966, 901, 1050, 985), 동일한 아이콘 위치들: [(966, 540, 1050, 624), (966, 730, 1050, 814), (966, 1048, 1050, 1132), (966, 1195, 1050, 1279), (966, 1342, 1050, 1426), (966, 1489, 1050, 1573), (966, 1636, 1050, 1720), (966, 1783, 1050, 1867)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 53,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1048,
+      1050,
+      1132
+    ],
+    "issue_description": "중복 아이콘 탐지: 9개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1048, 1050, 1132), 동일한 아이콘 위치들: [(966, 540, 1050, 624), (966, 730, 1050, 814), (966, 901, 1050, 985), (966, 1195, 1050, 1279), (966, 1342, 1050, 1426), (966, 1489, 1050, 1573), (966, 1636, 1050, 1720), (966, 1783, 1050, 1867)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 60,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1195,
+      1050,
+      1279
+    ],
+    "issue_description": "중복 아이콘 탐지: 9개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1195, 1050, 1279), 동일한 아이콘 위치들: [(966, 540, 1050, 624), (966, 730, 1050, 814), (966, 901, 1050, 985), (966, 1048, 1050, 1132), (966, 1342, 1050, 1426), (966, 1489, 1050, 1573), (966, 1636, 1050, 1720), (966, 1783, 1050, 1867)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 70,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1342,
+      1050,
+      1426
+    ],
+    "issue_description": "중복 아이콘 탐지: 9개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1342, 1050, 1426), 동일한 아이콘 위치들: [(966, 540, 1050, 624), (966, 730, 1050, 814), (966, 901, 1050, 985), (966, 1048, 1050, 1132), (966, 1195, 1050, 1279), (966, 1489, 1050, 1573), (966, 1636, 1050, 1720), (966, 1783, 1050, 1867)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 80,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1489,
+      1050,
+      1573
+    ],
+    "issue_description": "중복 아이콘 탐지: 9개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1489, 1050, 1573), 동일한 아이콘 위치들: [(966, 540, 1050, 624), (966, 730, 1050, 814), (966, 901, 1050, 985), (966, 1048, 1050, 1132), (966, 1195, 1050, 1279), (966, 1342, 1050, 1426), (966, 1636, 1050, 1720), (966, 1783, 1050, 1867)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 90,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1636,
+      1050,
+      1720
+    ],
+    "issue_description": "중복 아이콘 탐지: 9개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1636, 1050, 1720), 동일한 아이콘 위치들: [(966, 540, 1050, 624), (966, 730, 1050, 814), (966, 901, 1050, 985), (966, 1048, 1050, 1132), (966, 1195, 1050, 1279), (966, 1342, 1050, 1426), (966, 1489, 1050, 1573), (966, 1783, 1050, 1867)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 100,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1783,
+      1050,
+      1867
+    ],
+    "issue_description": "중복 아이콘 탐지: 9개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1783, 1050, 1867), 동일한 아이콘 위치들: [(966, 540, 1050, 624), (966, 730, 1050, 814), (966, 901, 1050, 985), (966, 1048, 1050, 1132), (966, 1195, 1050, 1279), (966, 1342, 1050, 1426), (966, 1489, 1050, 1573), (966, 1636, 1050, 1720)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 36,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      545,
+      1739,
+      619
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 545, 1739, 619), 동일한 아이콘 위치들: [(1665, 1200, 1739, 1274), (1665, 1347, 1739, 1421), (1665, 1494, 1739, 1568), (1665, 1641, 1739, 1715), (1665, 1788, 1739, 1862)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 67,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1200,
+      1739,
+      1274
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1200, 1739, 1274), 동일한 아이콘 위치들: [(1665, 545, 1739, 619), (1665, 1347, 1739, 1421), (1665, 1494, 1739, 1568), (1665, 1641, 1739, 1715), (1665, 1788, 1739, 1862)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 77,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1347,
+      1739,
+      1421
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1347, 1739, 1421), 동일한 아이콘 위치들: [(1665, 545, 1739, 619), (1665, 1200, 1739, 1274), (1665, 1494, 1739, 1568), (1665, 1641, 1739, 1715), (1665, 1788, 1739, 1862)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 87,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1494,
+      1739,
+      1568
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1494, 1739, 1568), 동일한 아이콘 위치들: [(1665, 545, 1739, 619), (1665, 1200, 1739, 1274), (1665, 1347, 1739, 1421), (1665, 1641, 1739, 1715), (1665, 1788, 1739, 1862)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 97,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1641,
+      1739,
+      1715
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1641, 1739, 1715), 동일한 아이콘 위치들: [(1665, 545, 1739, 619), (1665, 1200, 1739, 1274), (1665, 1347, 1739, 1421), (1665, 1494, 1739, 1568), (1665, 1788, 1739, 1862)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 107,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1788,
+      1739,
+      1862
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1788, 1739, 1862), 동일한 아이콘 위치들: [(1665, 545, 1739, 619), (1665, 1200, 1739, 1274), (1665, 1347, 1739, 1421), (1665, 1494, 1739, 1568), (1665, 1641, 1739, 1715)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": "The image does not contain date information on the top bar, so it is not possible to determine if there is a mismatch between the date on the calendar icon and the date information on the top bar."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_175029.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": "None"
+  }
+][
+  {
+    "image_path": "./resource/defect/Cut off issue/com.sec.android.app.launcher_LauncherActivity_20250517_140759.png",
+    "index": 20,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      87,
+      776,
+      177,
+      866
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (87, 776, 177, 866), 동일한 아이콘 위치들: [(87, 1221, 177, 1311)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.sec.android.app.launcher_LauncherActivity_20250517_140759.png",
+    "index": 25,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      87,
+      1221,
+      177,
+      1311
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (87, 1221, 177, 1311), 동일한 아이콘 위치들: [(87, 776, 177, 866)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.sec.android.app.launcher_LauncherActivity_20250517_140759.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": "The image does not contain a calendar icon. Therefore, I cannot determine if the weekday text on the calendar icon is outside the bounds of the icon."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.sec.android.app.launcher_LauncherActivity_20250517_140759.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": ""
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.sec.android.app.launcher_LauncherActivity_20250517_140759.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.sec.android.app.launcher_LauncherActivity_20250517_140759.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": ""
+  }
+][
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250521_174330.png",
+    "index": 93,
+    "issue_type": "cutoff",
+    "issue_location": [
+      966,
+      1587,
+      1050,
+      1671
+    ],
+    "issue_description": "컴포넌트 영역 (966, 540, 1050, 624)(966, 705, 1050, 789)(966, 852, 1050, 936)(966, 999, 1050, 1083)(966, 1146, 1050, 1230)(966, 1293, 1050, 1377)(966, 1440, 1050, 1524)(966, 1587, 1050, 1671)에서 컷오프 이슈 발생 : android.widget.RadioButton"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250521_174330.png",
+    "index": 53,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      999,
+      1050,
+      1083
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (966, 999, 1050, 1083), 동일한 아이콘 위치들: [(966, 1587, 1050, 1671)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250521_174330.png",
+    "index": 93,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1587,
+      1050,
+      1671
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1587, 1050, 1671), 동일한 아이콘 위치들: [(966, 999, 1050, 1083)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250521_174330.png",
+    "index": 63,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1146,
+      1050,
+      1230
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1146, 1050, 1230), 동일한 아이콘 위치들: [(966, 1293, 1050, 1377)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250521_174330.png",
+    "index": 73,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1293,
+      1050,
+      1377
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1293, 1050, 1377), 동일한 아이콘 위치들: [(966, 1146, 1050, 1230)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250521_174330.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250521_174330.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": "상단 바에는 날짜가 21일로 표기되어 있으나 캘린더 앱은 1월로 표기하고 있습니다."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250521_174330.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "No clock icon found in the image."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250521_174330.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": "None"
+  }
+][
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_085035.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": "There is no calendar icon in this image."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_085035.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_085035.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "There is no clock icon in the image."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_085035.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": "None"
+  }
+][][][][][
+  {
+    "image_path": "./resource/defect/Cut off issue/20250522_141152.png",
+    "index": 93,
+    "issue_type": "cutoff",
+    "issue_location": [
+      966,
+      1587,
+      1050,
+      1671
+    ],
+    "issue_description": "컴포넌트 영역 (966, 540, 1050, 624)(966, 705, 1050, 789)(966, 852, 1050, 936)(966, 999, 1050, 1083)(966, 1146, 1050, 1230)(966, 1293, 1050, 1377)(966, 1440, 1050, 1524)(966, 1587, 1050, 1671)에서 컷오프 이슈 발생 : android.widget.RadioButton"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/20250522_141152.png",
+    "index": 60,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1004,
+      1739,
+      1078
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1004, 1739, 1078), 동일한 아이콘 위치들: [(1665, 1151, 1739, 1225), (1665, 1298, 1739, 1372)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/20250522_141152.png",
+    "index": 70,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1151,
+      1739,
+      1225
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1151, 1739, 1225), 동일한 아이콘 위치들: [(1665, 1004, 1739, 1078), (1665, 1298, 1739, 1372)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/20250522_141152.png",
+    "index": 80,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1298,
+      1739,
+      1372
+    ],
+    "issue_description": "중복 아이콘 탐지: 3개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1298, 1739, 1372), 동일한 아이콘 위치들: [(1665, 1004, 1739, 1078), (1665, 1151, 1739, 1225)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/20250522_141152.png",
+    "index": 73,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1293,
+      1050,
+      1377
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1293, 1050, 1377), 동일한 아이콘 위치들: [(966, 1440, 1050, 1524)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/20250522_141152.png",
+    "index": 83,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1440,
+      1050,
+      1524
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1440, 1050, 1524), 동일한 아이콘 위치들: [(966, 1293, 1050, 1377)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/20250522_141152.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [
+      9
+    ],
+    "issue_description": "앱 라이브러리의 캘린더 앱의 달력 아이콘에서 글자가 테두리를 벗어나 있습니다."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/20250522_141152.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": "상단 바에는 날짜를 나타내는 캘린더 아이콘이 있지만, 하단 앱 트레이의 캘린더 앱 아이콘과는 날짜가 다릅니다. 상단 바에는 아무 날짜도 표시되어 있지 않지만 앱 트레이의 캘린더 아이콘에는 89라는 숫자가 쓰여 있습니다. 이 두 날짜 간의 불일치는 이슈입니다. 이는 issue_type 10에 해당합니다."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/20250522_141152.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "The image doesn't have the clock icon to check."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/20250522_141152.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": ""
+  }
+][][
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 93,
+    "issue_type": "cutoff",
+    "issue_location": [
+      966,
+      1587,
+      1050,
+      1671
+    ],
+    "issue_description": "컴포넌트 영역 (966, 540, 1050, 624)(966, 705, 1050, 789)(966, 852, 1050, 936)(966, 999, 1050, 1083)(966, 1146, 1050, 1230)(966, 1293, 1050, 1377)(966, 1440, 1050, 1524)(966, 1587, 1050, 1671)에서 컷오프 이슈 발생 : android.widget.RadioButton"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 36,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      545,
+      1739,
+      619
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 545, 1739, 619), 동일한 아이콘 위치들: [(1665, 1004, 1739, 1078), (1665, 1151, 1739, 1225), (1665, 1298, 1739, 1372), (1665, 1445, 1739, 1519), (1665, 1592, 1739, 1666)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 60,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1004,
+      1739,
+      1078
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1004, 1739, 1078), 동일한 아이콘 위치들: [(1665, 545, 1739, 619), (1665, 1151, 1739, 1225), (1665, 1298, 1739, 1372), (1665, 1445, 1739, 1519), (1665, 1592, 1739, 1666)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 70,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1151,
+      1739,
+      1225
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1151, 1739, 1225), 동일한 아이콘 위치들: [(1665, 545, 1739, 619), (1665, 1004, 1739, 1078), (1665, 1298, 1739, 1372), (1665, 1445, 1739, 1519), (1665, 1592, 1739, 1666)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 80,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1298,
+      1739,
+      1372
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1298, 1739, 1372), 동일한 아이콘 위치들: [(1665, 545, 1739, 619), (1665, 1004, 1739, 1078), (1665, 1151, 1739, 1225), (1665, 1445, 1739, 1519), (1665, 1592, 1739, 1666)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 90,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1445,
+      1739,
+      1519
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1445, 1739, 1519), 동일한 아이콘 위치들: [(1665, 545, 1739, 619), (1665, 1004, 1739, 1078), (1665, 1151, 1739, 1225), (1665, 1298, 1739, 1372), (1665, 1592, 1739, 1666)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 100,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      1665,
+      1592,
+      1739,
+      1666
+    ],
+    "issue_description": "중복 아이콘 탐지: 6개의 동일한 아이콘이 발견됨. 현재 위치: (1665, 1592, 1739, 1666), 동일한 아이콘 위치들: [(1665, 545, 1739, 619), (1665, 1004, 1739, 1078), (1665, 1151, 1739, 1225), (1665, 1298, 1739, 1372), (1665, 1445, 1739, 1519)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 39,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      705,
+      1050,
+      789
+    ],
+    "issue_description": "중복 아이콘 탐지: 7개의 동일한 아이콘이 발견됨. 현재 위치: (966, 705, 1050, 789), 동일한 아이콘 위치들: [(966, 852, 1050, 936), (966, 999, 1050, 1083), (966, 1146, 1050, 1230), (966, 1293, 1050, 1377), (966, 1440, 1050, 1524), (966, 1587, 1050, 1671)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 46,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      852,
+      1050,
+      936
+    ],
+    "issue_description": "중복 아이콘 탐지: 7개의 동일한 아이콘이 발견됨. 현재 위치: (966, 852, 1050, 936), 동일한 아이콘 위치들: [(966, 705, 1050, 789), (966, 999, 1050, 1083), (966, 1146, 1050, 1230), (966, 1293, 1050, 1377), (966, 1440, 1050, 1524), (966, 1587, 1050, 1671)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 53,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      999,
+      1050,
+      1083
+    ],
+    "issue_description": "중복 아이콘 탐지: 7개의 동일한 아이콘이 발견됨. 현재 위치: (966, 999, 1050, 1083), 동일한 아이콘 위치들: [(966, 705, 1050, 789), (966, 852, 1050, 936), (966, 1146, 1050, 1230), (966, 1293, 1050, 1377), (966, 1440, 1050, 1524), (966, 1587, 1050, 1671)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 63,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1146,
+      1050,
+      1230
+    ],
+    "issue_description": "중복 아이콘 탐지: 7개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1146, 1050, 1230), 동일한 아이콘 위치들: [(966, 705, 1050, 789), (966, 852, 1050, 936), (966, 999, 1050, 1083), (966, 1293, 1050, 1377), (966, 1440, 1050, 1524), (966, 1587, 1050, 1671)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 73,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1293,
+      1050,
+      1377
+    ],
+    "issue_description": "중복 아이콘 탐지: 7개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1293, 1050, 1377), 동일한 아이콘 위치들: [(966, 705, 1050, 789), (966, 852, 1050, 936), (966, 999, 1050, 1083), (966, 1146, 1050, 1230), (966, 1440, 1050, 1524), (966, 1587, 1050, 1671)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 83,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1440,
+      1050,
+      1524
+    ],
+    "issue_description": "중복 아이콘 탐지: 7개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1440, 1050, 1524), 동일한 아이콘 위치들: [(966, 705, 1050, 789), (966, 852, 1050, 936), (966, 999, 1050, 1083), (966, 1146, 1050, 1230), (966, 1293, 1050, 1377), (966, 1587, 1050, 1671)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 93,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      966,
+      1587,
+      1050,
+      1671
+    ],
+    "issue_description": "중복 아이콘 탐지: 7개의 동일한 아이콘이 발견됨. 현재 위치: (966, 1587, 1050, 1671), 동일한 아이콘 위치들: [(966, 705, 1050, 789), (966, 852, 1050, 936), (966, 999, 1050, 1083), (966, 1146, 1050, 1230), (966, 1293, 1050, 1377), (966, 1440, 1050, 1524)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250520_074114.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": "There are no issues with visually distinguishing interactive elements in this image."
+  }
+][
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_085530.png",
+    "index": 93,
+    "issue_type": "cutoff",
+    "issue_location": [
+      966,
+      1587,
+      1050,
+      1671
+    ],
+    "issue_description": "컴포넌트 영역 (966, 540, 1050, 624)(966, 705, 1050, 789)(966, 852, 1050, 936)(966, 999, 1050, 1083)(966, 1146, 1050, 1230)(966, 1293, 1050, 1377)(966, 1440, 1050, 1524)(966, 1587, 1050, 1671)에서 컷오프 이슈 발생 : android.widget.RadioButton"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_085530.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_085530.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": "There is no date information on the status bar and calendar icon displayed in the image."
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_085530.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Cut off issue/com.android.settings_SubSettings_20250523_085530.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": ""
+  }
+][][][][
+  {
+    "image_path": "./resource/defect/Design Issue/com.samsung.android.app.contacts_PeopleActivity_20250515_171302.png",
+    "index": 33,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      89,
+      950,
+      184,
+      1045
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (89, 950, 184, 1045), 동일한 아이콘 위치들: [(89, 1338, 184, 1433)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Design Issue/com.samsung.android.app.contacts_PeopleActivity_20250515_171302.png",
+    "index": 49,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      89,
+      1338,
+      184,
+      1433
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (89, 1338, 184, 1433), 동일한 아이콘 위치들: [(89, 950, 184, 1045)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Design Issue/com.samsung.android.app.contacts_PeopleActivity_20250515_171302.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Design Issue/com.samsung.android.app.contacts_PeopleActivity_20250515_171302.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Design Issue/com.samsung.android.app.contacts_PeopleActivity_20250515_171302.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "There is no clock icon in the image, so the requested issue cannot be evaluated. Returning None as requested by the user when everything is normal (no clock icon). Note that in general it is a bad idea to return None as a string, because a null value would have been more adequate, but that is what the user asked for."
+  },
+  {
+    "image_path": "./resource/defect/Design Issue/com.samsung.android.app.contacts_PeopleActivity_20250515_171302.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": "상호작용 가능한 요소가 시각적으로 명확히 구분되지 않는 문제는 발견되지 않았습니다."
+  }
+][][][
+  {
+    "image_path": "./resource/defect/Visibility Issue/com.android.settings_SubSettings_20250513_181542.png",
+    "index": 44,
+    "issue_type": "cutoff",
+    "issue_location": [
+      836,
+      526,
+      926,
+      616
+    ],
+    "issue_description": "컴포넌트 영역 (153, 526, 243, 616)(494, 526, 584, 616)(836, 526, 926, 616)에서 컷오프 이슈 발생 : android.widget.RadioButton"
+  },
+  {
+    "image_path": "./resource/defect/Visibility Issue/com.android.settings_SubSettings_20250513_181542.png",
+    "index": 30,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      153,
+      526,
+      243,
+      616
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (153, 526, 243, 616), 동일한 아이콘 위치들: [(494, 526, 584, 616)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Visibility Issue/com.android.settings_SubSettings_20250513_181542.png",
+    "index": 36,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      494,
+      526,
+      584,
+      616
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (494, 526, 584, 616), 동일한 아이콘 위치들: [(153, 526, 243, 616)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Visibility Issue/com.android.settings_SubSettings_20250513_181542.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": ""
+  },
+  {
+    "image_path": "./resource/defect/Visibility Issue/com.android.settings_SubSettings_20250513_181542.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Visibility Issue/com.android.settings_SubSettings_20250513_181542.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "There is no clock icon in the picture."
+  },
+  {
+    "image_path": "./resource/defect/Visibility Issue/com.android.settings_SubSettings_20250513_181542.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": ""
+  }
+][][
+  {
+    "image_path": "./resource/defect/Visibility Issue/com.sec.android.app.launcher_LauncherActivity_20250521_171711.png",
+    "index": 20,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      314,
+      635,
+      398,
+      719
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (314, 635, 398, 719), 동일한 아이콘 위치들: [(314, 966, 398, 1050)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Visibility Issue/com.sec.android.app.launcher_LauncherActivity_20250521_171711.png",
+    "index": 25,
+    "issue_type": "duplicate_icon",
+    "issue_location": [
+      314,
+      966,
+      398,
+      1050
+    ],
+    "issue_description": "중복 아이콘 탐지: 2개의 동일한 아이콘이 발견됨. 현재 위치: (314, 966, 398, 1050), 동일한 아이콘 위치들: [(314, 635, 398, 719)] (디폴트와 다름)"
+  },
+  {
+    "image_path": "./resource/defect/Visibility Issue/com.sec.android.app.launcher_LauncherActivity_20250521_171711.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Visibility Issue/com.sec.android.app.launcher_LauncherActivity_20250521_171711.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": ""
+  },
+  {
+    "image_path": "./resource/defect/Visibility Issue/com.sec.android.app.launcher_LauncherActivity_20250521_171711.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Visibility Issue/com.sec.android.app.launcher_LauncherActivity_20250521_171711.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": ""
+  }
+][][][][
+  {
+    "image_path": "./resource/defect/Visibility Issue/20250524_144614.png",
+    "index": 0,
+    "issue_type": "calendar_text",
+    "issue_location": [],
+    "issue_description": "None"
+  },
+  {
+    "image_path": "./resource/defect/Visibility Issue/20250524_144614.png",
+    "index": 1,
+    "issue_type": "calendar_date",
+    "issue_location": [],
+    "issue_description": "상단 바에는 날짜가 5월 24일로 표기되어 있으나 캘린더 앱은 14일로 표기하고 있습니다."
+  },
+  {
+    "image_path": "./resource/defect/Visibility Issue/20250524_144614.png",
+    "index": 2,
+    "issue_type": "clock",
+    "issue_location": [],
+    "issue_description": "The clock icon is not present in the image."
+  },
+  {
+    "image_path": "./resource/defect/Visibility Issue/20250524_144614.png",
+    "index": 3,
+    "issue_type": "interaction",
+    "issue_location": [],
+    "issue_description": "None"
+  }
+][][][]

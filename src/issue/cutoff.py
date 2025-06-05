@@ -59,7 +59,7 @@ class Cutoff:
                 issue_description=f"컴포넌트 영역 {bounds_str}에서 컷오프 이슈 발생 : {component['type']}"
             )
         
-        return result
+        return [result]
 
 
 

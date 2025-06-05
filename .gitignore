@@ -1,6 +1,6 @@
 .env
 /weights/*
-/output/*
+/output/*/*
 /resource/*
 /cluster_data/*
 /raw/*

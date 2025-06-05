@@ -30,6 +30,31 @@ class Icon:
     def run_icon_check(self) -> List[ResultModel]:
         issues = []
         logger.info(f"중복 아이콘에 대한 검사 시작")
+        
+        # 디폴트 이미지를 한 번만 선택 (효율성을 위해)
+        default_image = None
+        try:
+            group_result = self.match.select_group()
+            if group_result is not None:
+                try:
+                    _, selected_group = group_result
+                    default_xml_path = self.match.selct_default_image(selected_group)
+                    if default_xml_path != "":
+                        default_image_path = default_xml_path.replace('.xml', '.png')
+                        default_image = cv2.imread(default_image_path)
+                        if default_image is not None:
+                            logger.info(f"디폴트 이미지 로드 완료: {default_image_path}")
+                        else:
+                            logger.warning(f"디폴트 이미지 로드 실패: {default_image_path}")
+                    else:
+                        logger.warning("디폴트 이미지를 찾을 수 없습니다.")
+                except (TypeError, ValueError):
+                    logger.error("그룹 선택 결과를 언패킹할 수 없습니다.")
+            else:
+                logger.warning("그룹 선택 결과가 None입니다.")
+        except Exception as e:
+            logger.error(f"디폴트 이미지 선택 중 오류: {e}")
+        
         try:
             # 아이콘 크기 컴포넌트만 추출
             components = self.detector.get_icon_components()
@@ -84,9 +109,9 @@ class Icon:
                     # cv2.waitKey(0)
                     # cv2.destroyAllWindows()
                     
-                    # 전체 그룹에 대해 디폴트 검증 (한 번만 실행)
+                    # 전체 그룹에 대해 디폴트 검증 (디폴트 이미지를 매개변수로 전달)
                     all_bounds_str = [str(bounds) for bounds in group_bounds]
-                    is_normal_duplicate = self.check_default_duplicate(all_bounds_str)
+                    is_normal_duplicate = self.check_default_duplicate(all_bounds_str, default_image)
                     # logger.info(f"디폴트 검증 결과: {is_normal_duplicate}")
                     
                     # 검증 결과에 따라 이슈 생성
@@ -105,8 +130,8 @@ class Icon:
                                 issue_location=list(icon['bounds']),
                                 issue_description=f"중복 아이콘 탐지: {len(duplicate_group)}개의 동일한 아이콘이 발견됨. 현재 위치: {icon['bounds']}, 동일한 아이콘 위치들: [{bounds_list_str}] (디폴트와 다름)"
                             )
-                            issues.append(issue)
 
+                            issues.append(issue)
                             cv2.rectangle(self.image, (icon['bounds'][0], icon['bounds'][1]), (icon['bounds'][2], icon['bounds'][3]), (0, 255, 255), 2)
                             cv2.putText(self.image, f"duplicate", (icon['bounds'][0], icon['bounds'][1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
                             
@@ -120,43 +145,21 @@ class Icon:
         
         return issues
     
-    def check_default_duplicate(self, duplicate_bounds: List[str]) -> bool:
+    def check_default_duplicate(self, duplicate_bounds: List[str], default_img: Optional[np.ndarray]) -> bool:
         """
         디폴트 이미지의 같은 좌표에서 이미지들이 동일한지 확인
         
         Args:
             duplicate_bounds: 타겟 이미지에서 중복된 아이콘들의 바운딩박스 리스트
+            default_img: 미리 로드된 디폴트 이미지 (None일 수 있음)
             
         Returns:
             True: 디폴트에서도 같은 위치의 이미지들이 동일함 (정상)
             False: 디폴트에서는 다른 이미지 (이슈)
         """
         try:
-            # select_group()이 None을 반환할 수 있으므로 안전하게 처리
-            group_result = self.match.select_group()
-            if group_result is None:
-                logger.error("그룹 선택 결과가 None입니다.")
-                return False
-            
-            # 튜플 언패킹 시도 
-            try:
-                _, selected_group = group_result
-            except (TypeError, ValueError):
-                logger.error("그룹 선택 결과를 언패킹할 수 없습니다.")
-                return False
-            
-            default_xml_path = self.match.selct_default_image(selected_group)
-            # print(default_xml_path)
-            
-            if default_xml_path == "":
-                logger.error("디폴트 이미지를 찾을 수 없습니다.")
-                return False
-                
-            default_image_path = default_xml_path.replace('.xml', '.png')
-            default_img = cv2.imread(default_image_path)
-            
             if default_img is None:
-                logger.error(f"디폴트 이미지를 로드할 수 없습니다: {default_image_path}")
+                logger.warning("디폴트 이미지가 제공되지 않았습니다.")
                 return False
             
             # print(f"디폴트 이미지에서 같은 좌표의 이미지 비교:")

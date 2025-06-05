@@ -2,82 +2,60 @@ import json
 import glob
 from tqdm import tqdm
 
+from src.classification import ImageXMLClassifier
 from src.layout import Layout
 from src.gemini import Gemini
 
-# # classifier = ImageXMLClassifier()
-# # classifier.run_classification() 
 
-# for test_image in tqdm(glob.glob('./resource/defect/*/*.png')):  
-#     layout = Layout(test_image)
-#     issues = layout.run_layout_check()
+# 1. classification -- src/classification.py
+classifier = ImageXMLClassifier()
+classifier.run_classification() 
 
-#     gemini = Gemini(test_image)
-#     result = gemini.detect_all_issues()
+for test_image in tqdm(glob.glob('./resource/defect/*/*.png')):  
+    # 2. layout -- src/layout.py, src/utils/detect.py
+    layout = Layout(test_image)
+    issues = layout.run_layout_check()
 
-#     all_issues = issues + result
+    # 3. gemini -- src/gemini.py    
+    gemini = Gemini(test_image)
+    result = gemini.detect_all_issues()
 
-#     print(all_issues)
-    
-    # with open('./output/result-0605.json', 'a') as f:
-    #     # 안전한 JSON 변환
-    #     json_results = []
-    #     for issue in all_issues:
-    #         if hasattr(issue, 'model_dump'):
-    #             json_results.append(issue.model_dump())
-    #         else:
-    #             print(f"⚠️ model_dump 메서드가 없는 항목 발견: {type(issue)} - {issue}")
-    #             # 튜플이나 다른 타입인 경우 건너뛰기
-    #             continue
+    all_issues = issues + result
+
+    try:
+        all_issues = [issue.model_dump() for issue in all_issues]
+    except:
+        all_issues = []
+
+    # -- 위에서 검출된 이슈 중 가장 중요한 이슈를 종합해서 판단하기
+    # 이 부분은 할루시네이션이 심하고 고도화가 필요해 수행하지 않았습니다.
+    # gemini = Gemini(test_image)
+    # result = gemini.detect_all_issues()
+
+    with open('./output/result-0605.json', 'a') as f:
+        # 안전한 JSON 변환
+        json_results = []
+        for issue in all_issues:
+            json_results.append(issue)
         
-    #     json.dump(json_results, f, ensure_ascii=False, indent=2)
-
-from src.issue.visibility import Visibility
-from src.utils.detect import Detect
-from src.utils.logger import init_logger
-from src.issue.alignment import get_dial_alignment
-from src.issue.cutoff import Cutoff
-from src.issue.icon import Icon
-
-logger = init_logger()
-
-image_path = './resource/test/fail1.png'
-detector = Detect(image_path)
-classes = detector.all_node_classes()
-issues = []
-
-# if 'android.widget.DialerButton' in classes:
-#     logger.info(f"dial 정렬 검증 시작")
-#     # 만약 전화 버튼 컴포넌트가 있는 경우
-#         # 3. 전화버튼이 정렬 안됨
-#     get_dial_alignment(image_path)
-#     logger.info(f"dial 정렬 검증 완료")
+        json.dump(json_results, f, ensure_ascii=False, indent=2)
 
 
-# logger.info("dial: 해당 없음")
+'''
+# raw result -- ./output/result-0605.json
+# 시간 관계상 visibility 파일의 ./resource/defect/Visibility Issue/com.sec.android.app.launcher_LauncherActivity_20250521_171919.png에서 중단하였습니다.
 
-if 'android.widget.RadioButton' in classes:
-    logger.info(f"radio 검증 시작")
-    # 만약 라디오버튼 컴포넌트가 있는 경우
-        # 7. 아이콘의 가장자리가 잘려 보이지 않음
-    cutoff = Cutoff(image_path)
-    issues.extend(cutoff.run_radio_button_check())
-    print(issues)
-    logger.info(f"radio 검증 완료")
-logger.info("radio: 해당 없음")
+## 할루시네이션 문제가 해결되지 않았으므로 
+## 제미나이가 이미지 별 이슈를 종합하여 검토하는 부분은 result.json파일을 활용하여 진행하는 방향으로 수정해야 할 것 같습니다.
 
-# icon = Icon(image_path)
-# icon_issues = icon.run_icon_check()
-# issues.extend(icon_issues)
-# 아이콘 컴포넌트를 감지한 경우
-    # 4. 컴포넌트 내부 요소의 정렬
-    # 5. 동일 계층 요소간의 정렬
-    # 6. 텍스트가 할당된 영역을 초과
-    # 8. 완벽하게 동일한 아이콘이 있음
-# print(issues)
-# print("icon 검증 완료")
+# 이후 진행해야하는 mock code
+# 이슈 종합 진단
+gemini = Gemini()
+issues = gemini.sort_issues('./output/result-0605.json')
+# 검출된 이슈에 대한 정답 여부 판정 및 산출물 생성
+issuse_to_confusion_matrix(issues)
+'''
 
-# align = Align(image_path)
-# issues.extend(align.run_alignment_check())
-# print("align 검증 완료")
+
+
 

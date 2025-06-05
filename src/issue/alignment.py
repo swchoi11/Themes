@@ -26,7 +26,7 @@ class Align:
     def run_alignment_check(self) -> List[ResultModel]:
 
         groups = self.get_bound_groups()
-        print(groups)
+        # print(groups)
         if not groups:
             return []
 
@@ -39,7 +39,7 @@ class Align:
         response = json.loads(response)
 
         for res in response:
-            print(res)
+            # print(res)
             if not res['aligned']:
                 img = cv2.imread(self.image_path)
                 h, w = img.shape[:2]  # h: 높이, w: 너비
@@ -51,9 +51,15 @@ class Align:
                 cv2.rectangle(img, (0, int(y1)), (w, int(y2)), (0, 0, 255), 2)
                                 
                 cv2.imwrite(f"alignment_issue.png", img)
-                print(f"정렬 문제 발견: y축 범위 {y1}-{y2}")
-                return [res['bounds']]
-        
+                # print(f"정렬 문제 발견: y축 범위 {y1}-{y2}")
+                result = ResultModel(
+                    image_path=self.image_path,
+                    index='',
+                    issue_type='alignment',
+                    issue_location=[0, y1, w, y2],
+                    issue_description=f"정렬 문제 발견: y축 범위 {y1}-{y2}"
+                )
+                return result
         return []
 
     
@@ -72,17 +78,11 @@ class Align:
         if not components:
             return []
         
-        print(f"=== 컴포넌트 처리 시작 (총 {len(sorted_components)}개) ===")
         for i, comp in enumerate(sorted_components):
             vertical_bounds = (comp['bounds'][1], comp['bounds'][3])
-            print(f"\n{i+1}. 컴포넌트 처리 중: {vertical_bounds} (전체 bounds: {comp['bounds']})")
-            print(f"   처리 전 그룹 수: {len(groups)}")
             
             self._add_component_to_groups(groups, vertical_bounds, comp['bounds'])
             
-            print(f"   처리 후 그룹 수: {len(groups)}")
-        
-        print(f"\n=== 최종 그룹핑 결과 ===")
         self._validate_grouping(groups)
         
         return groups
@@ -108,7 +108,6 @@ class Align:
             if group['bounds'] == vertical_bounds:
                 # 같은 구간이면 해당 그룹에 컴포넌트 추가
                 group['components'].append(component_bounds)
-                print(f"기존 그룹에 컴포넌트 추가: {vertical_bounds}")
                 return
         
         # 2. 기존 그룹들과의 관계 분석
@@ -130,7 +129,6 @@ class Align:
         if len(contained_groups) >= 2:
             # 케이스 1: 2개 이상의 구간을 포함하는 커다란 컴포넌트 
             # -> 기존 그룹들은 유지하고 새로운 구간을 추가
-            print(f"케이스 1: 컴포넌트 {vertical_bounds}가 {len(contained_groups)}개 그룹을 포함")
             groups.append({
                 "bounds": vertical_bounds,
                 "components": [component_bounds]
@@ -138,14 +136,12 @@ class Align:
         elif len(overlapping_groups) > 0:
             # 케이스 2, 3: 겹치는 구간이 있는 경우 
             # -> 기존 그룹들은 유지하고 새로운 구간을 추가
-            print(f"케이스 2/3: 컴포넌트 {vertical_bounds}가 {len(overlapping_groups)}개 그룹과 겹침")
             groups.append({
                 "bounds": vertical_bounds,
                 "components": [component_bounds]
             })
         else:
             # 겹치지 않는 경우 -> 새로운 그룹 생성
-            print(f"새로운 그룹 생성: {vertical_bounds}")
             groups.append({
                 "bounds": vertical_bounds,
                 "components": [component_bounds]
@@ -163,12 +159,10 @@ class Align:
 
     def _validate_grouping(self, groups):
         """그룹핑 결과를 검증하고 출력"""
-        print(f"총 {len(groups)}개 그룹 생성됨")
         
         for i, group in enumerate(groups):
             bounds = group['bounds']
             components = group['components']
-            print(f"그룹 {i+1}: bounds={bounds}, 컴포넌트 수={len(components)}")
             
             # 같은 bounds를 가진 다른 그룹이 있는지 확인
             duplicate_count = sum(1 for g in groups if g['bounds'] == bounds)
@@ -177,8 +171,6 @@ class Align:
         
         # 통계 출력
         unique_bounds = set(group['bounds'] for group in groups)
-        print(f"고유 bounds 수: {len(unique_bounds)}")
-        print(f"전체 그룹 수: {len(groups)}")
         
         if len(unique_bounds) < len(groups):
             print("❌ 누적이 제대로 되지 않음 - 같은 bounds의 그룹이 여러 개 존재")
