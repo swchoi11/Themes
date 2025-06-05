@@ -265,7 +265,7 @@ class Visibility():
             logger.info(f"가독성 검사 시작: {self.image_path}")
             issues = []
             for component in tqdm(self.components, desc="가독성 검사 중"):
-                logger.info(f"가독성 검사 중: {component['index']}")
+                #logger.info(f"가독성 검사 중: {component['index']}")
 
                 x1, y1, x2, y2 = component['bounds']
                 index = component['index']
@@ -274,17 +274,17 @@ class Visibility():
 
                 # 컴포넌트 영역의 주된 색상 추출
                 colors = self.color_extraction(img_crop)
-                logger.info(f"컴포넌트 영역의 주된 색상 추출: {colors}")                
+                #logger.info(f"컴포넌트 영역의 주된 색상 추출: {colors}")                
                 
                 if not colors:
                     continue
                 
                 # 대비 검사
                 contrast_result, max_contrast =self.calculate_contrast(colors)
-                logger.info(f"대비 검사 결과: {contrast_result}, {max_contrast}")
+                #logger.info(f"대비 검사 결과: {contrast_result}, {max_contrast}")
 
                 if not contrast_result:
-                    logger.info(f"이슈 발견! 컴포넌트 정보: {component}")
+                    #logger.info(f"이슈 발견! 컴포넌트 정보: {component}")
                     try:
                         resource_id = component.get('resource-id', 'unknown')
                         issue = ResultModel(
@@ -295,7 +295,7 @@ class Visibility():
                             issue_description=f"{component['type']}, {resource_id}에서 가독성 이슈 발생 - 색상 대비 부족:{max_contrast}"
                         )
                         issues.append(issue)
-                        logger.info(f"이슈 추가 완료: {issue.issue_description}")
+                        #logger.info(f"이슈 추가 완료: {issue.issue_description}")
                     except Exception as e:
                         logger.error(f"이슈 생성 중 오류: {e}")
                         logger.error(f"컴포넌트 데이터: {component}")
@@ -303,7 +303,7 @@ class Visibility():
             # 가장 낮은 대비 값을 가지는 이슈를 저장
             if issues:
                 min_contrast = min(issues, key=lambda x: x.issue_description.split(":")[-1])
-                logger.info(f"가독성 검사 완료. 검출된 이슈 {len(issues)+1}개 중 가장 낮은 대비 값을 가지는 이슈를 저장합니다.")
+                #logger.info(f"가독성 검사 완료. 검출된 이슈 {len(issues)+1}개 중 가장 낮은 대비 값을 가지는 이슈를 저장합니다.")
 
                 file_name = os.path.basename(self.image_path)
                 output_path = f"./output/{file_name}"

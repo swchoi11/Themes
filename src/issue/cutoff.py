@@ -24,7 +24,7 @@ class Cutoff:
         issues = []
         logger.info(f"라디오 버튼 검사 시작")
         output_path = f"./output/{os.path.basename(self.image_path)}"
-        
+        bounds_str = ""
         for component in components:
             logger.info(f"라디오 버튼 검사 중: {component['bounds']}")
             x1, y1, x2, y2 = component['bounds']
@@ -48,19 +48,18 @@ class Cutoff:
                         cv2.putText(self.img, f"cutoff", (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                         cv2.imwrite(output_path, self.img)
                         
-                        bounds_str = f"({x1}, {y1}, {x2}, {y2})"
-                        
-                        result = ResultModel(
-                            image_path=self.image_path,
-                            index=component['index'],
-                            issue_type='cutoff',
-                            issue_location=[x1, y1, x2, y2],
-                            issue_description=f"컴포넌트 영역 {bounds_str}에서 컷오프 이슈 발생 : {component['type']}"
-                        )
-                        issues.append(result)
+                        bounds_str += f"({x1}, {y1}, {x2}, {y2})"
                         break  # 한 컴포넌트에서 이슈를 찾으면 다음 컴포넌트로
+                        
+            result = ResultModel(
+                image_path=self.image_path,
+                index=component['index'],
+                issue_type='cutoff',
+                issue_location=[x1, y1, x2, y2],
+                issue_description=f"컴포넌트 영역 {bounds_str}에서 컷오프 이슈 발생 : {component['type']}"
+            )
         
-        return issues
+        return result
 
 
 

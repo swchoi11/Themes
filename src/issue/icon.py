@@ -27,8 +27,6 @@ class Icon:
         # 이미지 로드
         self.image = cv2.imread(self.image_path)
 
-   
-
     def run_icon_check(self) -> List[ResultModel]:
         issues = []
         logger.info(f"중복 아이콘에 대한 검사 시작")
@@ -67,10 +65,9 @@ class Icon:
                         group_bounds.append(bounds)
                         group_info.append(f"{icon['type']} at {bounds}")
                     
-                    logger.info(f"중복 아이콘 그룹 발견 ({len(duplicate_group)}개):")
+                    # logger.info(f"중복 아이콘 그룹 발견 ({len(duplicate_group)}개):")
                     
                     # 중복된 아이콘들을 imshow로 표시
-                    print(f"중복 아이콘 {len(duplicate_group)}개 발견!")
                     for i, icon_idx in enumerate(duplicate_group):
                         icon = components[icon_idx]
                         x1, y1, x2, y2 = icon['bounds']
@@ -90,7 +87,7 @@ class Icon:
                     # 전체 그룹에 대해 디폴트 검증 (한 번만 실행)
                     all_bounds_str = [str(bounds) for bounds in group_bounds]
                     is_normal_duplicate = self.check_default_duplicate(all_bounds_str)
-                    logger.info(f"디폴트 검증 결과: {is_normal_duplicate}")
+                    # logger.info(f"디폴트 검증 결과: {is_normal_duplicate}")
                     
                     # 검증 결과에 따라 이슈 생성
                     if not is_normal_duplicate:
@@ -119,7 +116,7 @@ class Icon:
                         logger.info(f"디폴트 이미지에서도 동일한 중복이 발견되어 정상으로 판정됨")
             
         except Exception as e:
-            print(f"아이콘 중복 탐지 중 오류: {e}")
+            logger.error(f"아이콘 중복 탐지 중 오류: {e}")
         
         return issues
     
@@ -138,31 +135,31 @@ class Icon:
             # select_group()이 None을 반환할 수 있으므로 안전하게 처리
             group_result = self.match.select_group()
             if group_result is None:
-                print("그룹 선택 결과가 None입니다.")
+                logger.error("그룹 선택 결과가 None입니다.")
                 return False
             
             # 튜플 언패킹 시도 
             try:
                 _, selected_group = group_result
             except (TypeError, ValueError):
-                print("그룹 선택 결과를 언패킹할 수 없습니다.")
+                logger.error("그룹 선택 결과를 언패킹할 수 없습니다.")
                 return False
             
             default_xml_path = self.match.selct_default_image(selected_group)
-            print(default_xml_path)
+            # print(default_xml_path)
             
             if default_xml_path == "":
-                print("디폴트 이미지를 찾을 수 없습니다.")
+                logger.error("디폴트 이미지를 찾을 수 없습니다.")
                 return False
                 
             default_image_path = default_xml_path.replace('.xml', '.png')
             default_img = cv2.imread(default_image_path)
             
             if default_img is None:
-                print(f"디폴트 이미지를 로드할 수 없습니다: {default_image_path}")
+                logger.error(f"디폴트 이미지를 로드할 수 없습니다: {default_image_path}")
                 return False
             
-            print(f"디폴트 이미지에서 같은 좌표의 이미지 비교:")
+            # print(f"디폴트 이미지에서 같은 좌표의 이미지 비교:")
             
             # 각 바운딩박스에서 디폴트 이미지 추출
             default_crops = []
@@ -177,9 +174,9 @@ class Icon:
                 
                 if default_crop.size > 0:
                     default_crops.append(default_crop)
-                    print(f"  - 좌표 {coords}에서 이미지 추출: {default_crop.shape}")
+                    # print(f"  - 좌표 {coords}에서 이미지 추출: {default_crop.shape}")
                 else:
-                    print(f"  - 좌표 {coords}에서 이미지 추출 실패")
+                    # print(f"  - 좌표 {coords}에서 이미지 추출 실패")
                     return False
             
             # 추출된 이미지들이 모두 동일한지 확인
@@ -198,18 +195,18 @@ class Icon:
                 diff = cv2.absdiff(base_image, compare_image)
                 similarity = 1.0 - (np.mean(diff) / 255.0)
                 
-                print(f"  이미지 0 vs 이미지 {i}: 유사도 {similarity:.3f}")
+                # print(f"  이미지 0 vs 이미지 {i}: 유사도 {similarity:.3f}")
                 
                 # 유사도가 0.95 이상이면 동일한 것으로 판정
                 if similarity < 0.99:
-                    print(f"  → 디폴트에서 다른 이미지 발견 (이슈)")
+                    # print(f"  → 디폴트에서 다른 이미지 발견 (이슈)")
                     return False
             
-            print(f"  → 디폴트에서도 모든 이미지가 동일함 (정상)")
+            # print(f"  → 디폴트에서도 모든 이미지가 동일함 (정상)")
             return True
             
         except Exception as e:
-            print(f"디폴트 중복 확인 중 오류: {e}")
+            logger.error(f"디폴트 중복 확인 중 오류: {e}")
             return False
     
     def _find_duplicate_icons(self, icon_images: List[Dict]) -> List[List[int]]:
