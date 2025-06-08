@@ -474,10 +474,10 @@ class SingleLayout(LayoutAnalyzer):
 if __name__ == '__main__':
     try:
         # Load data
-        theme_image_path = "../resource/0530_theme_img_xml_labeled/Visibility Issue/Fail_[042]_com.sec.android.app.launcher_LauncherActivity_20250521_173924.png"
-        theme_json_path = "../output/json/Fail_[042]_com.sec.android.app.launcher_LauncherActivity_20250521_173924.json"
-        default_image_path = "../resource/0530_theme_img_xml_labeled/Visibility Issue/Fail_[042]_com.sec.android.app.launcher_LauncherActivity_20250521_173924.png"
-        default_json_path = "../output/json/Fail_[042]_com.sec.android.app.launcher_LauncherActivity_20250521_173924.json"
+        theme_image_path = "../../resource/0530_theme_img_xml_labeled/Visibility Issue/Fail_[042]_com.sec.android.app.launcher_LauncherActivity_20250521_173924.png"
+        theme_json_path = "../../output/json/Fail_[042]_com.sec.android.app.launcher_LauncherActivity_20250521_173924.json"
+        default_image_path = "../../resource/0530_theme_img_xml_labeled/Visibility Issue/Fail_[042]_com.sec.android.app.launcher_LauncherActivity_20250521_173924.png"
+        default_json_path = "../../output/json/Fail_[042]_com.sec.android.app.launcher_LauncherActivity_20250521_173924.json"
 
         # SingleLayout analysis
         single_analyzer = SingleLayout()
