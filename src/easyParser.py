@@ -23,6 +23,7 @@ import math
 import pandas as pd
 from tqdm import tqdm
 
+from src.xmlParser import XMLParser
 from utils.utils import get_som_labeled_img, get_caption_model_processor, get_yolo_model, check_ocr_box
 from src.visualizer import visualize_ui_skeleton_result
 
@@ -991,7 +992,7 @@ class LayoutAwareParser:
         self.config = config
         self.skeleton_extractor = SkeletonUIExtractor(config)
 
-    def parse_by_layout(self, image: Union[str, Image.Image]) -> Dict:
+    def parse_by_layout(self, image: Union[str, Image.Image], xml_path: Optional[str] = None) -> Dict:
         """레이아웃별로 파싱 수행"""
 
         if isinstance(image, str):
@@ -1001,9 +1002,26 @@ class LayoutAwareParser:
         # 1. 스켈레톤 구조 추출
         layout_structure = self.skeleton_extractor.extract_skeleton(image)
 
+        if xml_path and os.path.exists(xml_path):
+            try:
+                # XMLParser 생성
+                xml_parser = XMLParser(image_path=image_path, xml_path=xml_path)
+                xml_components = xml_parser.get_components()
+                print(f"XML에서 {len(xml_components)}개 컴포넌트 추출")
+
+                # UIElement와 UIComponent 간 병합
+                merged_elements = self._merge_skeleton_with_xml(
+                    layout_structure.elements,
+                    xml_components
+                )
+                layout_structure.elements = merged_elements
+                print(f"병합 후 최종: {len(layout_structure.elements)}개 요소")
+
+            except Exception as e:
+                print(f"XML 병합 실패: {e}, 기본 스켈레톤만 사용")
+
         # 2. 각 레이아웃 영역별 세부 파싱
         parsed_regions = {}
-
         for region_name, region_info in layout_structure.layout_regions.items():
             if region_info['elements']:
                 parsed_regions[region_name] = self._parse_region(
@@ -1012,23 +1030,29 @@ class LayoutAwareParser:
                     layout_structure.elements
                 )
 
-        # 3. 폼 구조 추출
-        forms = self._extract_forms(layout_structure.elements)
-
-        # 4. 네비게이션 구조 추출
-        navigation = self._extract_navigation(layout_structure.elements)
-
-        # 5. 인터랙션 맵 생성
-        interaction_map = self._create_interaction_map(layout_structure.elements)
-
-        # 6. 접근성 정보 추출
-        accessibility_info = self._extract_accessibility_info(layout_structure.elements)
+        # # 3. 폼 구조 추출
+        # forms = self._extract_forms(layout_structure.elements)
+        #
+        # # 4. 네비게이션 구조 추출
+        # navigation = self._extract_navigation(layout_structure.elements)
+        #
+        # # 5. 인터랙션 맵 생성
+        # interaction_map = self._create_interaction_map(layout_structure.elements)
+        #
+        # # 6. 접근성 정보 추출
+        # accessibility_info = self._extract_accessibility_info(layout_structure.elements)
 
         return {
             'skeleton': {
                 'structure_type': layout_structure.structure_type,
                 'elements': [asdict(elem) for elem in layout_structure.elements],
-                'hierarchy': layout_structure.hierarchy
+                'hierarchy': layout_structure.hierarchy,
+                'metadata': {
+                    'source': 'xml_ocr_yolo_merged' if xml_path else 'ocr_yolo_only',
+                    'total_elements': len(layout_structure.elements),
+                    'image_path': image_path,
+                    'xml_path': xml_path
+                }
             },
             'layout_regions': {name: {
                 'elements': [asdict(elem) for elem in info['elements']],
@@ -1036,13 +1060,75 @@ class LayoutAwareParser:
                 'type': info.get('type', 'layout')
             } for name, info in layout_structure.layout_regions.items()},
             'parsed_regions': parsed_regions,
-            'forms': forms,
-            'navigation': navigation,
-            'grid_structure': layout_structure.grid_structure,
-            'interaction_map': interaction_map,
-            'accessibility': accessibility_info,
-            'statistics': self._calculate_statistics(layout_structure.elements)
+            # 'forms': forms,
+            # 'navigation': navigation,
+            # 'grid_structure': layout_structure.grid_structure,
+            # 'interaction_map': interaction_map,
+            # 'accessibility': accessibility_info,
+            # 'statistics': self._calculate_statistics(layout_structure.elements)
         }
+
+    def _merge_skeleton_with_xml(self, ui_elements: List[UIElement], xml_components: List, xml_parser_instance=None) -> List[UIElement]:
+
+        ui_elements_dict = [self._uielement_to_dict(elem) for elem in ui_elements]
+
+        # XMLParser의 병합 로직 활용
+        if xml_components and xml_parser_instance:
+            try:
+                # XMLParser 인스턴스의 merge_with_elements 메서드 사용
+                merged_components = xml_parser_instance.merge_with_elements(
+                    xml_components, ui_elements_dict, element_type='dict'
+                )
+
+                # 병합된 결과를 다시 UIElement로 변환
+                merged_ui_elements = []
+                for comp in merged_components:
+                    ui_elem = self._dict_to_uielement(asdict(comp))
+                    merged_ui_elements.append(ui_elem)
+
+                # 기존 UIElement 중 병합되지 않은 것들도 추가
+                existing_ids = {comp.id for comp in merged_components}
+                for ui_elem in ui_elements:
+                    if ui_elem.id not in existing_ids:
+                        merged_ui_elements.append(ui_elem)
+
+                return merged_ui_elements
+            except Exception as e:
+                print(f"XMLParser 병합 실패: {e}")
+                return ui_elements
+
+        return ui_elements
+
+    def _uielement_to_dict(self, ui_element: UIElement) -> Dict:
+        """UIElement를 dict로 변환"""
+        return {
+            'id': ui_element.id,
+            'type': ui_element.type,
+            'bbox': ui_element.bbox,
+            'content': ui_element.content,
+            'confidence': ui_element.confidence,
+            'interactivity': ui_element.interactivity,
+            'clickable': ui_element.interactivity,  # XML 호환성을 위한 별칭
+            'parent_id': ui_element.parent_id,
+            'children': ui_element.children,
+            'layout_role': ui_element.layout_role,
+            'visual_features': ui_element.visual_features
+        }
+
+    def _dict_to_uielement(self, elem_dict: Dict) -> UIElement:
+        """dict를 UIElement로 변환"""
+        return UIElement(
+            id=elem_dict.get('id', ''),
+            type=elem_dict.get('type', 'unknown'),
+            bbox=elem_dict.get('bbox', [0, 0, 0, 0]),
+            content=elem_dict.get('content'),
+            confidence=elem_dict.get('confidence', 0.0),
+            interactivity=elem_dict.get('interactivity', False) or elem_dict.get('clickable', False),
+            parent_id=elem_dict.get('parent_id'),
+            children=elem_dict.get('children', []),
+            layout_role=elem_dict.get('layout_role'),
+            visual_features=elem_dict.get('visual_features', {})
+        )
 
     def _parse_region(self, image: Image.Image, region_info: Dict, all_elements: List[UIElement]) -> Dict:
         """특정 영역 세부 파싱"""
@@ -1361,7 +1447,7 @@ class LayoutAwareParser:
 
         return [min_x, min_y, max_x, max_y]
 
-def extract_ui_skeleton(image_path: str, config: Optional[Dict] = None) -> Dict:
+def extract_ui_skeleton(image_path: str, xml_path: str, config: Optional[Dict] = None) -> Dict:
     """UI 스켈레톤 추출 편의 함수"""
     if config is None:
         config = {
@@ -1373,7 +1459,7 @@ def extract_ui_skeleton(image_path: str, config: Optional[Dict] = None) -> Dict:
         }
 
     parser = LayoutAwareParser(config)
-    return parser.parse_by_layout(image_path)
+    return parser.parse_by_layout(image_path, xml_path)
 
 
 class EasyParserRunner:
@@ -1412,7 +1498,7 @@ class EasyParserRunner:
                 print(f"[PROCESSING] {image_path}")
 
                 try:
-                    result = self.parser.parse_by_layout(image_path)
+                    result = self.parser.parse_by_layout(image_path=image_path, xml_path=None)
                     with open(json_path, "w", encoding="utf-8") as f:
                         json.dump(result, f, ensure_ascii=False, indent=2)
                     print(f"[INFO] 분석 결과: {json_path}")
@@ -1459,24 +1545,25 @@ if __name__ == "__main__":
     }
 
     parser = LayoutAwareParser(config)
-    rootDir = "./resource/0530_theme_img_xml_labeled"
+    rootDir = "./resource"
 
-    img_paths = glob.glob(f"{rootDir}/**/*.png", recursive=True)
+    img_paths = glob.glob(f"{rootDir}/image/*.png", recursive=True)
     broken_files = []
     for image_path in tqdm(img_paths):
         filename = os.path.splitext(os.path.basename(image_path))[0]
+        xml_path=f"{rootDir}/xml/{filename}.xml"
         config['filename'] = filename
 
         if os.path.isfile(f"{OUT_DIR}/{filename}.json"):
             print(f"해당 파일은 존재 합니다.:{OUT_DIR}/{filename}.json")
             continue
 
-        print(f"\n\n image path: {image_path} * -------------------------------------------------------------------- ")
+        print(f"image path: {image_path}")
         if is_image_valid(image_path):
             broken_files.append(os.path.basename(image_path))
             print(f"해당 파일은 손상 되었습니다.: {image_path}")
             continue
-        result = parser.parse_by_layout(image_path)
+        result = parser.parse_by_layout(image_path, xml_path)
         with open(f"{OUT_DIR}/{filename}.json", "w", encoding="utf-8") as f:
             json.dump(result, f, ensure_ascii=False, indent=2)
 
@@ -1489,10 +1576,10 @@ if __name__ == "__main__":
             if region_info['elements']:
                 print(f"   {region_name}: {len(region_info['elements'])}개 요소")
 
-        print("\n=== 네비게이션 구조 ===")
-        if result['navigation']:
-            print(f"   타입: {result['navigation']['type']}")
-            print(f"   요소 수: {len(result['navigation']['elements'])}")
+        # print("\n=== 네비게이션 구조 ===")
+        # if result['navigation']:
+        #     print(f"   타입: {result['navigation']['type']}")
+        #     print(f"   요소 수: {len(result['navigation']['elements'])}")
 
     df = pd.DataFrame(broken_files, columns=["filename"])
     df.to_csv("broken_images.csv", index=False, encoding="utf-8")
