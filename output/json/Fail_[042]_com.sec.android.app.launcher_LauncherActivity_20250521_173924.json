@@ -1,0 +1,5141 @@
+{
+  "skeleton": {
+    "structure_type": "navigation_layout",
+    "elements": [
+      {
+        "id": "text_0",
+        "type": "text",
+        "bbox": [
+          0.0328125,
+          0.041666666666666664,
+          0.1328125,
+          0.06380208333333333
+        ],
+        "content": "Mobifone",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "region_content",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            107.35569852941177,
+            92.36488970588235,
+            94.59283088235294
+          ],
+          "edge_density": 0.2426470588235294,
+          "aspect_ratio": 4.51764705882353
+        }
+      },
+      {
+        "id": "text_1",
+        "type": "text",
+        "bbox": [
+          0.3234375,
+          0.16927083333333334,
+          0.3734375,
+          0.18880208333333334
+        ],
+        "content": "Wi-Fi",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "input_6",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            107.60208333333334,
+            91.35416666666667,
+            94.85416666666667
+          ],
+          "edge_density": 0.24166666666666667,
+          "aspect_ratio": 2.5599999999999996
+        }
+      },
+      {
+        "id": "text_2",
+        "type": "text",
+        "bbox": [
+          0.6078125,
+          0.16927083333333334,
+          0.696875,
+          0.1875
+        ],
+        "content": "Bluetooth",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "input_8",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            114.88972431077694,
+            99.45989974937343,
+            103.11528822055138
+          ],
+          "edge_density": 0.2631578947368421,
+          "aspect_ratio": 4.885714285714291
+        }
+      },
+      {
+        "id": "text_3",
+        "type": "text",
+        "bbox": [
+          0.2609375,
+          0.3125,
+          0.321875,
+          0.3346354166666667
+        ],
+        "content": "Portrait",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_14",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            94.11613876319758,
+            76.29562594268477,
+            79.61538461538461
+          ],
+          "edge_density": 0.1779788838612368,
+          "aspect_ratio": 2.7529411764705873
+        }
+      },
+      {
+        "id": "text_4",
+        "type": "text",
+        "bbox": [
+          0.40625,
+          0.3138020833333333,
+          0.45625,
+          0.3333333333333333
+        ],
+        "content": "Flight",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "region_content",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            97.4375,
+            80.025,
+            83.4
+          ],
+          "edge_density": 0.22291666666666668,
+          "aspect_ratio": 2.5599999999999996
+        }
+      },
+      {
+        "id": "text_5",
+        "type": "text",
+        "bbox": [
+          0.5453125,
+          0.3138020833333333,
+          0.5953125,
+          0.3333333333333333
+        ],
+        "content": "Torch",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_17",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            92.97083333333333,
+            75.04791666666667,
+            78.34166666666667
+          ],
+          "edge_density": 0.1875,
+          "aspect_ratio": 2.5600000000000023
+        }
+      },
+      {
+        "id": "text_6",
+        "type": "text",
+        "bbox": [
+          0.68125,
+          0.3111979166666667,
+          0.7359375,
+          0.3333333333333333
+        ],
+        "content": "Mobile",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_19",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            96.63361344537815,
+            79.14453781512606,
+            82.49915966386554
+          ],
+          "edge_density": 0.19663865546218487,
+          "aspect_ratio": 2.4705882352941217
+        }
+      },
+      {
+        "id": "text_7",
+        "type": "text",
+        "bbox": [
+          0.403125,
+          0.3333333333333333,
+          0.45625,
+          0.3502604166666667
+        ],
+        "content": "mode",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "region_content",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            97.01131221719457,
+            79.52262443438914,
+            82.89366515837104
+          ],
+          "edge_density": 0.19457013574660634,
+          "aspect_ratio": 3.1384615384615304
+        }
+      },
+      {
+        "id": "text_8",
+        "type": "text",
+        "bbox": [
+          0.690625,
+          0.3333333333333333,
+          0.7296875,
+          0.3489583333333333
+        ],
+        "content": "data",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_19",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            103.06,
+            86.28,
+            89.75
+          ],
+          "edge_density": 0.22666666666666666,
+          "aspect_ratio": 2.5
+        }
+      },
+      {
+        "id": "text_9",
+        "type": "text",
+        "bbox": [
+          0.2640625,
+          0.4283854166666667,
+          0.321875,
+          0.4479166666666667
+        ],
+        "content": "Mobile",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_12",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            98.26306306306306,
+            80.90090090090091,
+            84.3009009009009
+          ],
+          "edge_density": 0.2072072072072072,
+          "aspect_ratio": 2.960000000000002
+        }
+      },
+      {
+        "id": "text_10",
+        "type": "text",
+        "bbox": [
+          0.403125,
+          0.4296875,
+          0.4578125,
+          0.4479166666666667
+        ],
+        "content": "Power",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_18",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            96.69795918367348,
+            79.15714285714286,
+            82.55714285714286
+          ],
+          "edge_density": 0.18571428571428572,
+          "aspect_ratio": 2.999999999999997
+        }
+      },
+      {
+        "id": "text_11",
+        "type": "text",
+        "bbox": [
+          0.534375,
+          0.4296875,
+          0.6078125,
+          0.4479166666666667
+        ],
+        "content": "Location",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "region_content",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            95.790273556231,
+            78.16413373860182,
+            81.53647416413374
+          ],
+          "edge_density": 0.22188449848024316,
+          "aspect_ratio": 4.0285714285714205
+        }
+      },
+      {
+        "id": "text_12",
+        "type": "text",
+        "bbox": [
+          0.6796875,
+          0.4270833333333333,
+          0.7375,
+          0.44921875
+        ],
+        "content": "Link to",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_16",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            90.90779014308426,
+            72.78219395866455,
+            76.03974562798092
+          ],
+          "edge_density": 0.17170111287758347,
+          "aspect_ratio": 2.6117647058823525
+        }
+      },
+      {
+        "id": "text_13",
+        "type": "text",
+        "bbox": [
+          0.259375,
+          0.4453125,
+          0.3234375,
+          0.4674479166666667
+        ],
+        "content": "Hotspot",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_12",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            95.27690100430416,
+            77.61979913916787,
+            80.96556671449068
+          ],
+          "edge_density": 0.20086083213773315,
+          "aspect_ratio": 2.8941176470588195
+        }
+      },
+      {
+        "id": "text_14",
+        "type": "text",
+        "bbox": [
+          0.403125,
+          0.4466145833333333,
+          0.4578125,
+          0.4674479166666667
+        ],
+        "content": "saving",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "region_content",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            95.31428571428572,
+            77.65178571428571,
+            80.98571428571428
+          ],
+          "edge_density": 0.1982142857142857,
+          "aspect_ratio": 2.6249999999999956
+        }
+      },
+      {
+        "id": "text_15",
+        "type": "text",
+        "bbox": [
+          0.6703125,
+          0.4453125,
+          0.746875,
+          0.4661458333333333
+        ],
+        "content": "Windows",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_16",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            95.51658163265306,
+            77.8545918367347,
+            81.20663265306122
+          ],
+          "edge_density": 0.17346938775510204,
+          "aspect_ratio": 3.675000000000002
+        }
+      },
+      {
+        "id": "text_16",
+        "type": "text",
+        "bbox": [
+          0.5546875,
+          0.50390625,
+          0.5859375,
+          0.51953125
+        ],
+        "content": "Dex",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_15",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            175.55833333333334,
+            154.68333333333334,
+            157.1625
+          ],
+          "edge_density": 0.29583333333333334,
+          "aspect_ratio": 2.0
+        }
+      },
+      {
+        "id": "text_17",
+        "type": "text",
+        "bbox": [
+          0.2625,
+          0.5442708333333334,
+          0.321875,
+          0.5625
+        ],
+        "content": "Screen",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_10",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            96.7781954887218,
+            79.26691729323308,
+            82.64661654135338
+          ],
+          "edge_density": 0.22180451127819548,
+          "aspect_ratio": 3.2571428571428642
+        }
+      },
+      {
+        "id": "text_18",
+        "type": "text",
+        "bbox": [
+          0.384375,
+          0.5442708333333334,
+          0.478125,
+          0.5625
+        ],
+        "content": "Quick Share",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "region_content",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            99.13095238095238,
+            81.9095238095238,
+            85.30833333333334
+          ],
+          "edge_density": 0.2226190476190476,
+          "aspect_ratio": 5.142857142857153
+        }
+      },
+      {
+        "id": "text_19",
+        "type": "text",
+        "bbox": [
+          0.55,
+          0.5455729166666666,
+          0.5875,
+          0.5611979166666666
+        ],
+        "content": "DeX",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_15",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            101.68055555555556,
+            84.75,
+            88.23958333333333
+          ],
+          "edge_density": 0.2743055555555556,
+          "aspect_ratio": 2.3999999999999986
+        }
+      },
+      {
+        "id": "text_20",
+        "type": "text",
+        "bbox": [
+          0.6625,
+          0.5442708333333334,
+          0.75625,
+          0.5625
+        ],
+        "content": "Eye comfort",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_9",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            98.18452380952381,
+            80.84880952380952,
+            84.23571428571428
+          ],
+          "edge_density": 0.23809523809523808,
+          "aspect_ratio": 5.142857142857153
+        }
+      },
+      {
+        "id": "text_21",
+        "type": "text",
+        "bbox": [
+          0.2578125,
+          0.5651041666666666,
+          0.3234375,
+          0.5794270833333334
+        ],
+        "content": "recorder",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_10",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            105.0021645021645,
+            88.41558441558442,
+            91.94372294372295
+          ],
+          "edge_density": 0.2878787878787879,
+          "aspect_ratio": 4.581818181818157
+        }
+      },
+      {
+        "id": "text_22",
+        "type": "text",
+        "bbox": [
+          0.3921875,
+          0.56640625,
+          0.471875,
+          0.5846354166666666
+        ],
+        "content": "Everyone",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "region_content",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            89.56022408963585,
+            71.23669467787114,
+            74.39355742296918
+          ],
+          "edge_density": 0.21428571428571427,
+          "aspect_ratio": 4.371428571428578
+        }
+      },
+      {
+        "id": "text_23",
+        "type": "text",
+        "bbox": [
+          0.684375,
+          0.5611979166666666,
+          0.734375,
+          0.5807291666666666
+        ],
+        "content": "shield",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "region_content",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            97.89166666666667,
+            80.49583333333334,
+            83.90833333333333
+          ],
+          "edge_density": 0.23125,
+          "aspect_ratio": 2.5600000000000023
+        }
+      },
+      {
+        "id": "text_24",
+        "type": "text",
+        "bbox": [
+          0.553125,
+          0.6236979166666666,
+          0.5796875,
+          0.640625
+        ],
+        "content": "A",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_11",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            162.2579185520362,
+            137.80995475113122,
+            140.68778280542986
+          ],
+          "edge_density": 0.2579185520361991,
+          "aspect_ratio": 1.5692307692307683
+        }
+      },
+      {
+        "id": "text_25",
+        "type": "text",
+        "bbox": [
+          0.2375,
+          0.6588541666666666,
+          0.346875,
+          0.6770833333333334
+        ],
+        "content": "Do not disturb",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_7",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            98.15918367346939,
+            80.83265306122449,
+            84.23775510204082
+          ],
+          "edge_density": 0.22142857142857142,
+          "aspect_ratio": 5.999999999999976
+        }
+      },
+      {
+        "id": "text_26",
+        "type": "text",
+        "bbox": [
+          0.3765625,
+          0.6588541666666666,
+          0.4859375,
+          0.6770833333333334
+        ],
+        "content": "Scan QR code",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "region_content",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            98.4765306122449,
+            81.15612244897959,
+            84.55408163265307
+          ],
+          "edge_density": 0.22959183673469388,
+          "aspect_ratio": 5.999999999999976
+        }
+      },
+      {
+        "id": "text_27",
+        "type": "text",
+        "bbox": [
+          0.5265625,
+          0.6575520833333334,
+          0.6125,
+          0.6796875
+        ],
+        "content": "Interpreter",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "button_11",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            94.64385026737968,
+            76.85026737967914,
+            80.22459893048128
+          ],
+          "edge_density": 0.17754010695187167,
+          "aspect_ratio": 3.8823529411764772
+        }
+      },
+      {
+        "id": "text_28",
+        "type": "text",
+        "bbox": [
+          0.659375,
+          0.6588541666666666,
+          0.7578125,
+          0.6770833333333334
+        ],
+        "content": "Multi control",
+        "confidence": 0.95,
+        "interactivity": false,
+        "parent_id": "region_content",
+        "children": [
+          "text_5"
+        ],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            98.1859410430839,
+            80.85487528344672,
+            84.23809523809524
+          ],
+          "edge_density": 0.20748299319727892,
+          "aspect_ratio": 5.3999999999999755
+        }
+      },
+      {
+        "id": "text_0",
+        "type": "text",
+        "bbox": [
+          0.40625,
+          0.3138020932674408,
+          0.45625001192092896,
+          0.3333333432674408
+        ],
+        "content": "Flight",
+        "confidence": 0.8,
+        "interactivity": false,
+        "parent_id": "region_main_content",
+        "children": [],
+        "layout_role": "main_content",
+        "visual_features": {
+          "avg_color": [
+            97.4375,
+            80.025,
+            83.4
+          ],
+          "edge_density": 0.22291666666666668,
+          "aspect_ratio": 2.5600006103515627
+        }
+      },
+      {
+        "id": "text_1",
+        "type": "text",
+        "bbox": [
+          0.40312498807907104,
+          0.3333333432674408,
+          0.45625001192092896,
+          0.3502604067325592
+        ],
+        "content": "mode",
+        "confidence": 0.8,
+        "interactivity": false,
+        "parent_id": "region_main_content",
+        "children": [],
+        "layout_role": "main_content",
+        "visual_features": {
+          "avg_color": [
+            98.16428571428571,
+            80.80714285714286,
+            84.19761904761904
+          ],
+          "edge_density": 0.20476190476190476,
+          "aspect_ratio": 3.1384666307497824
+        }
+      },
+      {
+        "id": "text_2",
+        "type": "text",
+        "bbox": [
+          0.3843750059604645,
+          0.5442708134651184,
+          0.4781250059604645,
+          0.5625
+        ],
+        "content": "Quick Share",
+        "confidence": 0.8,
+        "interactivity": false,
+        "parent_id": "region_main_content",
+        "children": [],
+        "layout_role": "main_content",
+        "visual_features": {
+          "avg_color": [
+            97.54222222222222,
+            80.13222222222223,
+            83.50444444444445
+          ],
+          "edge_density": 0.20777777777777778,
+          "aspect_ratio": 5.142851537593801
+        }
+      },
+      {
+        "id": "text_3",
+        "type": "text",
+        "bbox": [
+          0.3921875059604645,
+          0.56640625,
+          0.47187501192092896,
+          0.5846354365348816
+        ],
+        "content": "Everyone",
+        "confidence": 0.8,
+        "interactivity": false,
+        "parent_id": "region_main_content",
+        "children": [],
+        "layout_role": "main_content",
+        "visual_features": {
+          "avg_color": [
+            89.56022408963585,
+            71.23669467787114,
+            74.39355742296918
+          ],
+          "edge_density": 0.21428571428571427,
+          "aspect_ratio": 4.371424133928426
+        }
+      },
+      {
+        "id": "text_4",
+        "type": "text",
+        "bbox": [
+          0.3765625059604645,
+          0.6588541865348816,
+          0.4859375059604645,
+          0.6770833134651184
+        ],
+        "content": "Scan QR code",
+        "confidence": 0.8,
+        "interactivity": false,
+        "parent_id": "region_main_content",
+        "children": [],
+        "layout_role": "main_content",
+        "visual_features": {
+          "avg_color": [
+            100.28241758241758,
+            83.16813186813187,
+            86.5967032967033
+          ],
+          "edge_density": 0.24725274725274726,
+          "aspect_ratio": 6.0000130789905635
+        }
+      },
+      {
+        "id": "text_5",
+        "type": "text",
+        "bbox": [
+          0.659375011920929,
+          0.6588541865348816,
+          0.7578125,
+          0.6770833134651184
+        ],
+        "content": "Multi control",
+        "confidence": 0.8,
+        "interactivity": false,
+        "parent_id": "text_28",
+        "children": [],
+        "layout_role": "main_content",
+        "visual_features": {
+          "avg_color": [
+            99.96947496947497,
+            82.84371184371184,
+            86.25641025641026
+          ],
+          "edge_density": 0.22344322344322345,
+          "aspect_ratio": 5.400011117141979
+        }
+      },
+      {
+        "id": "input_6",
+        "type": "input",
+        "bbox": [
+          0.21987013518810272,
+          0.13720813393592834,
+          0.4993228018283844,
+          0.21970373392105103
+        ],
+        "content": "Wi-Fi ",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [
+          "text_1"
+        ],
+        "layout_role": "navigation",
+        "visual_features": {
+          "avg_color": [
+            91.04371730070054,
+            67.46865301055246,
+            70.85244302562738
+          ],
+          "edge_density": 0.035913806863527534,
+          "aspect_ratio": 3.387485716700992
+        }
+      },
+      {
+        "id": "button_7",
+        "type": "button",
+        "bbox": [
+          0.22021672129631042,
+          0.5969868898391724,
+          0.361358106136322,
+          0.6813138127326965
+        ],
+        "content": "Do not disturb ",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [
+          "text_25"
+        ],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            94.86001690617076,
+            72.17210481825866,
+            75.40625528317835
+          ],
+          "edge_density": 0.07962806424344886,
+          "aspect_ratio": 1.673740485209267
+        }
+      },
+      {
+        "id": "input_8",
+        "type": "input",
+        "bbox": [
+          0.5008642077445984,
+          0.1368575543165207,
+          0.77998286485672,
+          0.22033149003982544
+        ],
+        "content": "Bluetooth ",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [
+          "text_2"
+        ],
+        "layout_role": "navigation",
+        "visual_features": {
+          "avg_color": [
+            92.56913407821229,
+            69.37779329608938,
+            72.75768156424581
+          ],
+          "edge_density": 0.04312150837988827,
+          "aspect_ratio": 3.3437821601862674
+        }
+      },
+      {
+        "id": "button_9",
+        "type": "button",
+        "bbox": [
+          0.6358870267868042,
+          0.4824885427951813,
+          0.7784178853034973,
+          0.5806553959846497
+        ],
+        "content": "Eye comfort shield ",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [
+          "text_20"
+        ],
+        "layout_role": "main_content",
+        "visual_features": {
+          "avg_color": [
+            91.61376811594202,
+            69.05884057971015,
+            72.31753623188406
+          ],
+          "edge_density": 0.08753623188405797,
+          "aspect_ratio": 1.4519244926961175
+        }
+      },
+      {
+        "id": "button_10",
+        "type": "button",
+        "bbox": [
+          0.21912138164043427,
+          0.48254457116127014,
+          0.3643736243247986,
+          0.5832747220993042
+        ],
+        "content": "Screen recorder ",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [
+          "text_17",
+          "text_21"
+        ],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            90.64474235441978,
+            68.1360145231113,
+            71.36712749615975
+          ],
+          "edge_density": 0.07471023600055858,
+          "aspect_ratio": 1.4419936963434
+        }
+      },
+      {
+        "id": "button_11",
+        "type": "button",
+        "bbox": [
+          0.5005244016647339,
+          0.5977320075035095,
+          0.6371158361434937,
+          0.6799657940864563
+        ],
+        "content": "A Interpreter ",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [
+          "text_24",
+          "text_27"
+        ],
+        "layout_role": "main_content",
+        "visual_features": {
+          "avg_color": [
+            95.21565407772304,
+            72.15526363802226,
+            75.41780696953111
+          ],
+          "edge_density": 0.09268381682174785,
+          "aspect_ratio": 1.6610135584719068
+        }
+      },
+      {
+        "id": "button_12",
+        "type": "button",
+        "bbox": [
+          0.22016337513923645,
+          0.36703550815582275,
+          0.3658549189567566,
+          0.4682907164096832
+        ],
+        "content": "Mobile Hotspot ",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [
+          "text_9",
+          "text_13"
+        ],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            102.14402618657938,
+            78.04268957992362,
+            81.52809601745771
+          ],
+          "edge_density": 0.07242225859247135,
+          "aspect_ratio": 1.4388548137914228
+        }
+      },
+      {
+        "id": "button_13",
+        "type": "button",
+        "bbox": [
+          0.5295954942703247,
+          0.36811456084251404,
+          0.6067458391189575,
+          0.449042409658432
+        ],
+        "content": "Location ",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "main_content",
+        "visual_features": {
+          "avg_color": [
+            133.58967741935484,
+            102.82677419354839,
+            107.00548387096774
+          ],
+          "edge_density": 0.13193548387096773,
+          "aspect_ratio": 0.9533225703814563
+        }
+      },
+      {
+        "id": "button_14",
+        "type": "button",
+        "bbox": [
+          0.22002024948596954,
+          0.2501872181892395,
+          0.3625284731388092,
+          0.3368675410747528
+        ],
+        "content": "Portrait ",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [
+          "text_3"
+        ],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            92.19466403162055,
+            69.23978919631094,
+            72.45454545454545
+          ],
+          "edge_density": 0.06357048748353096,
+          "aspect_ratio": 1.6440665990718957
+        }
+      },
+      {
+        "id": "button_15",
+        "type": "button",
+        "bbox": [
+          0.5285857915878296,
+          0.4836035966873169,
+          0.6064930558204651,
+          0.5643942952156067
+        ],
+        "content": "Dex DeX ",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [
+          "text_16",
+          "text_19"
+        ],
+        "layout_role": "main_content",
+        "visual_features": {
+          "avg_color": [
+            107.22612903225806,
+            81.41129032258064,
+            84.80129032258064
+          ],
+          "edge_density": 0.12290322580645162,
+          "aspect_ratio": 0.9643098234304209
+        }
+      },
+      {
+        "id": "button_16",
+        "type": "button",
+        "bbox": [
+          0.6251953840255737,
+          0.36574020981788635,
+          0.7787405252456665,
+          0.467465877532959
+        ],
+        "content": "Link to Windows ",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [
+          "text_12",
+          "text_15"
+        ],
+        "layout_role": "main_content",
+        "visual_features": {
+          "avg_color": [
+            90.49573753552053,
+            68.50258331180574,
+            71.68173598553345
+          ],
+          "edge_density": 0.06652027899767501,
+          "aspect_ratio": 1.5094041127374391
+        }
+      },
+      {
+        "id": "button_17",
+        "type": "button",
+        "bbox": [
+          0.5260147452354431,
+          0.2519620358943939,
+          0.6084470152854919,
+          0.3337036669254303
+        ],
+        "content": "Torch ",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [
+          "text_5"
+        ],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            103.35160227613058,
+            77.48397723869422,
+            80.91165019466906
+          ],
+          "edge_density": 0.09973045822102426,
+          "aspect_ratio": 1.008449048670808
+        }
+      },
+      {
+        "id": "button_18",
+        "type": "button",
+        "bbox": [
+          0.3906472325325012,
+          0.3677231967449188,
+          0.46442294120788574,
+          0.46652594208717346
+        ],
+        "content": "Power saving ",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [
+          "text_10"
+        ],
+        "layout_role": "main_content",
+        "visual_features": {
+          "avg_color": [
+            106.83146696528556,
+            82.22424412094065,
+            85.64165733482643
+          ],
+          "edge_density": 0.12989921612541994,
+          "aspect_ratio": 0.7466969507762565
+        }
+      },
+      {
+        "id": "button_19",
+        "type": "button",
+        "bbox": [
+          0.666103720664978,
+          0.25138285756111145,
+          0.7450706958770752,
+          0.35028374195098877
+        ],
+        "content": "Mobile data ",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [
+          "text_6",
+          "text_8"
+        ],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            122.60842105263158,
+            92.76815789473685,
+            96.9192105263158
+          ],
+          "edge_density": 0.12026315789473684,
+          "aspect_ratio": 0.7984455922638805
+        }
+      },
+      {
+        "id": "input_20",
+        "type": "input",
+        "bbox": [
+          0.030893027782440186,
+          0.03732654079794884,
+          0.13178029656410217,
+          0.06422924250364304
+        ],
+        "content": "Mobifone ",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "logo",
+        "visual_features": {
+          "avg_color": [
+            100.37582417582418,
+            84.58827838827838,
+            86.87472527472528
+          ],
+          "edge_density": 0.1934065934065934,
+          "aspect_ratio": 3.7500794487234823
+        }
+      },
+      {
+        "id": "button_21",
+        "type": "button",
+        "bbox": [
+          0.6776217222213745,
+          0.7622870802879333,
+          0.751619815826416,
+          0.8210307955741882
+        ],
+        "content": "Night mode",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            107.13842592592593,
+            80.36111111111111,
+            83.74814814814815
+          ],
+          "edge_density": 0.09861111111111111,
+          "aspect_ratio": 1.2596767712844323
+        }
+      },
+      {
+        "id": "button_22",
+        "type": "button",
+        "bbox": [
+          0.676871657371521,
+          0.8333153128623962,
+          0.7512242794036865,
+          0.8923435211181641
+        ],
+        "content": "Sound",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            135.4005550416281,
+            103.79324699352452,
+            107.9222941720629
+          ],
+          "edge_density": 0.1211840888066605,
+          "aspect_ratio": 1.2596117047970927
+        }
+      },
+      {
+        "id": "button_23",
+        "type": "button",
+        "bbox": [
+          0.660833477973938,
+          0.08154628425836563,
+          0.712083101272583,
+          0.1240525022149086
+        ],
+        "content": "Power",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "navigation",
+        "visual_features": {
+          "avg_color": [
+            90.03213957759412,
+            71.62442607897154,
+            74.35537190082644
+          ],
+          "edge_density": 0.08264462809917356,
+          "aspect_ratio": 1.2056970900361221
+        }
+      },
+      {
+        "id": "button_24",
+        "type": "button",
+        "bbox": [
+          0.8144324421882629,
+          0.04056359454989433,
+          0.8365472555160522,
+          0.06070917844772339
+        ],
+        "content": "alarm clock",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "toolbar",
+        "visual_features": {
+          "avg_color": [
+            131.45238095238096,
+            119.08095238095238,
+            120.87142857142857
+          ],
+          "edge_density": 0.2523809523809524,
+          "aspect_ratio": 1.0977499307018082
+        }
+      },
+      {
+        "id": "button_25",
+        "type": "button",
+        "bbox": [
+          0.7632456421852112,
+          0.04087695851922035,
+          0.7866755723953247,
+          0.0607493631541729
+        ],
+        "content": "Bluetooth connectivity.",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "navigation",
+        "visual_features": {
+          "avg_color": [
+            104.21333333333334,
+            88.71555555555555,
+            90.96888888888888
+          ],
+          "edge_density": 0.19555555555555557,
+          "aspect_ratio": 1.1790183745002774
+        }
+      },
+      {
+        "id": "button_26",
+        "type": "button",
+        "bbox": [
+          0.7878692746162415,
+          0.04075012728571892,
+          0.8115971684455872,
+          0.060632333159446716
+        ],
+        "content": "Navigator",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "toolbar",
+        "visual_features": {
+          "avg_color": [
+            141.56,
+            130.3022222222222,
+            131.92888888888888
+          ],
+          "edge_density": 0.3288888888888889,
+          "aspect_ratio": 1.1934236060144396
+        }
+      },
+      {
+        "id": "button_27",
+        "type": "button",
+        "bbox": [
+          0.8383506536483765,
+          0.039642490446567535,
+          0.863880455493927,
+          0.06208360195159912
+        ],
+        "content": "Podcasts",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "toolbar",
+        "visual_features": {
+          "avg_color": [
+            109.05147058823529,
+            94.21691176470588,
+            96.43382352941177
+          ],
+          "edge_density": 0.2610294117647059,
+          "aspect_ratio": 1.137635354640363
+        }
+      },
+      {
+        "id": "button_28",
+        "type": "button",
+        "bbox": [
+          0.7234206795692444,
+          0.08387866616249084,
+          0.7715860605239868,
+          0.12093937397003174
+        ],
+        "content": "Settings",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "navigation",
+        "visual_features": {
+          "avg_color": [
+            103.33294930875576,
+            86.5057603686636,
+            89.01728110599079
+          ],
+          "edge_density": 0.09101382488479262,
+          "aspect_ratio": 1.2996346752163763
+        }
+      },
+      {
+        "id": "button_29",
+        "type": "button",
+        "bbox": [
+          0.9128857851028442,
+          0.03911394998431206,
+          0.959666907787323,
+          0.06391137093305588
+        ],
+        "content": "Currency value (97)",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "toolbar",
+        "visual_features": {
+          "avg_color": [
+            161.4280701754386,
+            151.73157894736843,
+            153.0719298245614
+          ],
+          "edge_density": 0.2789473684210526,
+          "aspect_ratio": 1.886531780106293
+        }
+      },
+      {
+        "id": "button_30",
+        "type": "button",
+        "bbox": [
+          0.6014735698699951,
+          0.08434633165597916,
+          0.6481233835220337,
+          0.11980298906564713
+        ],
+        "content": "Pencil",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "navigation",
+        "visual_features": {
+          "avg_color": [
+            94.30833333333334,
+            76.37857142857143,
+            79.03809523809524
+          ],
+          "edge_density": 0.07023809523809524,
+          "aspect_ratio": 1.3156856020871999
+        }
+      },
+      {
+        "id": "button_31",
+        "type": "button",
+        "bbox": [
+          0.8865587115287781,
+          0.039740804582834244,
+          0.9118208885192871,
+          0.06218114122748375
+        ],
+        "content": "A volume control or volume indicator.",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "toolbar",
+        "visual_features": {
+          "avg_color": [
+            92.94485294117646,
+            76.1875,
+            78.65441176470588
+          ],
+          "edge_density": 0.13602941176470587,
+          "aspect_ratio": 1.1257485745666094
+        }
+      },
+      {
+        "id": "button_32",
+        "type": "button",
+        "bbox": [
+          0.2628277838230133,
+          0.8435953259468079,
+          0.3099340796470642,
+          0.8821299076080322
+        ],
+        "content": "Music",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            149.45777777777778,
+            118.09222222222222,
+            121.99666666666667
+          ],
+          "edge_density": 0.16,
+          "aspect_ratio": 1.2224421232384073
+        }
+      },
+      {
+        "id": "button_33",
+        "type": "button",
+        "bbox": [
+          0.637033224105835,
+          0.9518658518791199,
+          0.702097475528717,
+          0.9999024271965027
+        ],
+        "content": "HideHide (Ctrl+Shift+F)",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "bottom_navigation",
+        "visual_features": {
+          "avg_color": [
+            79.03108465608466,
+            58.27579365079365,
+            61.245370370370374
+          ],
+          "edge_density": 0.031084656084656083,
+          "aspect_ratio": 1.3544731486996229
+        }
+      },
+      {
+        "id": "button_34",
+        "type": "button",
+        "bbox": [
+          0.2701346278190613,
+          0.7760664820671082,
+          0.29964861273765564,
+          0.8037445545196533
+        ],
+        "content": "Brightness settings",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_form_elements",
+        "children": [],
+        "layout_role": "content",
+        "visual_features": {
+          "avg_color": [
+            158.44110275689223,
+            126.62907268170426,
+            130.35338345864662
+          ],
+          "edge_density": 0.15789473684210525,
+          "aspect_ratio": 1.0663309364912212
+        }
+      },
+      {
+        "id": "scrollbar_35",
+        "type": "scrollbar",
+        "bbox": [
+          0.9991275668144226,
+          0.0003252625756431371,
+          1.0,
+          0.0864497646689415
+        ],
+        "content": "M0,0L9,0 4.5,5z",
+        "confidence": 0.8,
+        "interactivity": true,
+        "parent_id": "region_toolbar",
+        "children": [],
+        "layout_role": "toolbar",
+        "visual_features": {
+          "avg_color": [
+            73.22727272727273,
+            54.015151515151516,
+            56.72727272727273
+          ],
+          "edge_density": 0.0,
+          "aspect_ratio": 0.01012990687170869
+        }
+      }
+    ],
+    "hierarchy": {
+      "region_navigation": [
+        "input_6",
+        "input_8",
+        "button_23",
+        "button_25",
+        "button_28",
+        "button_30"
+      ],
+      "region_main_content": [
+        "text_0",
+        "text_1",
+        "text_2",
+        "text_3",
+        "text_4",
+        "text_5",
+        "button_9",
+        "button_11",
+        "button_13",
+        "button_15",
+        "button_16",
+        "button_18"
+      ],
+      "region_content": [
+        "text_0",
+        "text_1",
+        "text_2",
+        "text_3",
+        "text_4",
+        "text_5",
+        "text_6",
+        "text_7",
+        "text_8",
+        "text_9",
+        "text_10",
+        "text_11",
+        "text_12",
+        "text_13",
+        "text_14",
+        "text_15",
+        "text_16",
+        "text_17",
+        "text_18",
+        "text_19",
+        "text_20",
+        "text_21",
+        "text_22",
+        "text_23",
+        "text_24",
+        "text_25",
+        "text_26",
+        "text_27",
+        "text_28",
+        "button_7",
+        "button_10",
+        "button_12",
+        "button_14",
+        "button_17",
+        "button_19",
+        "button_21",
+        "button_22",
+        "button_32",
+        "button_34"
+      ],
+      "region_bottom_navigation": [
+        "button_33"
+      ],
+      "region_toolbar": [
+        "button_24",
+        "button_26",
+        "button_27",
+        "button_29",
+        "button_31",
+        "scrollbar_35"
+      ],
+      "region_logo": [
+        "input_20"
+      ],
+      "region_form_elements": [
+        "input_6",
+        "button_7",
+        "input_8",
+        "button_9",
+        "button_10",
+        "button_11",
+        "button_12",
+        "button_13",
+        "button_14",
+        "button_15",
+        "button_16",
+        "button_17",
+        "button_18",
+        "button_19",
+        "input_20",
+        "button_21",
+        "button_22",
+        "button_23",
+        "button_24",
+        "button_25",
+        "button_26",
+        "button_27",
+        "button_28",
+        "button_29",
+        "button_30",
+        "button_31",
+        "button_32",
+        "button_33",
+        "button_34"
+      ],
+      "input_6": [
+        "text_1"
+      ],
+      "input_8": [
+        "text_2"
+      ],
+      "button_14": [
+        "text_3"
+      ],
+      "button_17": [
+        "text_5"
+      ],
+      "button_19": [
+        "text_6",
+        "text_8"
+      ],
+      "button_12": [
+        "text_9",
+        "text_13"
+      ],
+      "button_18": [
+        "text_10"
+      ],
+      "button_16": [
+        "text_12",
+        "text_15"
+      ],
+      "button_15": [
+        "text_16",
+        "text_19"
+      ],
+      "button_10": [
+        "text_17",
+        "text_21"
+      ],
+      "button_9": [
+        "text_20"
+      ],
+      "button_11": [
+        "text_24",
+        "text_27"
+      ],
+      "button_7": [
+        "text_25"
+      ],
+      "text_28": [
+        "text_5"
+      ]
+    },
+    "metadata": {
+      "source": "xml_ocr_yolo_merged",
+      "total_elements": 65,
+      "image_path": "./resource/image\\Fail_[042]_com.sec.android.app.launcher_LauncherActivity_20250521_173924.png",
+      "xml_path": "./resource/xml/Fail_[042]_com.sec.android.app.launcher_LauncherActivity_20250521_173924.xml"
+    }
+  },
+  "layout_regions": {
+    "header": {
+      "elements": [],
+      "bbox": null,
+      "type": "layout"
+    },
+    "navigation": {
+      "elements": [
+        {
+          "id": "input_6",
+          "type": "input",
+          "bbox": [
+            0.21987013518810272,
+            0.13720813393592834,
+            0.4993228018283844,
+            0.21970373392105103
+          ],
+          "content": "Wi-Fi ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_1"
+          ],
+          "layout_role": "navigation",
+          "visual_features": {
+            "avg_color": [
+              91.04371730070054,
+              67.46865301055246,
+              70.85244302562738
+            ],
+            "edge_density": 0.035913806863527534,
+            "aspect_ratio": 3.387485716700992
+          }
+        },
+        {
+          "id": "input_8",
+          "type": "input",
+          "bbox": [
+            0.5008642077445984,
+            0.1368575543165207,
+            0.77998286485672,
+            0.22033149003982544
+          ],
+          "content": "Bluetooth ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_2"
+          ],
+          "layout_role": "navigation",
+          "visual_features": {
+            "avg_color": [
+              92.56913407821229,
+              69.37779329608938,
+              72.75768156424581
+            ],
+            "edge_density": 0.04312150837988827,
+            "aspect_ratio": 3.3437821601862674
+          }
+        },
+        {
+          "id": "button_23",
+          "type": "button",
+          "bbox": [
+            0.660833477973938,
+            0.08154628425836563,
+            0.712083101272583,
+            0.1240525022149086
+          ],
+          "content": "Power",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "navigation",
+          "visual_features": {
+            "avg_color": [
+              90.03213957759412,
+              71.62442607897154,
+              74.35537190082644
+            ],
+            "edge_density": 0.08264462809917356,
+            "aspect_ratio": 1.2056970900361221
+          }
+        },
+        {
+          "id": "button_25",
+          "type": "button",
+          "bbox": [
+            0.7632456421852112,
+            0.04087695851922035,
+            0.7866755723953247,
+            0.0607493631541729
+          ],
+          "content": "Bluetooth connectivity.",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "navigation",
+          "visual_features": {
+            "avg_color": [
+              104.21333333333334,
+              88.71555555555555,
+              90.96888888888888
+            ],
+            "edge_density": 0.19555555555555557,
+            "aspect_ratio": 1.1790183745002774
+          }
+        },
+        {
+          "id": "button_28",
+          "type": "button",
+          "bbox": [
+            0.7234206795692444,
+            0.08387866616249084,
+            0.7715860605239868,
+            0.12093937397003174
+          ],
+          "content": "Settings",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "navigation",
+          "visual_features": {
+            "avg_color": [
+              103.33294930875576,
+              86.5057603686636,
+              89.01728110599079
+            ],
+            "edge_density": 0.09101382488479262,
+            "aspect_ratio": 1.2996346752163763
+          }
+        },
+        {
+          "id": "button_30",
+          "type": "button",
+          "bbox": [
+            0.6014735698699951,
+            0.08434633165597916,
+            0.6481233835220337,
+            0.11980298906564713
+          ],
+          "content": "Pencil",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "navigation",
+          "visual_features": {
+            "avg_color": [
+              94.30833333333334,
+              76.37857142857143,
+              79.03809523809524
+            ],
+            "edge_density": 0.07023809523809524,
+            "aspect_ratio": 1.3156856020871999
+          }
+        }
+      ],
+      "bbox": [
+        0.21987013518810272,
+        0.04087695851922035,
+        0.7866755723953247,
+        0.22033149003982544
+      ],
+      "type": "layout"
+    },
+    "sidebar_left": {
+      "elements": [],
+      "bbox": null,
+      "type": "layout"
+    },
+    "sidebar_right": {
+      "elements": [],
+      "bbox": null,
+      "type": "layout"
+    },
+    "main_content": {
+      "elements": [
+        {
+          "id": "text_0",
+          "type": "text",
+          "bbox": [
+            0.40625,
+            0.3138020932674408,
+            0.45625001192092896,
+            0.3333333432674408
+          ],
+          "content": "Flight",
+          "confidence": 0.8,
+          "interactivity": false,
+          "parent_id": "region_main_content",
+          "children": [],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              97.4375,
+              80.025,
+              83.4
+            ],
+            "edge_density": 0.22291666666666668,
+            "aspect_ratio": 2.5600006103515627
+          }
+        },
+        {
+          "id": "text_1",
+          "type": "text",
+          "bbox": [
+            0.40312498807907104,
+            0.3333333432674408,
+            0.45625001192092896,
+            0.3502604067325592
+          ],
+          "content": "mode",
+          "confidence": 0.8,
+          "interactivity": false,
+          "parent_id": "region_main_content",
+          "children": [],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              98.16428571428571,
+              80.80714285714286,
+              84.19761904761904
+            ],
+            "edge_density": 0.20476190476190476,
+            "aspect_ratio": 3.1384666307497824
+          }
+        },
+        {
+          "id": "text_2",
+          "type": "text",
+          "bbox": [
+            0.3843750059604645,
+            0.5442708134651184,
+            0.4781250059604645,
+            0.5625
+          ],
+          "content": "Quick Share",
+          "confidence": 0.8,
+          "interactivity": false,
+          "parent_id": "region_main_content",
+          "children": [],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              97.54222222222222,
+              80.13222222222223,
+              83.50444444444445
+            ],
+            "edge_density": 0.20777777777777778,
+            "aspect_ratio": 5.142851537593801
+          }
+        },
+        {
+          "id": "text_3",
+          "type": "text",
+          "bbox": [
+            0.3921875059604645,
+            0.56640625,
+            0.47187501192092896,
+            0.5846354365348816
+          ],
+          "content": "Everyone",
+          "confidence": 0.8,
+          "interactivity": false,
+          "parent_id": "region_main_content",
+          "children": [],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              89.56022408963585,
+              71.23669467787114,
+              74.39355742296918
+            ],
+            "edge_density": 0.21428571428571427,
+            "aspect_ratio": 4.371424133928426
+          }
+        },
+        {
+          "id": "text_4",
+          "type": "text",
+          "bbox": [
+            0.3765625059604645,
+            0.6588541865348816,
+            0.4859375059604645,
+            0.6770833134651184
+          ],
+          "content": "Scan QR code",
+          "confidence": 0.8,
+          "interactivity": false,
+          "parent_id": "region_main_content",
+          "children": [],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              100.28241758241758,
+              83.16813186813187,
+              86.5967032967033
+            ],
+            "edge_density": 0.24725274725274726,
+            "aspect_ratio": 6.0000130789905635
+          }
+        },
+        {
+          "id": "text_5",
+          "type": "text",
+          "bbox": [
+            0.659375011920929,
+            0.6588541865348816,
+            0.7578125,
+            0.6770833134651184
+          ],
+          "content": "Multi control",
+          "confidence": 0.8,
+          "interactivity": false,
+          "parent_id": "text_28",
+          "children": [],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              99.96947496947497,
+              82.84371184371184,
+              86.25641025641026
+            ],
+            "edge_density": 0.22344322344322345,
+            "aspect_ratio": 5.400011117141979
+          }
+        },
+        {
+          "id": "button_9",
+          "type": "button",
+          "bbox": [
+            0.6358870267868042,
+            0.4824885427951813,
+            0.7784178853034973,
+            0.5806553959846497
+          ],
+          "content": "Eye comfort shield ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_20"
+          ],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              91.61376811594202,
+              69.05884057971015,
+              72.31753623188406
+            ],
+            "edge_density": 0.08753623188405797,
+            "aspect_ratio": 1.4519244926961175
+          }
+        },
+        {
+          "id": "button_11",
+          "type": "button",
+          "bbox": [
+            0.5005244016647339,
+            0.5977320075035095,
+            0.6371158361434937,
+            0.6799657940864563
+          ],
+          "content": "A Interpreter ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_24",
+            "text_27"
+          ],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              95.21565407772304,
+              72.15526363802226,
+              75.41780696953111
+            ],
+            "edge_density": 0.09268381682174785,
+            "aspect_ratio": 1.6610135584719068
+          }
+        },
+        {
+          "id": "button_13",
+          "type": "button",
+          "bbox": [
+            0.5295954942703247,
+            0.36811456084251404,
+            0.6067458391189575,
+            0.449042409658432
+          ],
+          "content": "Location ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              133.58967741935484,
+              102.82677419354839,
+              107.00548387096774
+            ],
+            "edge_density": 0.13193548387096773,
+            "aspect_ratio": 0.9533225703814563
+          }
+        },
+        {
+          "id": "button_15",
+          "type": "button",
+          "bbox": [
+            0.5285857915878296,
+            0.4836035966873169,
+            0.6064930558204651,
+            0.5643942952156067
+          ],
+          "content": "Dex DeX ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_16",
+            "text_19"
+          ],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              107.22612903225806,
+              81.41129032258064,
+              84.80129032258064
+            ],
+            "edge_density": 0.12290322580645162,
+            "aspect_ratio": 0.9643098234304209
+          }
+        },
+        {
+          "id": "button_16",
+          "type": "button",
+          "bbox": [
+            0.6251953840255737,
+            0.36574020981788635,
+            0.7787405252456665,
+            0.467465877532959
+          ],
+          "content": "Link to Windows ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_12",
+            "text_15"
+          ],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              90.49573753552053,
+              68.50258331180574,
+              71.68173598553345
+            ],
+            "edge_density": 0.06652027899767501,
+            "aspect_ratio": 1.5094041127374391
+          }
+        },
+        {
+          "id": "button_18",
+          "type": "button",
+          "bbox": [
+            0.3906472325325012,
+            0.3677231967449188,
+            0.46442294120788574,
+            0.46652594208717346
+          ],
+          "content": "Power saving ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_10"
+          ],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              106.83146696528556,
+              82.22424412094065,
+              85.64165733482643
+            ],
+            "edge_density": 0.12989921612541994,
+            "aspect_ratio": 0.7466969507762565
+          }
+        }
+      ],
+      "bbox": [
+        0.3765625059604645,
+        0.3138020932674408,
+        0.7787405252456665,
+        0.6799657940864563
+      ],
+      "type": "layout"
+    },
+    "content": {
+      "elements": [
+        {
+          "id": "text_0",
+          "type": "text",
+          "bbox": [
+            0.0328125,
+            0.041666666666666664,
+            0.1328125,
+            0.06380208333333333
+          ],
+          "content": "Mobifone",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "region_content",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              107.35569852941177,
+              92.36488970588235,
+              94.59283088235294
+            ],
+            "edge_density": 0.2426470588235294,
+            "aspect_ratio": 4.51764705882353
+          }
+        },
+        {
+          "id": "text_1",
+          "type": "text",
+          "bbox": [
+            0.3234375,
+            0.16927083333333334,
+            0.3734375,
+            0.18880208333333334
+          ],
+          "content": "Wi-Fi",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "input_6",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              107.60208333333334,
+              91.35416666666667,
+              94.85416666666667
+            ],
+            "edge_density": 0.24166666666666667,
+            "aspect_ratio": 2.5599999999999996
+          }
+        },
+        {
+          "id": "text_2",
+          "type": "text",
+          "bbox": [
+            0.6078125,
+            0.16927083333333334,
+            0.696875,
+            0.1875
+          ],
+          "content": "Bluetooth",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "input_8",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              114.88972431077694,
+              99.45989974937343,
+              103.11528822055138
+            ],
+            "edge_density": 0.2631578947368421,
+            "aspect_ratio": 4.885714285714291
+          }
+        },
+        {
+          "id": "text_3",
+          "type": "text",
+          "bbox": [
+            0.2609375,
+            0.3125,
+            0.321875,
+            0.3346354166666667
+          ],
+          "content": "Portrait",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_14",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              94.11613876319758,
+              76.29562594268477,
+              79.61538461538461
+            ],
+            "edge_density": 0.1779788838612368,
+            "aspect_ratio": 2.7529411764705873
+          }
+        },
+        {
+          "id": "text_4",
+          "type": "text",
+          "bbox": [
+            0.40625,
+            0.3138020833333333,
+            0.45625,
+            0.3333333333333333
+          ],
+          "content": "Flight",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "region_content",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              97.4375,
+              80.025,
+              83.4
+            ],
+            "edge_density": 0.22291666666666668,
+            "aspect_ratio": 2.5599999999999996
+          }
+        },
+        {
+          "id": "text_5",
+          "type": "text",
+          "bbox": [
+            0.5453125,
+            0.3138020833333333,
+            0.5953125,
+            0.3333333333333333
+          ],
+          "content": "Torch",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_17",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              92.97083333333333,
+              75.04791666666667,
+              78.34166666666667
+            ],
+            "edge_density": 0.1875,
+            "aspect_ratio": 2.5600000000000023
+          }
+        },
+        {
+          "id": "text_6",
+          "type": "text",
+          "bbox": [
+            0.68125,
+            0.3111979166666667,
+            0.7359375,
+            0.3333333333333333
+          ],
+          "content": "Mobile",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_19",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              96.63361344537815,
+              79.14453781512606,
+              82.49915966386554
+            ],
+            "edge_density": 0.19663865546218487,
+            "aspect_ratio": 2.4705882352941217
+          }
+        },
+        {
+          "id": "text_7",
+          "type": "text",
+          "bbox": [
+            0.403125,
+            0.3333333333333333,
+            0.45625,
+            0.3502604166666667
+          ],
+          "content": "mode",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "region_content",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              97.01131221719457,
+              79.52262443438914,
+              82.89366515837104
+            ],
+            "edge_density": 0.19457013574660634,
+            "aspect_ratio": 3.1384615384615304
+          }
+        },
+        {
+          "id": "text_8",
+          "type": "text",
+          "bbox": [
+            0.690625,
+            0.3333333333333333,
+            0.7296875,
+            0.3489583333333333
+          ],
+          "content": "data",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_19",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              103.06,
+              86.28,
+              89.75
+            ],
+            "edge_density": 0.22666666666666666,
+            "aspect_ratio": 2.5
+          }
+        },
+        {
+          "id": "text_9",
+          "type": "text",
+          "bbox": [
+            0.2640625,
+            0.4283854166666667,
+            0.321875,
+            0.4479166666666667
+          ],
+          "content": "Mobile",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_12",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              98.26306306306306,
+              80.90090090090091,
+              84.3009009009009
+            ],
+            "edge_density": 0.2072072072072072,
+            "aspect_ratio": 2.960000000000002
+          }
+        },
+        {
+          "id": "text_10",
+          "type": "text",
+          "bbox": [
+            0.403125,
+            0.4296875,
+            0.4578125,
+            0.4479166666666667
+          ],
+          "content": "Power",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_18",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              96.69795918367348,
+              79.15714285714286,
+              82.55714285714286
+            ],
+            "edge_density": 0.18571428571428572,
+            "aspect_ratio": 2.999999999999997
+          }
+        },
+        {
+          "id": "text_11",
+          "type": "text",
+          "bbox": [
+            0.534375,
+            0.4296875,
+            0.6078125,
+            0.4479166666666667
+          ],
+          "content": "Location",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "region_content",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              95.790273556231,
+              78.16413373860182,
+              81.53647416413374
+            ],
+            "edge_density": 0.22188449848024316,
+            "aspect_ratio": 4.0285714285714205
+          }
+        },
+        {
+          "id": "text_12",
+          "type": "text",
+          "bbox": [
+            0.6796875,
+            0.4270833333333333,
+            0.7375,
+            0.44921875
+          ],
+          "content": "Link to",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_16",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              90.90779014308426,
+              72.78219395866455,
+              76.03974562798092
+            ],
+            "edge_density": 0.17170111287758347,
+            "aspect_ratio": 2.6117647058823525
+          }
+        },
+        {
+          "id": "text_13",
+          "type": "text",
+          "bbox": [
+            0.259375,
+            0.4453125,
+            0.3234375,
+            0.4674479166666667
+          ],
+          "content": "Hotspot",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_12",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              95.27690100430416,
+              77.61979913916787,
+              80.96556671449068
+            ],
+            "edge_density": 0.20086083213773315,
+            "aspect_ratio": 2.8941176470588195
+          }
+        },
+        {
+          "id": "text_14",
+          "type": "text",
+          "bbox": [
+            0.403125,
+            0.4466145833333333,
+            0.4578125,
+            0.4674479166666667
+          ],
+          "content": "saving",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "region_content",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              95.31428571428572,
+              77.65178571428571,
+              80.98571428571428
+            ],
+            "edge_density": 0.1982142857142857,
+            "aspect_ratio": 2.6249999999999956
+          }
+        },
+        {
+          "id": "text_15",
+          "type": "text",
+          "bbox": [
+            0.6703125,
+            0.4453125,
+            0.746875,
+            0.4661458333333333
+          ],
+          "content": "Windows",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_16",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              95.51658163265306,
+              77.8545918367347,
+              81.20663265306122
+            ],
+            "edge_density": 0.17346938775510204,
+            "aspect_ratio": 3.675000000000002
+          }
+        },
+        {
+          "id": "text_16",
+          "type": "text",
+          "bbox": [
+            0.5546875,
+            0.50390625,
+            0.5859375,
+            0.51953125
+          ],
+          "content": "Dex",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_15",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              175.55833333333334,
+              154.68333333333334,
+              157.1625
+            ],
+            "edge_density": 0.29583333333333334,
+            "aspect_ratio": 2.0
+          }
+        },
+        {
+          "id": "text_17",
+          "type": "text",
+          "bbox": [
+            0.2625,
+            0.5442708333333334,
+            0.321875,
+            0.5625
+          ],
+          "content": "Screen",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_10",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              96.7781954887218,
+              79.26691729323308,
+              82.64661654135338
+            ],
+            "edge_density": 0.22180451127819548,
+            "aspect_ratio": 3.2571428571428642
+          }
+        },
+        {
+          "id": "text_18",
+          "type": "text",
+          "bbox": [
+            0.384375,
+            0.5442708333333334,
+            0.478125,
+            0.5625
+          ],
+          "content": "Quick Share",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "region_content",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              99.13095238095238,
+              81.9095238095238,
+              85.30833333333334
+            ],
+            "edge_density": 0.2226190476190476,
+            "aspect_ratio": 5.142857142857153
+          }
+        },
+        {
+          "id": "text_19",
+          "type": "text",
+          "bbox": [
+            0.55,
+            0.5455729166666666,
+            0.5875,
+            0.5611979166666666
+          ],
+          "content": "DeX",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_15",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              101.68055555555556,
+              84.75,
+              88.23958333333333
+            ],
+            "edge_density": 0.2743055555555556,
+            "aspect_ratio": 2.3999999999999986
+          }
+        },
+        {
+          "id": "text_20",
+          "type": "text",
+          "bbox": [
+            0.6625,
+            0.5442708333333334,
+            0.75625,
+            0.5625
+          ],
+          "content": "Eye comfort",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_9",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              98.18452380952381,
+              80.84880952380952,
+              84.23571428571428
+            ],
+            "edge_density": 0.23809523809523808,
+            "aspect_ratio": 5.142857142857153
+          }
+        },
+        {
+          "id": "text_21",
+          "type": "text",
+          "bbox": [
+            0.2578125,
+            0.5651041666666666,
+            0.3234375,
+            0.5794270833333334
+          ],
+          "content": "recorder",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_10",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              105.0021645021645,
+              88.41558441558442,
+              91.94372294372295
+            ],
+            "edge_density": 0.2878787878787879,
+            "aspect_ratio": 4.581818181818157
+          }
+        },
+        {
+          "id": "text_22",
+          "type": "text",
+          "bbox": [
+            0.3921875,
+            0.56640625,
+            0.471875,
+            0.5846354166666666
+          ],
+          "content": "Everyone",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "region_content",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              89.56022408963585,
+              71.23669467787114,
+              74.39355742296918
+            ],
+            "edge_density": 0.21428571428571427,
+            "aspect_ratio": 4.371428571428578
+          }
+        },
+        {
+          "id": "text_23",
+          "type": "text",
+          "bbox": [
+            0.684375,
+            0.5611979166666666,
+            0.734375,
+            0.5807291666666666
+          ],
+          "content": "shield",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "region_content",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              97.89166666666667,
+              80.49583333333334,
+              83.90833333333333
+            ],
+            "edge_density": 0.23125,
+            "aspect_ratio": 2.5600000000000023
+          }
+        },
+        {
+          "id": "text_24",
+          "type": "text",
+          "bbox": [
+            0.553125,
+            0.6236979166666666,
+            0.5796875,
+            0.640625
+          ],
+          "content": "A",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_11",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              162.2579185520362,
+              137.80995475113122,
+              140.68778280542986
+            ],
+            "edge_density": 0.2579185520361991,
+            "aspect_ratio": 1.5692307692307683
+          }
+        },
+        {
+          "id": "text_25",
+          "type": "text",
+          "bbox": [
+            0.2375,
+            0.6588541666666666,
+            0.346875,
+            0.6770833333333334
+          ],
+          "content": "Do not disturb",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_7",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              98.15918367346939,
+              80.83265306122449,
+              84.23775510204082
+            ],
+            "edge_density": 0.22142857142857142,
+            "aspect_ratio": 5.999999999999976
+          }
+        },
+        {
+          "id": "text_26",
+          "type": "text",
+          "bbox": [
+            0.3765625,
+            0.6588541666666666,
+            0.4859375,
+            0.6770833333333334
+          ],
+          "content": "Scan QR code",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "region_content",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              98.4765306122449,
+              81.15612244897959,
+              84.55408163265307
+            ],
+            "edge_density": 0.22959183673469388,
+            "aspect_ratio": 5.999999999999976
+          }
+        },
+        {
+          "id": "text_27",
+          "type": "text",
+          "bbox": [
+            0.5265625,
+            0.6575520833333334,
+            0.6125,
+            0.6796875
+          ],
+          "content": "Interpreter",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "button_11",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              94.64385026737968,
+              76.85026737967914,
+              80.22459893048128
+            ],
+            "edge_density": 0.17754010695187167,
+            "aspect_ratio": 3.8823529411764772
+          }
+        },
+        {
+          "id": "text_28",
+          "type": "text",
+          "bbox": [
+            0.659375,
+            0.6588541666666666,
+            0.7578125,
+            0.6770833333333334
+          ],
+          "content": "Multi control",
+          "confidence": 0.95,
+          "interactivity": false,
+          "parent_id": "region_content",
+          "children": [
+            "text_5"
+          ],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              98.1859410430839,
+              80.85487528344672,
+              84.23809523809524
+            ],
+            "edge_density": 0.20748299319727892,
+            "aspect_ratio": 5.3999999999999755
+          }
+        },
+        {
+          "id": "button_7",
+          "type": "button",
+          "bbox": [
+            0.22021672129631042,
+            0.5969868898391724,
+            0.361358106136322,
+            0.6813138127326965
+          ],
+          "content": "Do not disturb ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_25"
+          ],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              94.86001690617076,
+              72.17210481825866,
+              75.40625528317835
+            ],
+            "edge_density": 0.07962806424344886,
+            "aspect_ratio": 1.673740485209267
+          }
+        },
+        {
+          "id": "button_10",
+          "type": "button",
+          "bbox": [
+            0.21912138164043427,
+            0.48254457116127014,
+            0.3643736243247986,
+            0.5832747220993042
+          ],
+          "content": "Screen recorder ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_17",
+            "text_21"
+          ],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              90.64474235441978,
+              68.1360145231113,
+              71.36712749615975
+            ],
+            "edge_density": 0.07471023600055858,
+            "aspect_ratio": 1.4419936963434
+          }
+        },
+        {
+          "id": "button_12",
+          "type": "button",
+          "bbox": [
+            0.22016337513923645,
+            0.36703550815582275,
+            0.3658549189567566,
+            0.4682907164096832
+          ],
+          "content": "Mobile Hotspot ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_9",
+            "text_13"
+          ],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              102.14402618657938,
+              78.04268957992362,
+              81.52809601745771
+            ],
+            "edge_density": 0.07242225859247135,
+            "aspect_ratio": 1.4388548137914228
+          }
+        },
+        {
+          "id": "button_14",
+          "type": "button",
+          "bbox": [
+            0.22002024948596954,
+            0.2501872181892395,
+            0.3625284731388092,
+            0.3368675410747528
+          ],
+          "content": "Portrait ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_3"
+          ],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              92.19466403162055,
+              69.23978919631094,
+              72.45454545454545
+            ],
+            "edge_density": 0.06357048748353096,
+            "aspect_ratio": 1.6440665990718957
+          }
+        },
+        {
+          "id": "button_17",
+          "type": "button",
+          "bbox": [
+            0.5260147452354431,
+            0.2519620358943939,
+            0.6084470152854919,
+            0.3337036669254303
+          ],
+          "content": "Torch ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_5"
+          ],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              103.35160227613058,
+              77.48397723869422,
+              80.91165019466906
+            ],
+            "edge_density": 0.09973045822102426,
+            "aspect_ratio": 1.008449048670808
+          }
+        },
+        {
+          "id": "button_19",
+          "type": "button",
+          "bbox": [
+            0.666103720664978,
+            0.25138285756111145,
+            0.7450706958770752,
+            0.35028374195098877
+          ],
+          "content": "Mobile data ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_6",
+            "text_8"
+          ],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              122.60842105263158,
+              92.76815789473685,
+              96.9192105263158
+            ],
+            "edge_density": 0.12026315789473684,
+            "aspect_ratio": 0.7984455922638805
+          }
+        },
+        {
+          "id": "button_21",
+          "type": "button",
+          "bbox": [
+            0.6776217222213745,
+            0.7622870802879333,
+            0.751619815826416,
+            0.8210307955741882
+          ],
+          "content": "Night mode",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              107.13842592592593,
+              80.36111111111111,
+              83.74814814814815
+            ],
+            "edge_density": 0.09861111111111111,
+            "aspect_ratio": 1.2596767712844323
+          }
+        },
+        {
+          "id": "button_22",
+          "type": "button",
+          "bbox": [
+            0.676871657371521,
+            0.8333153128623962,
+            0.7512242794036865,
+            0.8923435211181641
+          ],
+          "content": "Sound",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              135.4005550416281,
+              103.79324699352452,
+              107.9222941720629
+            ],
+            "edge_density": 0.1211840888066605,
+            "aspect_ratio": 1.2596117047970927
+          }
+        },
+        {
+          "id": "button_32",
+          "type": "button",
+          "bbox": [
+            0.2628277838230133,
+            0.8435953259468079,
+            0.3099340796470642,
+            0.8821299076080322
+          ],
+          "content": "Music",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              149.45777777777778,
+              118.09222222222222,
+              121.99666666666667
+            ],
+            "edge_density": 0.16,
+            "aspect_ratio": 1.2224421232384073
+          }
+        },
+        {
+          "id": "button_34",
+          "type": "button",
+          "bbox": [
+            0.2701346278190613,
+            0.7760664820671082,
+            0.29964861273765564,
+            0.8037445545196533
+          ],
+          "content": "Brightness settings",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              158.44110275689223,
+              126.62907268170426,
+              130.35338345864662
+            ],
+            "edge_density": 0.15789473684210525,
+            "aspect_ratio": 1.0663309364912212
+          }
+        }
+      ],
+      "bbox": [
+        0.0328125,
+        0.041666666666666664,
+        0.7578125,
+        0.8923435211181641
+      ],
+      "type": "layout"
+    },
+    "footer": {
+      "elements": [],
+      "bbox": null,
+      "type": "layout"
+    },
+    "bottom_navigation": {
+      "elements": [
+        {
+          "id": "button_33",
+          "type": "button",
+          "bbox": [
+            0.637033224105835,
+            0.9518658518791199,
+            0.702097475528717,
+            0.9999024271965027
+          ],
+          "content": "HideHide (Ctrl+Shift+F)",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "bottom_navigation",
+          "visual_features": {
+            "avg_color": [
+              79.03108465608466,
+              58.27579365079365,
+              61.245370370370374
+            ],
+            "edge_density": 0.031084656084656083,
+            "aspect_ratio": 1.3544731486996229
+          }
+        }
+      ],
+      "bbox": [
+        0.637033224105835,
+        0.9518658518791199,
+        0.702097475528717,
+        0.9999024271965027
+      ],
+      "type": "layout"
+    },
+    "toolbar": {
+      "elements": [
+        {
+          "id": "button_24",
+          "type": "button",
+          "bbox": [
+            0.8144324421882629,
+            0.04056359454989433,
+            0.8365472555160522,
+            0.06070917844772339
+          ],
+          "content": "alarm clock",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "toolbar",
+          "visual_features": {
+            "avg_color": [
+              131.45238095238096,
+              119.08095238095238,
+              120.87142857142857
+            ],
+            "edge_density": 0.2523809523809524,
+            "aspect_ratio": 1.0977499307018082
+          }
+        },
+        {
+          "id": "button_26",
+          "type": "button",
+          "bbox": [
+            0.7878692746162415,
+            0.04075012728571892,
+            0.8115971684455872,
+            0.060632333159446716
+          ],
+          "content": "Navigator",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "toolbar",
+          "visual_features": {
+            "avg_color": [
+              141.56,
+              130.3022222222222,
+              131.92888888888888
+            ],
+            "edge_density": 0.3288888888888889,
+            "aspect_ratio": 1.1934236060144396
+          }
+        },
+        {
+          "id": "button_27",
+          "type": "button",
+          "bbox": [
+            0.8383506536483765,
+            0.039642490446567535,
+            0.863880455493927,
+            0.06208360195159912
+          ],
+          "content": "Podcasts",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "toolbar",
+          "visual_features": {
+            "avg_color": [
+              109.05147058823529,
+              94.21691176470588,
+              96.43382352941177
+            ],
+            "edge_density": 0.2610294117647059,
+            "aspect_ratio": 1.137635354640363
+          }
+        },
+        {
+          "id": "button_29",
+          "type": "button",
+          "bbox": [
+            0.9128857851028442,
+            0.03911394998431206,
+            0.959666907787323,
+            0.06391137093305588
+          ],
+          "content": "Currency value (97)",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "toolbar",
+          "visual_features": {
+            "avg_color": [
+              161.4280701754386,
+              151.73157894736843,
+              153.0719298245614
+            ],
+            "edge_density": 0.2789473684210526,
+            "aspect_ratio": 1.886531780106293
+          }
+        },
+        {
+          "id": "button_31",
+          "type": "button",
+          "bbox": [
+            0.8865587115287781,
+            0.039740804582834244,
+            0.9118208885192871,
+            0.06218114122748375
+          ],
+          "content": "A volume control or volume indicator.",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "toolbar",
+          "visual_features": {
+            "avg_color": [
+              92.94485294117646,
+              76.1875,
+              78.65441176470588
+            ],
+            "edge_density": 0.13602941176470587,
+            "aspect_ratio": 1.1257485745666094
+          }
+        },
+        {
+          "id": "scrollbar_35",
+          "type": "scrollbar",
+          "bbox": [
+            0.9991275668144226,
+            0.0003252625756431371,
+            1.0,
+            0.0864497646689415
+          ],
+          "content": "M0,0L9,0 4.5,5z",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_toolbar",
+          "children": [],
+          "layout_role": "toolbar",
+          "visual_features": {
+            "avg_color": [
+              73.22727272727273,
+              54.015151515151516,
+              56.72727272727273
+            ],
+            "edge_density": 0.0,
+            "aspect_ratio": 0.01012990687170869
+          }
+        }
+      ],
+      "bbox": [
+        0.7878692746162415,
+        0.0003252625756431371,
+        1.0,
+        0.0864497646689415
+      ],
+      "type": "layout"
+    },
+    "logo": {
+      "elements": [
+        {
+          "id": "input_20",
+          "type": "input",
+          "bbox": [
+            0.030893027782440186,
+            0.03732654079794884,
+            0.13178029656410217,
+            0.06422924250364304
+          ],
+          "content": "Mobifone ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "logo",
+          "visual_features": {
+            "avg_color": [
+              100.37582417582418,
+              84.58827838827838,
+              86.87472527472528
+            ],
+            "edge_density": 0.1934065934065934,
+            "aspect_ratio": 3.7500794487234823
+          }
+        }
+      ],
+      "bbox": [
+        0.030893027782440186,
+        0.03732654079794884,
+        0.13178029656410217,
+        0.06422924250364304
+      ],
+      "type": "layout"
+    },
+    "form_elements": {
+      "elements": [
+        {
+          "id": "input_6",
+          "type": "input",
+          "bbox": [
+            0.21987013518810272,
+            0.13720813393592834,
+            0.4993228018283844,
+            0.21970373392105103
+          ],
+          "content": "Wi-Fi ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_1"
+          ],
+          "layout_role": "navigation",
+          "visual_features": {
+            "avg_color": [
+              91.04371730070054,
+              67.46865301055246,
+              70.85244302562738
+            ],
+            "edge_density": 0.035913806863527534,
+            "aspect_ratio": 3.387485716700992
+          }
+        },
+        {
+          "id": "button_7",
+          "type": "button",
+          "bbox": [
+            0.22021672129631042,
+            0.5969868898391724,
+            0.361358106136322,
+            0.6813138127326965
+          ],
+          "content": "Do not disturb ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_25"
+          ],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              94.86001690617076,
+              72.17210481825866,
+              75.40625528317835
+            ],
+            "edge_density": 0.07962806424344886,
+            "aspect_ratio": 1.673740485209267
+          }
+        },
+        {
+          "id": "input_8",
+          "type": "input",
+          "bbox": [
+            0.5008642077445984,
+            0.1368575543165207,
+            0.77998286485672,
+            0.22033149003982544
+          ],
+          "content": "Bluetooth ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_2"
+          ],
+          "layout_role": "navigation",
+          "visual_features": {
+            "avg_color": [
+              92.56913407821229,
+              69.37779329608938,
+              72.75768156424581
+            ],
+            "edge_density": 0.04312150837988827,
+            "aspect_ratio": 3.3437821601862674
+          }
+        },
+        {
+          "id": "button_9",
+          "type": "button",
+          "bbox": [
+            0.6358870267868042,
+            0.4824885427951813,
+            0.7784178853034973,
+            0.5806553959846497
+          ],
+          "content": "Eye comfort shield ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_20"
+          ],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              91.61376811594202,
+              69.05884057971015,
+              72.31753623188406
+            ],
+            "edge_density": 0.08753623188405797,
+            "aspect_ratio": 1.4519244926961175
+          }
+        },
+        {
+          "id": "button_10",
+          "type": "button",
+          "bbox": [
+            0.21912138164043427,
+            0.48254457116127014,
+            0.3643736243247986,
+            0.5832747220993042
+          ],
+          "content": "Screen recorder ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_17",
+            "text_21"
+          ],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              90.64474235441978,
+              68.1360145231113,
+              71.36712749615975
+            ],
+            "edge_density": 0.07471023600055858,
+            "aspect_ratio": 1.4419936963434
+          }
+        },
+        {
+          "id": "button_11",
+          "type": "button",
+          "bbox": [
+            0.5005244016647339,
+            0.5977320075035095,
+            0.6371158361434937,
+            0.6799657940864563
+          ],
+          "content": "A Interpreter ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_24",
+            "text_27"
+          ],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              95.21565407772304,
+              72.15526363802226,
+              75.41780696953111
+            ],
+            "edge_density": 0.09268381682174785,
+            "aspect_ratio": 1.6610135584719068
+          }
+        },
+        {
+          "id": "button_12",
+          "type": "button",
+          "bbox": [
+            0.22016337513923645,
+            0.36703550815582275,
+            0.3658549189567566,
+            0.4682907164096832
+          ],
+          "content": "Mobile Hotspot ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_9",
+            "text_13"
+          ],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              102.14402618657938,
+              78.04268957992362,
+              81.52809601745771
+            ],
+            "edge_density": 0.07242225859247135,
+            "aspect_ratio": 1.4388548137914228
+          }
+        },
+        {
+          "id": "button_13",
+          "type": "button",
+          "bbox": [
+            0.5295954942703247,
+            0.36811456084251404,
+            0.6067458391189575,
+            0.449042409658432
+          ],
+          "content": "Location ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              133.58967741935484,
+              102.82677419354839,
+              107.00548387096774
+            ],
+            "edge_density": 0.13193548387096773,
+            "aspect_ratio": 0.9533225703814563
+          }
+        },
+        {
+          "id": "button_14",
+          "type": "button",
+          "bbox": [
+            0.22002024948596954,
+            0.2501872181892395,
+            0.3625284731388092,
+            0.3368675410747528
+          ],
+          "content": "Portrait ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_3"
+          ],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              92.19466403162055,
+              69.23978919631094,
+              72.45454545454545
+            ],
+            "edge_density": 0.06357048748353096,
+            "aspect_ratio": 1.6440665990718957
+          }
+        },
+        {
+          "id": "button_15",
+          "type": "button",
+          "bbox": [
+            0.5285857915878296,
+            0.4836035966873169,
+            0.6064930558204651,
+            0.5643942952156067
+          ],
+          "content": "Dex DeX ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_16",
+            "text_19"
+          ],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              107.22612903225806,
+              81.41129032258064,
+              84.80129032258064
+            ],
+            "edge_density": 0.12290322580645162,
+            "aspect_ratio": 0.9643098234304209
+          }
+        },
+        {
+          "id": "button_16",
+          "type": "button",
+          "bbox": [
+            0.6251953840255737,
+            0.36574020981788635,
+            0.7787405252456665,
+            0.467465877532959
+          ],
+          "content": "Link to Windows ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_12",
+            "text_15"
+          ],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              90.49573753552053,
+              68.50258331180574,
+              71.68173598553345
+            ],
+            "edge_density": 0.06652027899767501,
+            "aspect_ratio": 1.5094041127374391
+          }
+        },
+        {
+          "id": "button_17",
+          "type": "button",
+          "bbox": [
+            0.5260147452354431,
+            0.2519620358943939,
+            0.6084470152854919,
+            0.3337036669254303
+          ],
+          "content": "Torch ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_5"
+          ],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              103.35160227613058,
+              77.48397723869422,
+              80.91165019466906
+            ],
+            "edge_density": 0.09973045822102426,
+            "aspect_ratio": 1.008449048670808
+          }
+        },
+        {
+          "id": "button_18",
+          "type": "button",
+          "bbox": [
+            0.3906472325325012,
+            0.3677231967449188,
+            0.46442294120788574,
+            0.46652594208717346
+          ],
+          "content": "Power saving ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_10"
+          ],
+          "layout_role": "main_content",
+          "visual_features": {
+            "avg_color": [
+              106.83146696528556,
+              82.22424412094065,
+              85.64165733482643
+            ],
+            "edge_density": 0.12989921612541994,
+            "aspect_ratio": 0.7466969507762565
+          }
+        },
+        {
+          "id": "button_19",
+          "type": "button",
+          "bbox": [
+            0.666103720664978,
+            0.25138285756111145,
+            0.7450706958770752,
+            0.35028374195098877
+          ],
+          "content": "Mobile data ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [
+            "text_6",
+            "text_8"
+          ],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              122.60842105263158,
+              92.76815789473685,
+              96.9192105263158
+            ],
+            "edge_density": 0.12026315789473684,
+            "aspect_ratio": 0.7984455922638805
+          }
+        },
+        {
+          "id": "input_20",
+          "type": "input",
+          "bbox": [
+            0.030893027782440186,
+            0.03732654079794884,
+            0.13178029656410217,
+            0.06422924250364304
+          ],
+          "content": "Mobifone ",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "logo",
+          "visual_features": {
+            "avg_color": [
+              100.37582417582418,
+              84.58827838827838,
+              86.87472527472528
+            ],
+            "edge_density": 0.1934065934065934,
+            "aspect_ratio": 3.7500794487234823
+          }
+        },
+        {
+          "id": "button_21",
+          "type": "button",
+          "bbox": [
+            0.6776217222213745,
+            0.7622870802879333,
+            0.751619815826416,
+            0.8210307955741882
+          ],
+          "content": "Night mode",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              107.13842592592593,
+              80.36111111111111,
+              83.74814814814815
+            ],
+            "edge_density": 0.09861111111111111,
+            "aspect_ratio": 1.2596767712844323
+          }
+        },
+        {
+          "id": "button_22",
+          "type": "button",
+          "bbox": [
+            0.676871657371521,
+            0.8333153128623962,
+            0.7512242794036865,
+            0.8923435211181641
+          ],
+          "content": "Sound",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              135.4005550416281,
+              103.79324699352452,
+              107.9222941720629
+            ],
+            "edge_density": 0.1211840888066605,
+            "aspect_ratio": 1.2596117047970927
+          }
+        },
+        {
+          "id": "button_23",
+          "type": "button",
+          "bbox": [
+            0.660833477973938,
+            0.08154628425836563,
+            0.712083101272583,
+            0.1240525022149086
+          ],
+          "content": "Power",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "navigation",
+          "visual_features": {
+            "avg_color": [
+              90.03213957759412,
+              71.62442607897154,
+              74.35537190082644
+            ],
+            "edge_density": 0.08264462809917356,
+            "aspect_ratio": 1.2056970900361221
+          }
+        },
+        {
+          "id": "button_24",
+          "type": "button",
+          "bbox": [
+            0.8144324421882629,
+            0.04056359454989433,
+            0.8365472555160522,
+            0.06070917844772339
+          ],
+          "content": "alarm clock",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "toolbar",
+          "visual_features": {
+            "avg_color": [
+              131.45238095238096,
+              119.08095238095238,
+              120.87142857142857
+            ],
+            "edge_density": 0.2523809523809524,
+            "aspect_ratio": 1.0977499307018082
+          }
+        },
+        {
+          "id": "button_25",
+          "type": "button",
+          "bbox": [
+            0.7632456421852112,
+            0.04087695851922035,
+            0.7866755723953247,
+            0.0607493631541729
+          ],
+          "content": "Bluetooth connectivity.",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "navigation",
+          "visual_features": {
+            "avg_color": [
+              104.21333333333334,
+              88.71555555555555,
+              90.96888888888888
+            ],
+            "edge_density": 0.19555555555555557,
+            "aspect_ratio": 1.1790183745002774
+          }
+        },
+        {
+          "id": "button_26",
+          "type": "button",
+          "bbox": [
+            0.7878692746162415,
+            0.04075012728571892,
+            0.8115971684455872,
+            0.060632333159446716
+          ],
+          "content": "Navigator",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "toolbar",
+          "visual_features": {
+            "avg_color": [
+              141.56,
+              130.3022222222222,
+              131.92888888888888
+            ],
+            "edge_density": 0.3288888888888889,
+            "aspect_ratio": 1.1934236060144396
+          }
+        },
+        {
+          "id": "button_27",
+          "type": "button",
+          "bbox": [
+            0.8383506536483765,
+            0.039642490446567535,
+            0.863880455493927,
+            0.06208360195159912
+          ],
+          "content": "Podcasts",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "toolbar",
+          "visual_features": {
+            "avg_color": [
+              109.05147058823529,
+              94.21691176470588,
+              96.43382352941177
+            ],
+            "edge_density": 0.2610294117647059,
+            "aspect_ratio": 1.137635354640363
+          }
+        },
+        {
+          "id": "button_28",
+          "type": "button",
+          "bbox": [
+            0.7234206795692444,
+            0.08387866616249084,
+            0.7715860605239868,
+            0.12093937397003174
+          ],
+          "content": "Settings",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "navigation",
+          "visual_features": {
+            "avg_color": [
+              103.33294930875576,
+              86.5057603686636,
+              89.01728110599079
+            ],
+            "edge_density": 0.09101382488479262,
+            "aspect_ratio": 1.2996346752163763
+          }
+        },
+        {
+          "id": "button_29",
+          "type": "button",
+          "bbox": [
+            0.9128857851028442,
+            0.03911394998431206,
+            0.959666907787323,
+            0.06391137093305588
+          ],
+          "content": "Currency value (97)",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "toolbar",
+          "visual_features": {
+            "avg_color": [
+              161.4280701754386,
+              151.73157894736843,
+              153.0719298245614
+            ],
+            "edge_density": 0.2789473684210526,
+            "aspect_ratio": 1.886531780106293
+          }
+        },
+        {
+          "id": "button_30",
+          "type": "button",
+          "bbox": [
+            0.6014735698699951,
+            0.08434633165597916,
+            0.6481233835220337,
+            0.11980298906564713
+          ],
+          "content": "Pencil",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "navigation",
+          "visual_features": {
+            "avg_color": [
+              94.30833333333334,
+              76.37857142857143,
+              79.03809523809524
+            ],
+            "edge_density": 0.07023809523809524,
+            "aspect_ratio": 1.3156856020871999
+          }
+        },
+        {
+          "id": "button_31",
+          "type": "button",
+          "bbox": [
+            0.8865587115287781,
+            0.039740804582834244,
+            0.9118208885192871,
+            0.06218114122748375
+          ],
+          "content": "A volume control or volume indicator.",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "toolbar",
+          "visual_features": {
+            "avg_color": [
+              92.94485294117646,
+              76.1875,
+              78.65441176470588
+            ],
+            "edge_density": 0.13602941176470587,
+            "aspect_ratio": 1.1257485745666094
+          }
+        },
+        {
+          "id": "button_32",
+          "type": "button",
+          "bbox": [
+            0.2628277838230133,
+            0.8435953259468079,
+            0.3099340796470642,
+            0.8821299076080322
+          ],
+          "content": "Music",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              149.45777777777778,
+              118.09222222222222,
+              121.99666666666667
+            ],
+            "edge_density": 0.16,
+            "aspect_ratio": 1.2224421232384073
+          }
+        },
+        {
+          "id": "button_33",
+          "type": "button",
+          "bbox": [
+            0.637033224105835,
+            0.9518658518791199,
+            0.702097475528717,
+            0.9999024271965027
+          ],
+          "content": "HideHide (Ctrl+Shift+F)",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "bottom_navigation",
+          "visual_features": {
+            "avg_color": [
+              79.03108465608466,
+              58.27579365079365,
+              61.245370370370374
+            ],
+            "edge_density": 0.031084656084656083,
+            "aspect_ratio": 1.3544731486996229
+          }
+        },
+        {
+          "id": "button_34",
+          "type": "button",
+          "bbox": [
+            0.2701346278190613,
+            0.7760664820671082,
+            0.29964861273765564,
+            0.8037445545196533
+          ],
+          "content": "Brightness settings",
+          "confidence": 0.8,
+          "interactivity": true,
+          "parent_id": "region_form_elements",
+          "children": [],
+          "layout_role": "content",
+          "visual_features": {
+            "avg_color": [
+              158.44110275689223,
+              126.62907268170426,
+              130.35338345864662
+            ],
+            "edge_density": 0.15789473684210525,
+            "aspect_ratio": 1.0663309364912212
+          }
+        }
+      ],
+      "bbox": [
+        0.030893027782440186,
+        0.03732654079794884,
+        0.959666907787323,
+        0.9999024271965027
+      ],
+      "type": "semantic_group"
+    }
+  },
+  "parsed_regions": {
+    "navigation": {
+      "cropped_ocr": {
+        "text": [
+          "?",
+          "?",
+          "Wi-Fi",
+          "Bluetooth"
+        ],
+        "bbox": [
+          [
+            0.7687637969094923,
+            0.04411764705882353,
+            0.7842163355408388,
+            0.05974264705882353
+          ],
+          [
+            0.5447019867549668,
+            0.1636029411764706,
+            0.5733995584988962,
+            0.19255514705882354
+          ],
+          [
+            0.32339955849889623,
+            0.17003676470588236,
+            0.37141280353200884,
+            0.18474264705882354
+          ],
+          [
+            0.6087196467991169,
+            0.17049632352941177,
+            0.6931567328918322,
+            0.18474264705882354
+          ]
+        ]
+      },
+      "elements_count": 6,
+      "element_types": {
+        "input": 2,
+        "button": 4
+      },
+      "features": {
+        "avg_color": [
+          84.56904250206073,
+          63.19576797316446,
+          66.29444138690148
+        ],
+        "element_density": 0.05243587452759968,
+        "edge_complexity": 0.00976200140951347,
+        "element_alignment": {
+          "horizontal": false,
+          "vertical": false
+        }
+      }
+    },
+    "main_content": {
+      "cropped_ocr": {
+        "text": [
+          "Flight",
+          "Torch",
+          "Mobile",
+          "mode",
+          "data",
+          "Power",
+          "Location",
+          "Link to",
+          "saving",
+          "Windows",
+          "DeX",
+          "Quick Share",
+          "DeX",
+          "Eye comfort",
+          "shield",
+          "Everyone",
+          "A",
+          "Scan QR code",
+          "Interpreter",
+          "Multi control"
+        ],
+        "bbox": [
+          [
+            0.4083885209713024,
+            0.31525735294117646,
+            0.45253863134657835,
+            0.3313419117647059
+          ],
+          [
+            0.5485651214128036,
+            0.3161764705882353,
+            0.5916114790286976,
+            0.3290441176470588
+          ],
+          [
+            0.6826710816777042,
+            0.3161764705882353,
+            0.7334437086092715,
+            0.3290441176470588
+          ],
+          [
+            0.40783664459161145,
+            0.33409926470588236,
+            0.4519867549668874,
+            0.3474264705882353
+          ],
+          [
+            0.6909492273730684,
+            0.33318014705882354,
+            0.7257174392935982,
+            0.3478860294117647
+          ],
+          [
+            0.40618101545253865,
+            0.4306066176470588,
+            0.45474613686534215,
+            0.4443933823529412
+          ],
+          [
+            0.5375275938189845,
+            0.43106617647058826,
+            0.6015452538631346,
+            0.44393382352941174
+          ],
+          [
+            0.6821192052980133,
+            0.43014705882352944,
+            0.7334437086092715,
+            0.44485294117647056
+          ],
+          [
+            0.4056291390728477,
+            0.44715073529411764,
+            0.4530905077262693,
+            0.4646139705882353
+          ],
+          [
+            0.6749448123620309,
+            0.4485294117647059,
+            0.7422737306843267,
+            0.46231617647058826
+          ],
+          [
+            0.5568432671081678,
+            0.5045955882352942,
+            0.5833333333333334,
+            0.5165441176470589
+          ],
+          [
+            0.3868653421633554,
+            0.5464154411764706,
+            0.47406181015452536,
+            0.5588235294117647
+          ],
+          [
+            0.5518763796909493,
+            0.5445772058823529,
+            0.58719646799117,
+            0.5597426470588235
+          ],
+          [
+            0.6639072847682119,
+            0.546875,
+            0.7538631346578366,
+            0.5588235294117647
+          ],
+          [
+            0.6865342163355408,
+            0.5638786764705882,
+            0.7306843267108167,
+            0.5767463235294118
+          ],
+          [
+            0.39679911699779247,
+            0.5684742647058824,
+            0.46467991169977924,
+            0.5813419117647058
+          ],
+          [
+            0.5413907284768212,
+            0.6208639705882353,
+            0.5971302428256071,
+            0.6364889705882353
+          ],
+          [
+            0.3791390728476821,
+            0.6608455882352942,
+            0.4817880794701987,
+            0.6732536764705882
+          ],
+          [
+            0.5292494481236203,
+            0.6603860294117647,
+            0.6098233995584988,
+            0.6755514705882353
+          ],
+          [
+            0.66280353200883,
+            0.6608455882352942,
+            0.7538631346578366,
+            0.6732536764705882
+          ]
+        ]
+      },
+      "elements_count": 12,
+      "element_types": {
+        "text": 6,
+        "button": 6
+      },
+      "features": {
+        "avg_color": [
+          92.62869849727976,
+          69.85943343780603,
+          73.1628603835026
+        ],
+        "element_density": 0.06949643330263555,
+        "edge_complexity": 0.03175488328144121,
+        "element_alignment": {
+          "horizontal": false,
+          "vertical": false
+        }
+      }
+    },
+    "content": {
+      "cropped_ocr": {
+        "text": [
+          "Mobifone",
+          "Wi-Fi",
+          "Bluetooth",
+          "Portrait",
+          "Flight",
+          "Torch",
+          "Mobile",
+          "mode",
+          "data",
+          "Mobile",
+          "Power",
+          "Location",
+          "Link to",
+          "Hotspot",
+          "saving",
+          "Windows",
+          "Dex]",
+          "Screen",
+          "Quick Share",
+          "DeX",
+          "Eye comfort",
+          "recorder",
+          "Everyone",
+          "shield",
+          "A",
+          "Do not disturb",
+          "Scan QR code",
+          "Interpreter",
+          "Multi control"
+        ],
+        "bbox": [
+          [
+            0.0347682119205298,
+            0.043198529411764705,
+            0.13189845474613687,
+            0.06158088235294118
+          ],
+          [
+            0.3228476821192053,
+            0.17003676470588236,
+            0.37251655629139074,
+            0.18658088235294118
+          ],
+          [
+            0.6059602649006622,
+            0.16773897058823528,
+            0.6959161147902869,
+            0.18841911764705882
+          ],
+          [
+            0.2621412803532009,
+            0.31387867647058826,
+            0.3211920529801324,
+            0.3322610294117647
+          ],
+          [
+            0.40783664459161145,
+            0.31433823529411764,
+            0.45364238410596025,
+            0.33088235294117646
+          ],
+          [
+            0.5485651214128036,
+            0.31525735294117646,
+            0.5938189845474614,
+            0.33088235294117646
+          ],
+          [
+            0.6821192052980133,
+            0.31525735294117646,
+            0.7350993377483444,
+            0.33088235294117646
+          ],
+          [
+            0.4056291390728477,
+            0.33409926470588236,
+            0.45474613686534215,
+            0.3478860294117647
+          ],
+          [
+            0.6909492273730684,
+            0.33455882352941174,
+            0.7273730684326711,
+            0.3478860294117647
+          ],
+          [
+            0.2654525386313466,
+            0.4296875,
+            0.3184326710816777,
+            0.4453125
+          ],
+          [
+            0.4045253863134658,
+            0.42922794117647056,
+            0.45695364238410596,
+            0.44669117647058826
+          ],
+          [
+            0.5358719646799117,
+            0.42922794117647056,
+            0.6032008830022075,
+            0.44669117647058826
+          ],
+          [
+            0.6815673289183223,
+            0.42830882352941174,
+            0.7356512141280354,
+            0.44669117647058826
+          ],
+          [
+            0.2599337748344371,
+            0.44669117647058826,
+            0.3228476821192053,
+            0.46599264705882354
+          ],
+          [
+            0.40507726269315675,
+            0.44669117647058826,
+            0.45584988962472406,
+            0.46599264705882354
+          ],
+          [
+            0.673289183222958,
+            0.44577205882352944,
+            0.7439293598233996,
+            0.46599264705882354
+          ],
+          [
+            0.5535320088300221,
+            0.5022977941176471,
+            0.5860927152317881,
+            0.5188419117647058
+          ],
+          [
+            0.2632450331125828,
+            0.5445772058823529,
+            0.3195364238410596,
+            0.5606617647058824
+          ],
+          [
+            0.3852097130242826,
+            0.5445772058823529,
+            0.4762693156732892,
+            0.5606617647058824
+          ],
+          [
+            0.5524282560706402,
+            0.5454963235294118,
+            0.5883002207505519,
+            0.5606617647058824
+          ],
+          [
+            0.66280353200883,
+            0.5454963235294118,
+            0.7544150110375276,
+            0.5615808823529411
+          ],
+          [
+            0.2582781456953642,
+            0.5643382352941176,
+            0.3250551876379691,
+            0.5790441176470589
+          ],
+          [
+            0.3945916114790287,
+            0.5657169117647058,
+            0.46688741721854304,
+            0.5845588235294118
+          ],
+          [
+            0.6826710816777042,
+            0.5634191176470589,
+            0.7334437086092715,
+            0.578125
+          ],
+          [
+            0.5535320088300221,
+            0.6181066176470589,
+            0.5778145695364238,
+            0.6438419117647058
+          ],
+          [
+            0.2378587196467991,
+            0.6590073529411765,
+            0.3454746136865342,
+            0.6760110294117647
+          ],
+          [
+            0.3791390728476821,
+            0.6617647058823529,
+            0.48233995584988965,
+            0.6741727941176471
+          ],
+          [
+            0.5286975717439294,
+            0.6608455882352942,
+            0.6109271523178808,
+            0.6760110294117647
+          ],
+          [
+            0.6616997792494481,
+            0.6608455882352942,
+            0.7555187637969095,
+            0.6760110294117647
+          ]
+        ]
+      },
+      "elements_count": 39,
+      "element_types": {
+        "text": 29,
+        "button": 10
+      },
+      "features": {
+        "avg_color": [
+          89.16899211993682,
+          66.81104335391541,
+          69.9852467751604
+        ],
+        "element_density": 0.11636427669650529,
+        "edge_complexity": 0.015608412746575753,
+        "element_alignment": {
+          "horizontal": false,
+          "vertical": true
+        }
+      }
+    },
+    "bottom_navigation": {
+      "cropped_ocr": {
+        "text": [],
+        "bbox": []
+      },
+      "elements_count": 1,
+      "element_types": {
+        "button": 1
+      },
+      "features": {
+        "avg_color": [
+          79.03495762711864,
+          58.27640156453716,
+          61.2495925684485
+        ],
+        "element_density": 0.003125463813944407,
+        "edge_complexity": 0.01108213820078227,
+        "element_alignment": {
+          "horizontal": false,
+          "vertical": false
+        }
+      }
+    },
+    "toolbar": {
+      "cropped_ocr": {
+        "text": [
+          " 97"
+        ],
+        "bbox": [
+          [
+            0.9188741721854304,
+            0.043658088235294115,
+            0.9558498896247241,
+            0.058823529411764705
+          ]
+        ]
+      },
+      "elements_count": 6,
+      "element_types": {
+        "button": 5,
+        "scrollbar": 1
+      },
+      "features": {
+        "avg_color": [
+          84.11901077645759,
+          66.17254766510085,
+          68.69731970157503
+        ],
+        "element_density": 0.003292276648685288,
+        "edge_complexity": 0.02316938380768168,
+        "element_alignment": {
+          "horizontal": true,
+          "vertical": false
+        }
+      }
+    },
+    "logo": {
+      "cropped_ocr": {
+        "text": [
+          "Mobifone"
+        ],
+        "bbox": [
+          [
+            0.03421633554083885,
+            0.042738970588235295,
+            0.12969094922737306,
+            0.06020220588235294
+          ]
+        ]
+      },
+      "elements_count": 1,
+      "element_types": {
+        "input": 1
+      },
+      "features": {
+        "avg_color": [
+          101.89589221782552,
+          86.26926700584134,
+          88.55379687205577
+        ],
+        "element_density": 0.002714140097935247,
+        "edge_complexity": 0.08997550405125306,
+        "element_alignment": {
+          "horizontal": false,
+          "vertical": false
+        }
+      }
+    },
+    "form_elements": {
+      "cropped_ocr": {
+        "text": [
+          "Mobifone",
+          "X NQ@ 4G.II G97",
+          "?",
+          "Wi-Fi",
+          "Bluetooth",
+          "Portrait",
+          "Flight",
+          "Torch",
+          "Mobile",
+          "mode",
+          "data",
+          "5",
+          "Mobile",
+          "Power",
+          "Location",
+          "Link to",
+          "Hotspot",
+          "saving",
+          "Windows",
+          "Dex",
+          "A.",
+          "Screen",
+          "Quick Share",
+          "DeX",
+          "Eye comfort",
+          "recorder",
+          "Everyone",
+          "shield",
+          "A",
+          "Do not disturb",
+          "Scan QR code",
+          "Interpreter",
+          "Multi control"
+        ],
+        "bbox": [
+          [
+            0.03200883002207505,
+            0.0390625,
+            0.13134657836644592,
+            0.0625
+          ],
+          [
+            0.7693156732891833,
+            0.043198529411764705,
+            0.9552980132450332,
+            0.06020220588235294
+          ],
+          [
+            0.5441501103752759,
+            0.1636029411764706,
+            0.57560706401766,
+            0.19439338235294118
+          ],
+          [
+            0.3217439293598234,
+            0.16865808823529413,
+            0.37251655629139074,
+            0.1875
+          ],
+          [
+            0.6070640176600441,
+            0.16957720588235295,
+            0.695364238410596,
+            0.18658088235294118
+          ],
+          [
+            0.26269315673289184,
+            0.3157169117647059,
+            0.32064017660044153,
+            0.33088235294117646
+          ],
+          [
+            0.40783664459161145,
+            0.31387867647058826,
+            0.45474613686534215,
+            0.3318014705882353
+          ],
+          [
+            0.5480132450331126,
+            0.3157169117647059,
+            0.5927152317880795,
+            0.33088235294117646
+          ],
+          [
+            0.6821192052980133,
+            0.3115808823529412,
+            0.7356512141280354,
+            0.3322610294117647
+          ],
+          [
+            0.4067328918322296,
+            0.3350183823529412,
+            0.45474613686534215,
+            0.34880514705882354
+          ],
+          [
+            0.6909492273730684,
+            0.33409926470588236,
+            0.727924944812362,
+            0.34880514705882354
+          ],
+          [
+            0.27704194260485654,
+            0.3869485294117647,
+            0.304635761589404,
+            0.40900735294117646
+          ],
+          [
+            0.26490066225165565,
+            0.43014705882352944,
+            0.3184326710816777,
+            0.4453125
+          ],
+          [
+            0.4045253863134658,
+            0.4287683823529412,
+            0.456401766004415,
+            0.44669117647058826
+          ],
+          [
+            0.5353200883002207,
+            0.4287683823529412,
+            0.6032008830022075,
+            0.4485294117647059
+          ],
+          [
+            0.6804635761589404,
+            0.42784926470588236,
+            0.7373068432671082,
+            0.4476102941176471
+          ],
+          [
+            0.25938189845474613,
+            0.44577205882352944,
+            0.32450331125827814,
+            0.4664522058823529
+          ],
+          [
+            0.40397350993377484,
+            0.44577205882352944,
+            0.456401766004415,
+            0.4664522058823529
+          ],
+          [
+            0.6705298013245033,
+            0.44577205882352944,
+            0.7455849889624724,
+            0.4655330882352941
+          ],
+          [
+            0.5540838852097131,
+            0.5032169117647058,
+            0.5866445916114791,
+            0.5193014705882353
+          ],
+          [
+            0.6909492273730684,
+            0.5022977941176471,
+            0.727924944812362,
+            0.5225183823529411
+          ],
+          [
+            0.2621412803532009,
+            0.5422794117647058,
+            0.3211920529801324,
+            0.5629595588235294
+          ],
+          [
+            0.38465783664459163,
+            0.5445772058823529,
+            0.47792494481236203,
+            0.5615808823529411
+          ],
+          [
+            0.5513245033112583,
+            0.5445772058823529,
+            0.5877483443708609,
+            0.5606617647058824
+          ],
+          [
+            0.6605960264900662,
+            0.5431985294117647,
+            0.7566225165562914,
+            0.5638786764705882
+          ],
+          [
+            0.2577262693156733,
+            0.5643382352941176,
+            0.32560706401766004,
+            0.5785845588235294
+          ],
+          [
+            0.3934878587196468,
+            0.5652573529411765,
+            0.46909492273730685,
+            0.5845588235294118
+          ],
+          [
+            0.6859823399558499,
+            0.5634191176470589,
+            0.7317880794701986,
+            0.5785845588235294
+          ],
+          [
+            0.5469094922737306,
+            0.609375,
+            0.5927152317880795,
+            0.6456801470588235
+          ],
+          [
+            0.23841059602649006,
+            0.6608455882352942,
+            0.34492273730684325,
+            0.6746323529411765
+          ],
+          [
+            0.37858719646799116,
+            0.6608455882352942,
+            0.48399558498896245,
+            0.6746323529411765
+          ],
+          [
+            0.5275938189845475,
+            0.6599264705882353,
+            0.6109271523178808,
+            0.6769301470588235
+          ],
+          [
+            0.6616997792494481,
+            0.6599264705882353,
+            0.7560706401766004,
+            0.6769301470588235
+          ]
+        ]
+      },
+      "elements_count": 29,
+      "element_types": {
+        "input": 3,
+        "button": 26
+      },
+      "features": {
+        "avg_color": [
+          86.26019365518776,
+          64.42124259619625,
+          67.53219594109532
+        ],
+        "element_density": 0.20171734622504556,
+        "edge_complexity": 0.011449400460019033,
+        "element_alignment": {
+          "horizontal": true,
+          "vertical": false
+        }
+      }
+    }
+  }
+}
