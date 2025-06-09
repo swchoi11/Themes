@@ -990,13 +990,14 @@ class LayoutAwareParser:
 
     def __init__(self, config: Dict):
         self.config = config
+        self.overlap_threshold = 0.5
         self.skeleton_extractor = SkeletonUIExtractor(config)
 
     def parse_by_layout(self, image: Union[str, Image.Image], xml_path: Optional[str] = None) -> Dict:
         """레이아웃별로 파싱 수행"""
 
         if isinstance(image, str):
-            self.filenmae = os.path.basename(image).split('.')[0]
+            self.filename = os.path.basename(image).split('.')[0]
             image = Image.open(image)
 
         # 1. 스켈레톤 구조 추출
@@ -1006,13 +1007,15 @@ class LayoutAwareParser:
             try:
                 # XMLParser 생성
                 xml_parser = XMLParser(image_path=image_path, xml_path=xml_path)
+                # xml_parser.check_xml_structure()
+                print(xml_parser.check_bounds_validity())
                 xml_components = xml_parser.get_components()
                 print(f"XML에서 {len(xml_components)}개 컴포넌트 추출")
 
-                # UIElement와 UIComponent 간 병합
                 merged_elements = self._merge_skeleton_with_xml(
                     layout_structure.elements,
-                    xml_components
+                    xml_components,
+                    xml_parser
                 )
                 layout_structure.elements = merged_elements
                 print(f"병합 후 최종: {len(layout_structure.elements)}개 요소")
@@ -1068,36 +1071,260 @@ class LayoutAwareParser:
             # 'statistics': self._calculate_statistics(layout_structure.elements)
         }
 
-    def _merge_skeleton_with_xml(self, ui_elements: List[UIElement], xml_components: List, xml_parser_instance=None) -> List[UIElement]:
+    # def _merge_skeleton_with_xml(self, ui_elements: List[UIElement], xml_components: List, xml_parser_instance=None) -> List[UIElement]:
+    #
+    #     ui_elements_dict = [self._uielement_to_dict(elem) for elem in ui_elements]
+    #
+    #     # XMLParser의 병합 로직 활용
+    #     if xml_components and xml_parser_instance:
+    #         try:
+    #             # XMLParser 인스턴스의 merge_with_elements 메서드 사용
+    #             merged_components = xml_parser_instance.merge_with_elements(
+    #                 xml_components, ui_elements_dict, element_type='dict'
+    #             )
+    #
+    #             # 병합된 결과를 다시 UIElement로 변환
+    #             merged_ui_elements = []
+    #             for comp in merged_components:
+    #                 ui_elem = self._dict_to_uielement(asdict(comp))
+    #                 merged_ui_elements.append(ui_elem)
+    #
+    #             # 기존 UIElement 중 병합되지 않은 것들도 추가
+    #             existing_ids = {comp.id for comp in merged_components}
+    #             for ui_elem in ui_elements:
+    #                 if ui_elem.id not in existing_ids:
+    #                     merged_ui_elements.append(ui_elem)
+    #
+    #             return merged_ui_elements
+    #         except Exception as e:
+    #             print(f"XMLParser 병합 실패: {e}")
+    #             return ui_elements
+    #
+    #     return ui_elements
 
-        ui_elements_dict = [self._uielement_to_dict(elem) for elem in ui_elements]
+    def _merge_skeleton_with_xml(self, ui_elements: List[UIElement], xml_components: List, xml_parser_instance=None) -> \
+    List[UIElement]:
+        print(f"-------------------- * XML 병합 시작 * --------------------")
+        print(f"UI Elements 개수: {len(ui_elements)}")
+        print(f"XML Components 개수: {len(xml_components) if xml_components else 0}")
+        print(f"XML Parser Instance: {xml_parser_instance is not None}")
 
-        # XMLParser의 병합 로직 활용
-        if xml_components and xml_parser_instance:
+        if not xml_components:
+            return ui_elements
+
+        # XML 컴포넌트 유효성 검사 및 필터링
+        valid_xml_components = []
+        for comp in xml_components:
+            bbox = getattr(comp, 'bbox', None)
+            if bbox and len(bbox) >= 4:
+                x1, y1, x2, y2 = bbox[:4]
+                # 유효한 좌표 범위와 크기 확인
+                if (0 <= x1 < 1 and 0 <= y1 < 1 and
+                        x1 < x2 <= 1 and y1 < y2 <= 1 and
+                        (x2 - x1) > 0.005 and (y2 - y1) > 0.005):
+                    valid_xml_components.append(comp)
+                else:
+                    print(f" Invalid bbox: {comp.id} - {bbox}")
+            else:
+                print(f"None bbox : {getattr(comp, 'id', 'unknown')}")
+        print(f"Valid XML Components: {len(valid_xml_components)}개")
+
+        if not valid_xml_components:
+            return ui_elements
+
+        unique_ui_elements = []
+        seen_ids = set()
+        for elem in ui_elements:
+            if elem.id not in seen_ids:
+                unique_ui_elements.append(elem)
+                seen_ids.add(elem.id)
+            # else:
+                # print(f"Removed duplicated UI Element: {elem.id}")
+        print(f"중복 제거 후 UI Elements: {len(unique_ui_elements)}개")
+
+        if xml_parser_instance:
             try:
-                # XMLParser 인스턴스의 merge_with_elements 메서드 사용
-                merged_components = xml_parser_instance.merge_with_elements(
-                    xml_components, ui_elements_dict, element_type='dict'
+                ui_elements_dict = [self._uielement_to_dict(elem) for elem in unique_ui_elements]
+
+                merged_xml_components = xml_parser_instance.merge_with_elements(
+                    valid_xml_components, ui_elements_dict, element_type='dict'
                 )
 
-                # 병합된 결과를 다시 UIElement로 변환
-                merged_ui_elements = []
-                for comp in merged_components:
-                    ui_elem = self._dict_to_uielement(asdict(comp))
-                    merged_ui_elements.append(ui_elem)
+                print(f"XMLParser 병합 완료: {len(merged_xml_components)}개")
 
-                # 기존 UIElement 중 병합되지 않은 것들도 추가
-                existing_ids = {comp.id for comp in merged_components}
-                for ui_elem in ui_elements:
-                    if ui_elem.id not in existing_ids:
+                merged_ui_elements = []
+                for xml_comp in merged_xml_components:
+                    try:
+                        ui_element_dict = {
+                            'id': xml_comp.id,
+                            'type': self._map_xml_type_to_ui_type(xml_comp.type),
+                            'bbox': xml_comp.bbox,
+                            'content': xml_comp.content or xml_comp.content_desc or '',
+                            'confidence': 0.9 if getattr(xml_comp, 'ocr_matched', False) else 0.8,
+                            'interactivity': xml_comp.interactivity,
+                            'parent_id': xml_comp.parent_id,
+                            'children': xml_comp.children,
+                            'layout_role': self._infer_layout_role_from_xml_type(xml_comp.type),
+                            'visual_features': xml_comp.visual_features or {}
+                        }
+
+                        ui_elem = self._dict_to_uielement(ui_element_dict)
                         merged_ui_elements.append(ui_elem)
 
+                    except Exception as e:
+                        print(f"XML 컴포넌트 변환 실패 {xml_comp.id}: {e}")
+
+                for ui_elem in unique_ui_elements:
+                    should_add = True
+
+                    for xml_comp in merged_xml_components:
+                        if self._is_spatially_overlapping(ui_elem.bbox, xml_comp.bbox):
+                            should_add = False
+                            overlap_ratio = self._calculate_overlap_ratio(ui_elem.bbox, xml_comp.bbox)
+                            print(f"기존 UI Element 제외 (공간적 겹침): {ui_elem.id} <-> {xml_comp.id}")
+                            print(f"  UI bbox: {ui_elem.bbox}")
+                            print(f"  XML bbox: {xml_comp.bbox}")
+                            print(f"  ROI: {overlap_ratio:.3f}")
+                            break
+
+                    if should_add:
+                        merged_ui_elements.append(ui_elem)
+                        print(f"기존 UI Element 추가: {ui_elem.id}")
+
+                print(f"최종 병합 결과: {len(merged_ui_elements)}개")
                 return merged_ui_elements
+
             except Exception as e:
                 print(f"XMLParser 병합 실패: {e}")
-                return ui_elements
+                import traceback
+                traceback.print_exc()
+                return self._fallback_direct_merge(unique_ui_elements, valid_xml_components)
 
-        return ui_elements
+        return self._fallback_direct_merge(unique_ui_elements, valid_xml_components)
+
+    def _calculate_overlap_ratio(self, bbox1, bbox2):
+        """두 bounding box의 겹침 비율 계산 (디버깅용)"""
+        if not bbox1 or not bbox2 or len(bbox1) < 4 or len(bbox2) < 4:
+            return 0.0
+
+        x1_1, y1_1, x2_1, y2_1 = bbox1[:4]
+        x1_2, y1_2, x2_2, y2_2 = bbox2[:4]
+
+        # 겹치는 영역 계산
+        overlap_x1 = max(x1_1, x1_2)
+        overlap_y1 = max(y1_1, y1_2)
+        overlap_x2 = min(x2_1, x2_2)
+        overlap_y2 = min(y2_1, y2_2)
+
+        if overlap_x1 >= overlap_x2 or overlap_y1 >= overlap_y2:
+            return 0.0
+
+        overlap_area = (overlap_x2 - overlap_x1) * (overlap_y2 - overlap_y1)
+        area1 = (x2_1 - x1_1) * (y2_1 - y1_1)
+        area2 = (x2_2 - x1_2) * (y2_2 - y1_2)
+
+        min_area = min(area1, area2)
+        return overlap_area / min_area if min_area > 0 else 0.0
+
+    def _map_xml_type_to_ui_type(self, xml_type: str) -> str:
+        """XML 컴포넌트 타입을 UI 타입으로 매핑"""
+        type_mapping = {
+            'TextView': 'text',
+            'EditText': 'input',
+            'Button': 'button',
+            'ImageButton': 'button',
+            'ImageView': 'image',
+            'RadioButton': 'button',
+            'CheckBox': 'button',
+            'Switch': 'input',
+            'ToggleButton': 'button',
+            'Spinner': 'input',
+            'SeekBar': 'input',
+            'ProgressBar': 'progress'
+        }
+        return type_mapping.get(xml_type, 'unknown')
+
+    def _infer_layout_role_from_xml_type(self, xml_type: str) -> str:
+        """XML 타입에서 layout_role 추론"""
+        if xml_type in ['Button', 'ImageButton']:
+            return 'toolbar'
+        elif xml_type in ['TextView']:
+            return 'content'
+        elif xml_type in ['EditText', 'Switch', 'RadioButton', 'CheckBox']:
+            return 'form_input'
+        elif xml_type in ['ImageView']:
+            return 'content'
+        else:
+            return 'content'
+
+    def _fallback_direct_merge(self, ui_elements: List[UIElement], xml_components: List) -> List[UIElement]:
+        print("FallBack manual merge mode")
+
+        merged_elements = []
+
+        for xml_comp in xml_components:
+            try:
+                ui_element_dict = {
+                    'id': xml_comp.id,
+                    'type': self._map_xml_type_to_ui_type(xml_comp.type),
+                    'bbox': xml_comp.bbox,
+                    'content': xml_comp.content or xml_comp.content_desc or '',
+                    'confidence': 0.8,
+                    'interactivity': xml_comp.interactivity,
+                    'parent_id': xml_comp.parent_id,
+                    'children': xml_comp.children,
+                    'layout_role': self._infer_layout_role_from_xml_type(xml_comp.type),
+                    'visual_features': xml_comp.visual_features or {}
+                }
+
+                ui_elem = self._dict_to_uielement(ui_element_dict)
+                merged_elements.append(ui_elem)
+
+            except Exception as e:
+                print(f"폴백 변환 실패 {xml_comp.id}: {e}")
+
+        xml_ids = {comp.id for comp in xml_components}
+
+        for ui_elem in ui_elements:
+            if ui_elem.id not in xml_ids:
+                # 공간적 겹침 확인
+                is_overlapping = False
+                for xml_comp in xml_components:
+                    if self._is_spatially_overlapping(ui_elem.bbox, xml_comp.bbox):
+                        is_overlapping = True
+                        break
+
+                if not is_overlapping:
+                    merged_elements.append(ui_elem)
+
+        print(f"폴백 병합 완료: {len(merged_elements)}개")
+        return merged_elements
+
+    def _is_spatially_overlapping(self, bbox1, bbox2):
+        """공간적 겹침 확인"""
+        if not bbox1 or not bbox2 or len(bbox1) < 4 or len(bbox2) < 4:
+            return False
+
+        x1_1, y1_1, x2_1, y2_1 = bbox1[:4]
+        x1_2, y1_2, x2_2, y2_2 = bbox2[:4]
+
+        overlap_x1 = max(x1_1, x1_2)
+        overlap_y1 = max(y1_1, y1_2)
+        overlap_x2 = min(x2_1, x2_2)
+        overlap_y2 = min(y2_1, y2_2)
+
+        if overlap_x1 >= overlap_x2 or overlap_y1 >= overlap_y2:
+            return False
+
+        overlap_area = (overlap_x2 - overlap_x1) * (overlap_y2 - overlap_y1)
+
+        area1 = (x2_1 - x1_1) * (y2_1 - y1_1)
+        area2 = (x2_2 - x1_2) * (y2_2 - y1_2)
+
+        min_area = min(area1, area2)
+        overlap_ratio = overlap_area / min_area if min_area > 0 else 0
+
+        return overlap_ratio > self.overlap_threshold
 
     def _uielement_to_dict(self, ui_element: UIElement) -> Dict:
         """UIElement를 dict로 변환"""
@@ -1108,7 +1335,6 @@ class LayoutAwareParser:
             'content': ui_element.content,
             'confidence': ui_element.confidence,
             'interactivity': ui_element.interactivity,
-            'clickable': ui_element.interactivity,  # XML 호환성을 위한 별칭
             'parent_id': ui_element.parent_id,
             'children': ui_element.children,
             'layout_role': ui_element.layout_role,
@@ -1123,7 +1349,7 @@ class LayoutAwareParser:
             bbox=elem_dict.get('bbox', [0, 0, 0, 0]),
             content=elem_dict.get('content'),
             confidence=elem_dict.get('confidence', 0.0),
-            interactivity=elem_dict.get('interactivity', False) or elem_dict.get('clickable', False),
+            interactivity=elem_dict.get('interactivity', False),  # clickable 참조 제거
             parent_id=elem_dict.get('parent_id'),
             children=elem_dict.get('children', []),
             layout_role=elem_dict.get('layout_role'),
@@ -1549,7 +1775,8 @@ if __name__ == "__main__":
 
     img_paths = glob.glob(f"{rootDir}/image/*.png", recursive=True)
     broken_files = []
-    for image_path in tqdm(img_paths):
+
+    for image_path in tqdm(img_paths[:5]):
         filename = os.path.splitext(os.path.basename(image_path))[0]
         xml_path=f"{rootDir}/xml/{filename}.xml"
         config['filename'] = filename
@@ -1563,7 +1790,7 @@ if __name__ == "__main__":
             broken_files.append(os.path.basename(image_path))
             print(f"해당 파일은 손상 되었습니다.: {image_path}")
             continue
-        result = parser.parse_by_layout(image_path, xml_path)
+        result = parser.parse_by_layout(image=image_path, xml_path=xml_path)
         with open(f"{OUT_DIR}/{filename}.json", "w", encoding="utf-8") as f:
             json.dump(result, f, ensure_ascii=False, indent=2)
 

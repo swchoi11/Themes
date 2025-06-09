@@ -16,6 +16,7 @@ from matplotlib.patches import Rectangle
 class Visualizer():
     """결과 시각화 클래스"""
     def __init__(self):
+
         # 요소 타입별 색상
         self.element_colors = {
             'text': (255, 100, 100),      # 빨강
@@ -52,6 +53,15 @@ class Visualizer():
             'logo': (255, 235, 210),                # 크림색
             'form_elements': (255, 215, 170),       # 연한 오렌지베이지
         }
+
+    def eval(self, image_path: str, json_path: str, save_path: str):
+        with open(json_path, 'r', encoding='utf-8') as f:
+            result = json.load(f)
+
+        image = Image.open(image_path)
+        self._visualize_all_elements(image.copy(), result, f"{save_path}")
+        print(f"{save_path} 저장 되었습니다!!")
+
 
     def visualize_skeleton_result(self, image_path: str, result_path: str, output_dir: str):
         """전체 스켈레톤 결과를 시각화"""
@@ -96,6 +106,7 @@ class Visualizer():
         # self._export_detailed_analysis(result, os.path.join(output_dir, '11_detailed_analysis.txt'))
 
         print(f"시각화 결과가 {output_dir}에 저장되었습니다.")
+
 
     def _visualize_all_elements(self, image: Image.Image, result: Dict, output_path: str):
         """모든 UI 요소를 시각화"""
@@ -669,7 +680,7 @@ class Visualizer():
 
         print(f"상세 분석 리포트: {output_path} 저장")
 
-def visualize_ui_skeleton_result(image_path: str, result_path: str, output_dir: str, cluster_output_name: str = None):
+def visualize_ui_skeleton_result(image_path: str, result_path: str, output_dir: str, cluster_output_name: str = None, DEBUG=False):
     """UI 스켈레톤 결과 시각화 편의 함수"""
 
     if not cluster_output_name is None:
@@ -680,7 +691,7 @@ def visualize_ui_skeleton_result(image_path: str, result_path: str, output_dir: 
     visualizer = Visualizer()
     visualizer.visualize_skeleton_result(image_path, result_path, output_dir)
 
-    print(f"\n=== Enhanced 시각화 완료 ===")
+    print(f"\n------------- * Enhanced 시각화 완료 * -------------")
     print(f"결과 위치: {output_dir}")
     print("\n생성된 파일 목록:")
     print("01_skeleton_full.png: 전체 스켈레톤 구조")
@@ -695,12 +706,14 @@ def visualize_ui_skeleton_result(image_path: str, result_path: str, output_dir: 
     # print("10_accessibility_analysis.png: 접근성 분석")
     print("11_detailed_analysis.txt: 상세 분석 리포트")
 
+
 if __name__ == "__main__":
 
     BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-    ROOT_DIR = os.path.join(BASE_DIR, "resource", "0530_theme_img_xml_labeled")
+    ROOT_DIR = os.path.join(BASE_DIR, "resource", "image")
     JSON_OUTPUT_DIR = os.path.join(BASE_DIR, 'output', 'json')
     VISUAL_OUTPUT_DIR = os.path.join(BASE_DIR, 'output', 'visualization')
+    DEBUG = False
 
     image_map = {}
     for root, dirs, files in os.walk(ROOT_DIR):
@@ -714,22 +727,29 @@ if __name__ == "__main__":
     json_paths = glob.glob(os.path.join(JSON_OUTPUT_DIR, "*.json"))
     for json_path in tqdm(json_paths, desc="Creating visualizations"):
         try:
+
             json_filename = os.path.splitext(os.path.basename(json_path))[0]
             if json_filename not in image_map:
                 print(f"[SKIP] 이미지 파일 없음: {json_filename}.png")
                 continue
 
             image_path = image_map[json_filename]
-            visual_output = os.path.join(VISUAL_OUTPUT_DIR, json_filename)
-
-            if os.path.exists(visual_output):
-                print(f"해당 컴포넌트 UI 파일은 존재 합니다.: {visual_output}")
-                continue
+            if not DEBUG:
+                save_path = os.path.join(VISUAL_OUTPUT_DIR, f"{json_filename}.png")
+                vis = Visualizer()
+                vis.eval(image_path=image_path, json_path=json_path, save_path=save_path)
             else:
-                os.makedirs(visual_output, exist_ok=True)
 
-            visualize_ui_skeleton_result(image_path, json_path, visual_output)
-            print(f"[VISUAL SAVED] {visual_output}")
+                output_dir = os.path.join(VISUAL_OUTPUT_DIR, json_filename)
+
+                if os.path.exists(output_dir):
+                    print(f"해당 컴포넌트 UI 파일은 존재 합니다.: {output_dir}")
+                    continue
+                else:
+                    os.makedirs(output_dir, exist_ok=True)
+
+                visualize_ui_skeleton_result(image_path=image_path, json_path=json_path, output_dir=output_dir)
+                print(f"[VISUAL SAVED] {output_dir}")
 
         except Exception as e:
             print(f"[ERROR] {json_path}: {e}")
