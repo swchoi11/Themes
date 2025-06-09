@@ -46,7 +46,6 @@ class Visual:
 
         return components
     
-    @staticmethod
     def xml_visualize(self, output_path: str=None):
         if not os.path.exists(self.xml_path):
             print(f"xml 파일이 존재하지 않습니다. {self.xml_path}")

@@ -1,10 +1,10 @@
-from src.utils.detect import Detect
-from src.issue.visibility import Visibility
-from src.issue.cutoff import Cutoff
-from src.issue.icon import Icon
-from src.issue.alignment import Align, get_dial_alignment
-from src.utils.logger import init_logger
 import os
+from src.issue.icon import Icon
+from src.issue.cutoff import Cutoff
+from src.utils.detect import Detect
+from src.utils.logger import init_logger
+from src.issue.visibility import Visibility
+from src.issue.alignment import Align, get_dial_alignment
 
 logger = init_logger()
 
@@ -17,11 +17,11 @@ class Layout:
             self.image_path = file_path.replace('.xml', '.png')
             self.xml_path = file_path
 
-        file_name = os.path.basename(self.image_path)
         self.detector = Detect(self.image_path)
 
     def run_layout_check(self):
         classes = self.detector.all_node_classes()
+
         issues = []
 
         # 3-1. 가독성 검증 --> src/issue/visibility.py
@@ -34,7 +34,7 @@ class Layout:
             visibility = Visibility(self.image_path, filter_type="text")
             issues.extend(visibility.run_visibility_check())
             logger.info(f"visibility 검증 완료")
-
+            
         # 3-5. 전화버튼 정렬 검증 --> src/issue/alignment.py (미완성)
         if 'android.widget.DialerButton' in classes:
             # 만약 전화 버튼 컴포넌트가 있는 경우
@@ -49,6 +49,7 @@ class Layout:
             cutoff = Cutoff(self.image_path)
             issues.extend(cutoff.run_radio_button_check())
             logger.info(f"radio 검증 완료")
+            
 
         # 3-4. 동일 아이콘 검증 --> src/issue/icon.py(고도화 필요)
         icon = Icon(self.image_path)
@@ -64,8 +65,7 @@ class Layout:
         # 3-3. 정렬 이슈 검증 --> src/issue/alignment.py(고도화 필요)
         align = Align(self.image_path)
         issues.extend(align.run_alignment_check())
-        print("align 검증 완료")
+        print(issues)
 
         return issues
-
 

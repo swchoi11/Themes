@@ -215,3 +215,21 @@ class Detect:
         for node in all_nodes:
             classes.append(node.get('class'))
         return list(set(classes))
+    
+
+    def get_clock_components(self):
+        all_nodes = self._all_nodes(self.root)
+        clock_components = []
+        for node in all_nodes:
+            if 'icon' in node.get('resource-id') and 'Clock' in node.get('text'):
+                clock_components.append(node)
+        return clock_components
+    
+    def get_calender_components(self):
+        all_nodes = self._all_nodes(self.root)
+        calender_components = []
+        for node in all_nodes:
+            if 'icon' in node.get('resource-id') and 'Calendar' in node.get('text'):
+                calender_components.append(node)
+        return calender_components
+    

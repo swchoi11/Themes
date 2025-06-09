@@ -29,7 +29,7 @@ class Match:
         
         max_similarity = 0
 
-        groups = glob.glob("./output/*/*/", recursive=True)
+        groups = glob.glob("./output/classification/*/*/", recursive=True)
         for group in tqdm(groups, desc="그룹 대표 이미지와 비교중"):
             repr_xml_path = [xml for xml in os.listdir(group) if xml.endswith(".xml")][0]
             repr_xml_path = os.path.join(group, repr_xml_path)

@@ -124,11 +124,19 @@ class Icon:
                             bounds_list_str = ", ".join(other_bounds)
                             
                             issue = ResultModel(
-                                image_path=self.image_path,
-                                index=icon.get('index', 0),
-                                issue_type='duplicate_icon',
-                                issue_location=list(icon['bounds']),
-                                issue_description=f"중복 아이콘 탐지: {len(duplicate_group)}개의 동일한 아이콘이 발견됨. 현재 위치: {icon['bounds']}, 동일한 아이콘 위치들: [{bounds_list_str}] (디폴트와 다름)"
+                                filename = self.image_path,
+                                issue_type='design',
+                                component_id=0,
+                                ui_component_id="",
+                                ui_component_type="horizontal_section",
+                                severity="high",
+                                location_id="",
+                                location_type="",
+                                bbox=icon['bounds'],
+                                description_id="8",
+                                description_type="역할이 다른 기능 요소에 동일한 아이콘 이미지로 중복 존재",
+                                description=f"수평 구간에서 중복 아이콘 탐지: {len(duplicate_group)}개의 동일한 아이콘이 해당 수평 구간에서 발견됨. 중복 아이콘 위치들: [{bounds_list_str}] (디폴트와 다름)",
+                                ai_description=""
                             )
 
                             issues.append(issue)
@@ -136,10 +144,25 @@ class Icon:
                             cv2.putText(self.image, f"duplicate", (icon['bounds'][0], icon['bounds'][1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
                             
                         file_name = os.path.basename(self.image_path)
-                        cv2.imwrite(f"./output/{file_name}", self.image)
+                        cv2.imwrite(f"./output/images/{file_name}", self.image)
                     else:
                         logger.info(f"디폴트 이미지에서도 동일한 중복이 발견되어 정상으로 판정됨")
-            
+                        issue = ResultModel(
+                            filename = self.image_path,
+                            issue_type='design',
+                            component_id=0,
+                            ui_component_id="",
+                            ui_component_type="",
+                            severity="high",
+                            location_id="",
+                            location_type="",
+                            bbox=[],
+                            description_id="8",
+                            description_type="역할이 다른 기능 요소에 동일한 아이콘 이미지로 중복 존재",
+                            description="",
+                            ai_description=""
+                        )
+                        issues.append(issue)
         except Exception as e:
             logger.error(f"아이콘 중복 탐지 중 오류: {e}")
         

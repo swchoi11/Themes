@@ -265,7 +265,6 @@ class Visibility():
             logger.info(f"가독성 검사 시작: {self.image_path}")
             issues = []
             for component in tqdm(self.components, desc="가독성 검사 중"):
-                #logger.info(f"가독성 검사 중: {component['index']}")
 
                 x1, y1, x2, y2 = component['bounds']
                 index = component['index']
@@ -274,46 +273,80 @@ class Visibility():
 
                 # 컴포넌트 영역의 주된 색상 추출
                 colors = self.color_extraction(img_crop)
-                #logger.info(f"컴포넌트 영역의 주된 색상 추출: {colors}")                
                 
                 if not colors:
                     continue
                 
                 # 대비 검사
                 contrast_result, max_contrast =self.calculate_contrast(colors)
-                #logger.info(f"대비 검사 결과: {contrast_result}, {max_contrast}")
 
                 if not contrast_result:
-                    #logger.info(f"이슈 발견! 컴포넌트 정보: {component}")
                     try:
                         resource_id = component.get('resource-id', 'unknown')
                         issue = ResultModel(
-                            image_path=self.image_path,
-                            index=index,
-                            issue_type=f"visibility_{component['type']}",
-                            issue_location=component['bounds'],
-                            issue_description=f"{component['type']}, {resource_id}에서 가독성 이슈 발생 - 색상 대비 부족:{max_contrast}"
+                            filename=self.image_path,
+                            issue_type = "visibility",
+                            component_id = int(index),
+                            ui_component_id = "",
+                            ui_component_type = component['type'],
+                            severity = "high",
+                            location_id = "",
+                            location_type = "",
+                            bbox=component['bounds'],
+                            description_id = "0",
+                            description_type = "텍스트, 아이콘과 배경 간 대비가 낮아 가독성이 떨어짐",
+                            description=f"{component['type']}, {resource_id}에서 가독성 이슈 발생 - 색상 대비 부족:{max_contrast}",
+                            ai_description = ""
                         )
                         issues.append(issue)
-                        #logger.info(f"이슈 추가 완료: {issue.issue_description}")
                     except Exception as e:
                         logger.error(f"이슈 생성 중 오류: {e}")
                         logger.error(f"컴포넌트 데이터: {component}")
             
             # 가장 낮은 대비 값을 가지는 이슈를 저장
             if issues:
-                min_contrast = min(issues, key=lambda x: x.issue_description.split(":")[-1])
-                #logger.info(f"가독성 검사 완료. 검출된 이슈 {len(issues)+1}개 중 가장 낮은 대비 값을 가지는 이슈를 저장합니다.")
-
+                min_contrast = min(issues, key=lambda x: x.description.split(":")[-1])
+                
                 file_name = os.path.basename(self.image_path)
-                output_path = f"./output/{file_name}"
+                output_path = f"./output/images/{file_name}"
 
                 cv2.rectangle(self.img, (min_contrast.issue_location[0], min_contrast.issue_location[1]), (min_contrast.issue_location[2], min_contrast.issue_location[3]), (0, 255, 0), 2)
                 cv2.putText(self.img, f"contrast: {min_contrast.issue_description.split(':')[-1]}", (min_contrast.issue_location[0], min_contrast.issue_location[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                 cv2.imwrite(output_path, self.img)
                 
+                issue = ResultModel(
+                    filename = self.image_path,
+                    issue_type = "visibility",
+                    component_id = min_contrast.component_id,
+                    ui_component_id = "",
+                    ui_component_type = min_contrast.ui_component_type,
+                    severity = "high",
+                    location_id = "",
+                    location_type = "",
+                    bbox = min_contrast.bbox,
+                    description_id = "0",
+                    description_type = "텍스트, 아이콘과 배경 간 대비가 낮아 가독성이 떨어짐",
+                    description = min_contrast.description,
+                    ai_description = ""
+                )
+            else:
+                issue = ResultModel(
+                    filename = self.image_path,
+                    issue_type = "visibility",
+                    component_id = 0,
+                    ui_component_id = "",
+                    ui_component_type = "",
+                    severity = "",
+                    location_id = "",
+                    location_type = "",
+                    bbox = [],
+                    description_id = "0",
+                    description_type = "텍스트, 아이콘과 배경 간 대비가 낮아 가독성이 떨어짐",
+                    description = "",
+                    ai_description = ""
+                )
 
-            return min_contrast
+            return [issue]
             # return issues
         except Exception as e:
             #print(f"가독성 검사 중 오류 발생: {e}")

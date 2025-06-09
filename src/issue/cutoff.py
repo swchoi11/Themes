@@ -23,7 +23,7 @@ class Cutoff:
         components = self.detect.get_class_components("android.widget.RadioButton")
         issues = []
         logger.info(f"라디오 버튼 검사 시작")
-        output_path = f"./output/{os.path.basename(self.image_path)}"
+        output_path = f"./output/images/{os.path.basename(self.image_path)}"
         bounds_str = ""
         for component in components:
             logger.info(f"라디오 버튼 검사 중: {component['bounds']}")
@@ -52,11 +52,19 @@ class Cutoff:
                         break  # 한 컴포넌트에서 이슈를 찾으면 다음 컴포넌트로
                         
             result = ResultModel(
-                image_path=self.image_path,
-                index=component['index'],
-                issue_type='cutoff',
-                issue_location=[x1, y1, x2, y2],
-                issue_description=f"컴포넌트 영역 {bounds_str}에서 컷오프 이슈 발생 : {component['type']}"
+                filename=self.image_path,
+                issue_type='design',
+                component_id=int(component['index']),
+                ui_component_id="",
+                ui_component_type=component['type'],
+                severity="high",
+                location_id="",
+                location_type="",
+                bbox=[x1, y1, x2, y2],
+                description_id="7",
+                description_type="아이콘의 가장자리가 보이지 않음거나 잘려보임(이미지 제외)",
+                description=f"컴포넌트 영역 {bounds_str}에서 컷오프 이슈 발생 : {component['type']}",
+                ai_description=""
             )
         
         return [result]

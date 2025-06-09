@@ -1,14 +1,71 @@
-from typing import Optional
+from typing import List
 from pydantic import BaseModel
 
 class ResultModel(BaseModel):
-    image_path: str = ""
-    index: int = 0
+    filename: str = ""
     issue_type: str = ""
-    issue_location: list[int] = []
-    issue_description: str = ""
+    component_id: int
+    ui_component_id: str        # EvalKPI.UI_COMPONENT.keys()
+    ui_component_type : str     # EvalKPI.UI_COMPONENT.value()
+    severity: str
+    location_id: str            # EvalKPI.LOCATION.keys()
+    location_type: str          # EvalKPI.LOCATION.value()
+    bbox: List[float]
+    description_id: str         # EvalKPI.DESCRIPTION.keys()
+    description_type: str       # EvalKPI.DESCRIPTION.value()
+    description: str = ""
+    ai_description: str         # Gemini.response.text()
 
 class Result(BaseModel):
-    issue_location: list[int] = []
-    issue_description: str = ""
+    severity: str = ""
+    bbox: List[int] = []
+    ai_description: str = ""
     
+class EvalKPI:
+    """ PoC 평가 기준 정의"""
+
+    #1. UI 구성 요소 12가지
+    UI_COMPONENT = {
+        '0': 'Button',          # 클릭 가능한 일반 버튼
+        '1': 'ImageView',       # 이미지가 표시된 뷰
+        '2': 'RadioButton',     # 단일 선택 가능한 동그란 선택 버튼
+        '3': 'CheckBox',        # 다중 선택 가능한 사각형 선택 버튼
+        '4': 'EditText',        # 텍스트 입력 필드
+        '5': 'TextView',        # 읽기 전용 텍스트
+        '6': 'Switch',          # 토글 가능한 스위치
+        '7': 'ToggleButton',    # 눌러서 상태 전환이 되는 버튼 형태의 스위치
+        '8': 'SeekBar',         # 수평 슬라이더, 값 조절 가능
+        '9': 'ProgressBar',     # 로딩 상태 등을 표시하는 진행 바
+        'A': 'Spinner',         # 클릭 시 목록이 뜨는 드롭다운 선택 박스
+        'B': 'ImageButton'      # 이미지로 된 버튼
+    }
+
+    #2. 9 분위 영역
+    LOCATION = {
+        '0': 'TL',  # Top Left
+        '1': 'TC',  # Top Center
+        '2': 'TR',  # Top Right
+        '3': 'ML',  # Middle Left
+        '4': 'MC',  # Middle Center
+        '5': 'MR',  # Middle Right
+        '6': 'BL',  # Bottom Left
+        '7': 'BC',  # Bottom Center
+        '8': 'BR'   # Bottom Right
+    }
+
+    # 3. Issue Representative Description
+    DESCRIPTION = {
+        '0': "텍스트, 아이콘과 배경 간 대비가 낮아 가독성이 떨어짐",
+        '8': "역할이 다른 기능 요소에 동일한 아이콘 이미지로 중복 존재",
+        '9': "달력 아이콘에서 요일 글자가 테두리를 벗어남",
+        'A': "앱 내 달력, 시간 아이콘이 status bar 등에 보이는 실제 현재 날짜, 시각과 매칭되지 않음",
+        '4': "컴포넌트 내부 요소들의 수직/수평 정렬이 균일하지 않음",
+        '5': "동일 계층 요소들 간의 정렬 기준점이 서로 다름",
+        '7': "아이콘의 가장자리가 보이지 않음거나 잘려보임(이미지 제외)",
+        '2': "상호작용 가능한 요소가 시각적으로 명확히 구분되지 않음",
+
+        '1': "하이라이트된 항목, 텍스트와 배경 간 대비가 낮아 가독성이 떨어짐",
+        '3': "화면 요소들(아이콘,텍스트, 버튼 등)이 일관된 정렬 기준을 따르지 않음(전화 버튼 Text 배열이 중앙 정렬이 되지 않을 경우 Defect로 인식)",
+        '6': "텍스트가 할당된 영역을 초과하여 영역 외 텍스트 잘림",
+        'B': "콘텐츠와 화면 비율이 맞지 않아 불필요한 여백이 많이 발생함"
+    }

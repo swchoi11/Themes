@@ -4,7 +4,9 @@ from typing import Tuple
 import cv2
 import re
 import random
-
+import os
+import shutil
+import json
 
 def normalize_xml_content(xml_path: str) -> str:
     """
@@ -62,3 +64,40 @@ def draw_components(components, image_path, file_name='output.png'):
         random_color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
         cv2.rectangle(img, (component[0], component[1]), (component[2], component[3]), random_color, 2)
     cv2.imwrite(file_name, img)
+
+def check_size(image_path: str):
+    img = cv2.imread(image_path)
+    h, w = img.shape[:2]
+    return h/w <= 2.0
+
+def init_process():
+    os.makedirs('./output/images/', exist_ok=True)
+    os.makedirs('./output/images/not_processed', exist_ok=True)
+    os.makedirs('./output/jsons/all_issues', exist_ok=True)
+    os.makedirs('./output/jsons/final_issue', exist_ok=True)
+    os.makedirs('./output/classification', exist_ok=True)
+
+def move_to_not_processed(test_image: str):
+    file_name = os.path.basename(test_image)
+    xml_path = test_image.replace('.png', '.xml')
+    
+    # 이미지와 XML 파일 이동
+    shutil.move(test_image, f'./output/images/not_processed/{file_name}')
+    if os.path.exists(xml_path):
+        xml_name = os.path.basename(xml_path)
+        shutil.move(xml_path, f'./output/images/not_processed/{xml_name}')
+
+def load_existing_results(filename):
+    """기존 JSON 파일 로드"""
+    if os.path.exists(filename):
+        try:
+            with open(filename, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except (json.JSONDecodeError, FileNotFoundError):
+            return []
+    return []
+
+def save_results(all_results, filename):
+    """결과를 JSON 파일에 저장"""
+    with open(filename, 'w', encoding='utf-8') as f:
+        json.dump(all_results, f, ensure_ascii=False, indent=2)

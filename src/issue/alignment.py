@@ -53,11 +53,19 @@ class Align:
                 cv2.imwrite(f"alignment_issue.png", img)
                 # print(f"정렬 문제 발견: y축 범위 {y1}-{y2}")
                 result = ResultModel(
-                    image_path=self.image_path,
-                    index='',
+                    filename=self.image_path,
                     issue_type='alignment',
-                    issue_location=[0, y1, w, y2],
-                    issue_description=f"정렬 문제 발견: y축 범위 {y1}-{y2}"
+                    component_id=0,
+                    ui_component_id="",
+                    ui_component_type="",
+                    severity="high",
+                    location_id="",
+                    location_type="",
+                    bbox=[0, y1, w, y2],
+                    description_id="4",
+                    description_type="컴포넌트 내부 요소들의 수직/수평 정렬이 균일하지 않음",
+                    description=f"정렬 문제 발견: y축 범위 {y1}-{y2}",
+                    ai_description=""
                 )
                 return result
         return []
@@ -172,10 +180,10 @@ class Align:
         # 통계 출력
         unique_bounds = set(group['bounds'] for group in groups)
         
-        if len(unique_bounds) < len(groups):
-            print("❌ 누적이 제대로 되지 않음 - 같은 bounds의 그룹이 여러 개 존재")
-        else:
-            print("✅ 누적이 제대로 됨 - 각 bounds마다 하나의 그룹만 존재")
+        # if len(unique_bounds) < len(groups):
+        #     print("❌ 누적이 제대로 되지 않음 - 같은 bounds의 그룹이 여러 개 존재")
+        # else:
+        #     print("✅ 누적이 제대로 됨 - 각 bounds마다 하나의 그룹만 존재")
 
 # 다이얼러 전용 정렬 확인 함수 (기존 코드 유지)
 def get_dial_alignment(image_path: str):

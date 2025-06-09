@@ -1,61 +1,66 @@
 import json
 import glob
+import os
 from tqdm import tqdm
 
 from src.classification import ImageXMLClassifier
 from src.layout import Layout
 from src.gemini import Gemini
+from src.utils.utils import check_size, init_process, move_to_not_processed, load_existing_results, save_results
+from src.utils.model import ResultModel
 
 
-# 1. classification -- src/classification.py
-classifier = ImageXMLClassifier()
-classifier.run_classification() 
+# 1. classification
+# classifier = ImageXMLClassifier()
+# classifier.check_classification()
 
-for test_image in tqdm(glob.glob('./resource/defect/*/*.png')):  
-    # 2. layout -- src/layout.py, src/utils/detect.py
-    layout = Layout(test_image)
-    issues = layout.run_layout_check()
+json_filename = './output/jsons/all_issues/result-0609.json'
+all_results = load_existing_results(json_filename)
 
-    # 3. gemini -- src/gemini.py    
-    gemini = Gemini(test_image)
-    result = gemini.detect_all_issues()
+# for test_image in tqdm(glob.glob('./resource/defect/*/*.png')):
+#     init_process()
+    
+#     # 이미지 크기 확인
+#     if not check_size(test_image):
+#         move_to_not_processed(test_image)
+#         continue
+    
+#     # 2. layout check
+#     layout = Layout(test_image)
+#     issues = layout.run_layout_check()
+    
+#     # 3. gemini check
+#     gemini = Gemini(test_image)
+#     issues.extend(gemini.layout_issues())
+#     issues.extend(gemini.design_issues())
 
-    all_issues = issues + result
+#     # 이슈가 없으면 정상 결과 추가
+#     if not issues:
+#         issue = ResultModel(
+#             filename=test_image,
+#             issue_type="normal",
+#             component_id=0,
+#             ui_component_id="",
+#             ui_component_type="",
+#             severity="0",
+#             location_id="",
+#             location_type="",
+#             bbox=[],
+#             description_id="",
+#             description_type="",
+#             description="문제가 없습니다.",
+#             ai_description=""
+#         )
+#         issues.append(issue)
+    
+#     # ResultModel을 딕셔너리로 변환하여 전체 결과에 추가
+#     for issue in issues:
+#         all_results.append(issue.model_dump())
+    
+#     # 매 이미지 처리 후 저장 (안전성을 위해)
+#     save_results(all_results, json_filename)
 
-    try:
-        all_issues = [issue.model_dump() for issue in all_issues]
-    except:
-        all_issues = []
+gemini = Gemini(json_filename)
+output_path = gemini.sort_issues(json_filename)
 
-    # -- 위에서 검출된 이슈 중 가장 중요한 이슈를 종합해서 판단하기
-    # 이 부분은 할루시네이션이 심하고 고도화가 필요해 수행하지 않았습니다.
-    # gemini = Gemini(test_image)
-    # result = gemini.detect_all_issues()
-
-    with open('./output/result-0605.json', 'a') as f:
-        # 안전한 JSON 변환
-        json_results = []
-        for issue in all_issues:
-            json_results.append(issue)
-        
-        json.dump(json_results, f, ensure_ascii=False, indent=2)
-
-
-'''
-# raw result -- ./output/result-0605.json
-# 시간 관계상 visibility 파일의 ./resource/defect/Visibility Issue/com.sec.android.app.launcher_LauncherActivity_20250521_171919.png에서 중단하였습니다.
-
-## 할루시네이션 문제가 해결되지 않았으므로 
-## 제미나이가 이미지 별 이슈를 종합하여 검토하는 부분은 result.json파일을 활용하여 진행하는 방향으로 수정해야 할 것 같습니다.
-
-# 이후 진행해야하는 mock code
-# 이슈 종합 진단
-gemini = Gemini()
-issues = gemini.sort_issues('./output/result-0605.json')
-# 검출된 이슈에 대한 정답 여부 판정 및 산출물 생성
-issuse_to_confusion_matrix(issues)
-'''
-
-
-
-
+print(output_path)
