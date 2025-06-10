@@ -21,7 +21,7 @@ class Gemini:
     def __init__(self):
         load_dotenv()
         self.client = genai.Client(api_key=os.getenv('API_KEY'))
-        self.model = 'gemini-2.0-flash'
+        self.model = 'gemini-2.5-flash-preview-05-20'
 
         self.max_retries = 5
         self.initial_delay = 1

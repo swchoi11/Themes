@@ -14,17 +14,549 @@ from common.prompt import IssuePrompt
 from src.gemini import Gemini
 
 
+class DuplicateDetector:
+    """중복 아이콘 검출 클래스"""
+
+    def __init__(self, parent: 'LayoutDetector'):
+        self.parent = parent
+        self.similarity_threshold = 0.95  # icon.py와 동일
+        self.default_image_cache = {}
+
+    def detect_duplicate_icons(self, elements: List[Dict], image: np.ndarray,
+                               default_image: Optional[np.ndarray] = None) -> List[Issue]:
+        """중복 아이콘 검출 (icon.py 로직 기반)"""
+        issues = []
+
+        # 아이콘 크기 요소만 필터링
+        icon_elements = self._filter_icon_elements(elements)
+        if len(icon_elements) < 2:
+            return issues
+
+        print(f"아이콘 요소 {len(icon_elements)}개 검사 시작")
+
+        # 각 아이콘의 이미지 데이터 추출
+        icon_images = []
+        for i, icon in enumerate(icon_elements):
+            bbox = icon['bbox']
+            h, w = image.shape[:2]
+            x1, y1, x2, y2 = [int(coord * dim) for coord, dim in zip(bbox, [w, h, w, h])]
+
+            if x1 < x2 and y1 < y2 and x1 >= 0 and y1 >= 0 and x2 <= w and y2 <= h:
+                icon_img = image[y1:y2, x1:x2]
+                if icon_img.size > 0:
+                    icon_images.append({
+                        'index': i,
+                        'element': icon,
+                        'image': icon_img
+                    })
+
+        # 중복 그룹 찾기
+        duplicate_groups = self._find_duplicate_groups(icon_images)
+
+        for group in duplicate_groups:
+            if len(group) > 1:
+                # 디폴트 이미지와 비교하여 정상 중복인지 확인
+                is_normal_duplicate = self._verify_with_default_image(
+                    group, icon_images, default_image
+                )
+
+                if not is_normal_duplicate:
+                    # 중복 이슈 생성 (새 이슈 타입 8)
+                    for icon_idx in group:
+                        element = icon_images[icon_idx]['element']
+
+                        other_positions = [
+                            str(icon_images[other_idx]['element']['bbox'])
+                            for other_idx in group if other_idx != icon_idx
+                        ]
+
+                        issue = self.parent._create_issue(element, 8)  # 새 이슈 타입
+                        issue.ai_description = (
+                            f"중복 아이콘 탐지: {len(group)}개의 동일한 아이콘. "
+                            f"현재 위치: {element['bbox']}, "
+                            f"동일 아이콘 위치: {', '.join(other_positions)} "
+                            f"(디폴트와 다름)"
+                        )
+                        issue.severity = 'medium'
+                        issues.append(issue)
+
+                        print(f"중복 아이콘 이슈: {element.get('id', 'unknown')}")
+
+        return issues
+
+    def _filter_icon_elements(self, elements: List[Dict]) -> List[Dict]:
+        """아이콘 크기 요소 필터링"""
+        icon_elements = []
+
+        for element in elements:
+            elem_type = element.get('type', '').lower()
+
+            # 이미지/아이콘 타입 확인
+            if elem_type in ['imageview', 'image', 'icon']:
+                bbox = element['bbox']
+                width = bbox[2] - bbox[0]
+                height = bbox[3] - bbox[1]
+
+                # 아이콘 크기 범위 (상대좌표 기준)
+                if 0.02 <= width <= 0.15 and 0.02 <= height <= 0.15:
+                    # 정사각형에 가까운 비율
+                    aspect_ratio = width / height if height > 0 else 1.0
+                    if 0.5 <= aspect_ratio <= 2.0:
+                        icon_elements.append(element)
+
+        return icon_elements
+
+    def _find_duplicate_groups(self, icon_images: List[Dict]) -> List[List[int]]:
+        """아이콘 유사도 기반 중복 그룹 찾기"""
+        if len(icon_images) < 2:
+            return []
+
+        # 유사도 매트릭스 계산
+        similarity_matrix = np.zeros((len(icon_images), len(icon_images)))
+
+        for i in range(len(icon_images)):
+            for j in range(i + 1, len(icon_images)):
+                similarity = self._calculate_icon_similarity(
+                    icon_images[i]['image'],
+                    icon_images[j]['image']
+                )
+                similarity_matrix[i][j] = similarity
+                similarity_matrix[j][i] = similarity
+
+        # 중복 그룹 찾기
+        duplicate_groups = []
+        processed = set()
+
+        for i in range(len(icon_images)):
+            if i in processed:
+                continue
+
+            group = [i]
+            processed.add(i)
+
+            for j in range(i + 1, len(icon_images)):
+                if j not in processed and similarity_matrix[i][j] >= self.similarity_threshold:
+                    group.append(j)
+                    processed.add(j)
+
+            if len(group) > 1:
+                duplicate_groups.append(group)
+
+        return duplicate_groups
+
+    def _calculate_icon_similarity(self, img1: np.ndarray, img2: np.ndarray) -> float:
+        """아이콘 유사도 계산 (icon.py와 동일)"""
+        try:
+            # 크기 정규화
+            target_size = (32, 32)
+            img1_resized = cv2.resize(img1, target_size)
+            img2_resized = cv2.resize(img2, target_size)
+
+            # 그레이스케일 변환
+            if len(img1_resized.shape) == 3:
+                img1_gray = cv2.cvtColor(img1_resized, cv2.COLOR_BGR2GRAY)
+            else:
+                img1_gray = img1_resized
+
+            if len(img2_resized.shape) == 3:
+                img2_gray = cv2.cvtColor(img2_resized, cv2.COLOR_BGR2GRAY)
+            else:
+                img2_gray = img2_resized
+
+            # 1. 히스토그램 비교
+            hist1 = cv2.calcHist([img1_gray], [0], None, [256], [0, 256])
+            hist2 = cv2.calcHist([img2_gray], [0], None, [256], [0, 256])
+            hist_similarity = cv2.compareHist(hist1, hist2, cv2.HISTCMP_CORREL)
+
+            # 2. 픽셀 단위 비교
+            diff = cv2.absdiff(img1_gray, img2_gray)
+            pixel_similarity = 1.0 - (np.mean(diff) / 255.0)
+
+            # 3. 템플릿 매칭
+            result = cv2.matchTemplate(img1_gray, img2_gray, cv2.TM_CCOEFF_NORMED)
+            template_similarity = np.max(result)
+
+            # 가중 평균
+            final_similarity = (
+                    hist_similarity * 0.3 +
+                    pixel_similarity * 0.4 +
+                    template_similarity * 0.3
+            )
+
+            return max(0.0, min(1.0, final_similarity))
+
+        except Exception as e:
+            print(f"유사도 계산 오류: {e}")
+            return 0.0
+
+    def _verify_with_default_image(self, group: List[int], icon_images: List[Dict],
+                                   default_image: Optional[np.ndarray]) -> bool:
+        """디폴트 이미지와 비교 검증"""
+        if default_image is None:
+            return False
+
+        try:
+            # 각 그룹 멤버의 좌표에서 디폴트 이미지 추출
+            default_crops = []
+
+            for icon_idx in group:
+                element = icon_images[icon_idx]['element']
+                bbox = element['bbox']
+
+                # 디폴트 이미지에서 같은 좌표로 추출
+                h, w = default_image.shape[:2]
+                x1, y1, x2, y2 = [int(coord * dim) for coord, dim in zip(bbox, [w, h, w, h])]
+
+                if 0 <= x1 < x2 <= w and 0 <= y1 < y2 <= h:
+                    default_crop = default_image[y1:y2, x1:x2]
+                    if default_crop.size > 0:
+                        default_crops.append(default_crop)
+
+            if len(default_crops) < 2:
+                return False
+
+            # 디폴트 이미지에서 추출한 이미지들이 모두 동일한지 확인
+            base_image = default_crops[0]
+
+            for compare_image in default_crops[1:]:
+                # 크기 맞추기
+                if base_image.shape != compare_image.shape:
+                    compare_image = cv2.resize(compare_image,
+                                               (base_image.shape[1], base_image.shape[0]))
+
+                # 유사도 계산
+                similarity = self._calculate_icon_similarity(base_image, compare_image)
+
+                # 디폴트에서 다르면 이슈
+                if similarity < 0.99:
+                    return False
+
+            return True  # 디폴트에서도 동일하면 정상
+
+        except Exception as e:
+            print(f"디폴트 검증 오류: {e}")
+            return False
+
+
+class AestheticDetector:
+    """심미적 이슈 검출 클래스"""
+
+    def __init__(self, parent: 'LayoutDetector'):
+        self.parent = parent
+
+    def detect_aesthetic_issues(self, elements: List[Dict], image: np.ndarray,
+                                layout_data: Dict) -> List[Issue]:
+        """심미적 이슈 검출"""
+        issues = []
+
+        # 1. 색상 조화 검사
+        color_issues = self._check_color_harmony(elements, image)
+        issues.extend(color_issues)
+
+        # 2. 공간 활용 검사
+        spacing_issues = self._check_spacing_consistency(elements)
+        issues.extend(spacing_issues)
+
+        # 3. 비례 조화 검사
+        proportion_issues = self._check_proportional_harmony(elements)
+        issues.extend(proportion_issues)
+
+        return issues
+
+    def _check_color_harmony(self, elements: List[Dict], image: np.ndarray) -> List[Issue]:
+        """색상 조화 검사"""
+        issues = []
+
+        # 전체 화면의 주요 색상 추출
+        screen_colors = self._extract_screen_colors(image)
+
+        # 각 요소의 색상이 전체 조화를 해치는지 확인
+        for element in elements:
+            elem_type = element.get('type', '').lower()
+
+            if elem_type in ['button', 'imagebutton']:
+                element_colors = self._get_element_colors(element, image)
+
+                if element_colors and self._is_color_discordant(element_colors, screen_colors):
+                    issue = self.parent._create_issue(element, 9)  # 새 이슈 타입
+                    issue.ai_description = f"색상 조화 불일치: 요소 색상이 전체 테마와 부조화"
+                    issue.severity = 'low'
+                    issues.append(issue)
+
+        return issues
+
+    def _extract_screen_colors(self, image: np.ndarray) -> List[List[int]]:
+        """화면 전체 주요 색상 추출"""
+        try:
+            # 이미지를 작게 리사이즈하여 처리 속도 향상
+            small_img = cv2.resize(image, (100, 100))
+            pixels = small_img.reshape(-1, 3)
+
+            # 간단한 K-means 대신 대표 색상 추출
+            colors = []
+            for i in range(0, len(pixels), len(pixels) // 5):
+                chunk = pixels[i:i + len(pixels) // 5]
+                if len(chunk) > 0:
+                    avg_color = np.mean(chunk, axis=0)
+                    colors.append(avg_color.astype(int).tolist())
+
+            return colors[:5]  # 최대 5개 색상
+        except:
+            return [[128, 128, 128]]  # 기본 회색
+
+    def _get_element_colors(self, element: Dict, image: np.ndarray) -> List[List[int]]:
+        """요소의 주요 색상 추출"""
+        try:
+            bbox = element['bbox']
+            h, w = image.shape[:2]
+            x1, y1, x2, y2 = [int(coord * dim) for coord, dim in zip(bbox, [w, h, w, h])]
+
+            if x1 >= x2 or y1 >= y2 or x1 < 0 or y1 < 0 or x2 > w or y2 > h:
+                return []
+
+            element_region = image[y1:y2, x1:x2]
+            if element_region.size == 0:
+                return []
+
+            # 평균 색상 계산
+            avg_color = np.mean(element_region.reshape(-1, 3), axis=0)
+            return [avg_color.astype(int).tolist()]
+
+        except Exception:
+            return []
+
+    def _is_color_discordant(self, element_colors: List[List[int]],
+                             screen_colors: List[List[int]]) -> bool:
+        """색상 부조화 판별"""
+        if not element_colors or not screen_colors:
+            return False
+
+        element_color = element_colors[0]
+
+        # 모든 화면 색상과의 거리 계산
+        min_distance = float('inf')
+        for screen_color in screen_colors:
+            distance = np.sqrt(sum((a - b) ** 2 for a, b in zip(element_color, screen_color)))
+            min_distance = min(min_distance, distance)
+
+        # 거리가 너무 크면 부조화로 판정
+        return min_distance > 100  # 임계값
+
+    def _check_spacing_consistency(self, elements: List[Dict]) -> List[Issue]:
+        """공간 활용 일관성 검사"""
+        issues = []
+
+        # 요소 간 간격 계산
+        spacings = []
+        sorted_elements = sorted(elements, key=lambda e: (e['bbox'][1], e['bbox'][0]))
+
+        for i in range(len(sorted_elements) - 1):
+            current = sorted_elements[i]
+            next_elem = sorted_elements[i + 1]
+
+            # 수직 간격 계산
+            vertical_gap = next_elem['bbox'][1] - current['bbox'][3]
+            if vertical_gap > 0:
+                spacings.append(vertical_gap)
+
+        if spacings:
+            spacing_std = np.std(spacings)
+            mean_spacing = np.mean(spacings)
+
+            # 간격 편차가 큰 경우
+            if spacing_std > mean_spacing * 0.5:
+                # 가장 편차가 큰 요소 찾기
+                for i, spacing in enumerate(spacings):
+                    if abs(spacing - mean_spacing) > spacing_std:
+                        problematic_element = sorted_elements[i + 1]
+
+                        issue = self.parent._create_issue(problematic_element, 10)  # 새 이슈 타입
+                        issue.ai_description = f"공간 활용 불일치: 간격 {spacing:.3f} (평균: {mean_spacing:.3f})"
+                        issue.severity = 'low'
+                        issues.append(issue)
+                        break
+
+        return issues
+
+    def _check_proportional_harmony(self, elements: List[Dict]) -> List[Issue]:
+        """비례 조화 검사"""
+        issues = []
+
+        # 황금비 (1.618) 기반 검사
+        golden_ratio = 1.618
+
+        for element in elements:
+            bbox = element['bbox']
+            width = bbox[2] - bbox[0]
+            height = bbox[3] - bbox[1]
+
+            if height > 0:
+                aspect_ratio = width / height
+
+                # 황금비와의 차이가 클 때, 그리고 정사각형도 아닐 때
+                golden_diff = abs(aspect_ratio - golden_ratio)
+                square_diff = abs(aspect_ratio - 1.0)
+
+                if golden_diff > 0.5 and square_diff > 0.3 and (aspect_ratio > 3.0 or aspect_ratio < 0.3):
+                    issue = self.parent._create_issue(element, 11)  # 새 이슈 타입
+                    issue.ai_description = f"비례 부조화: 종횡비 {aspect_ratio:.2f} (극단적 비율)"
+                    issue.severity = 'low'
+                    issues.append(issue)
+
+        return issues
+
+
+class GeminiContextBuilder:
+    """Gemini가 인식하기 쉬운 형태로 컨텍스트 구성"""
+
+    def __init__(self, parent: 'LayoutDetector'):
+        self.parent = parent
+
+    def build_verification_context(self, issues: List[Issue], layout_data: Dict,
+                                   image_path: str) -> str:
+        """Gemini 검증용 컨텍스트 구성"""
+
+        # 1. 화면 구조 요약
+        screen_summary = self._build_screen_summary(layout_data)
+
+        # 2. 이슈별 상세 컨텍스트
+        issues_context = self._build_issues_context(issues)
+
+        # 3. 검증 가이드라인
+        verification_guide = self._build_verification_guide()
+
+        context = f"""
+        === 화면 분석 컨텍스트 ===
+        이미지 파일: {os.path.basename(image_path)}
+        
+        {screen_summary}
+        
+        === 검출된 이슈 목록 ===
+        {issues_context}
+        
+        === 검증 가이드라인 ===
+        {verification_guide}
+        
+        각 이슈에 대해 다음 정보로 응답해주세요:
+        1. 이슈 ID (component_id)
+        2. 실제 이슈 여부 (true/false)
+        3. 심각도 (high/medium/low)
+        4. 상세 설명 (사용자가 이해하기 쉬운 언어로)
+        
+        JSON 형태로 응답해주세요:
+        {{
+          "issues": [
+            {{
+              "component_id": "element_id",
+              "is_actual_issue": true,
+              "severity": "high",
+              "description": "구체적인 설명"
+            }}
+          ]
+        }}
+        """
+        return context
+
+    def _build_screen_summary(self, layout_data: Dict) -> str:
+        """화면 구조 요약"""
+        elements = layout_data.get('skeleton', {}).get('elements', [])
+        layout_regions = layout_data.get('layout_regions', {})
+
+        # 요소 통계
+        type_counts = {}
+        for element in elements:
+            elem_type = element.get('type', 'unknown')
+            type_counts[elem_type] = type_counts.get(elem_type, 0) + 1
+
+        # 활성 영역 정보
+        active_regions = [name for name, info in layout_regions.items()
+                          if info.get('elements')]
+
+        summary = f"""
+        화면 구조:
+        - 총 요소 수: {len(elements)}개
+        - 요소 타입별 분포: {', '.join([f'{t}({c}개)' for t, c in type_counts.items()])}
+        - 활성 화면 영역: {', '.join(active_regions)}
+        - 화면 복잡도: {'높음' if len(elements) > 50 else '보통' if len(elements) > 20 else '낮음'}
+        """
+        return summary
+
+    def _build_issues_context(self, issues: List[Issue]) -> str:
+        """이슈별 상세 컨텍스트"""
+        if not issues:
+            return "검출된 이슈가 없습니다."
+
+        context_parts = []
+
+        # 이슈 타입별 그룹화
+        issues_by_type = defaultdict(list)
+        for issue in issues:
+            issues_by_type[issue.issue_type].append(issue)
+
+        for issue_type, type_issues in issues_by_type.items():
+            issue_name = self._get_issue_name(issue_type)
+            context_parts.append(f"\n[{issue_name}] - {len(type_issues)}개")
+
+            for i, issue in enumerate(type_issues[:3]):  # 최대 3개만 표시
+                bbox_str = f"({issue.bbox[0]:.3f}, {issue.bbox[1]:.3f}, {issue.bbox[2]:.3f}, {issue.bbox[3]:.3f})"
+                context_parts.append(
+                    f"  {i + 1}. ID: {issue.component_id}, "
+                    f"타입: {issue.component_type}, "
+                    f"위치: {bbox_str}, "
+                    f"설명: {issue.ai_description}"
+                )
+
+            if len(type_issues) > 3:
+                context_parts.append(f"  ... 외 {len(type_issues) - 3}개")
+
+        return '\n'.join(context_parts)
+
+    def _get_issue_name(self, issue_type: str) -> str:
+        """이슈 타입에 따른 이름 반환"""
+        issue_names = {
+            '0': "텍스트/아이콘 대비 문제",
+            '1': "하이라이트 요소 대비 문제",
+            '2': "상호작용 요소 시각적 구분성",
+            '3': "일관된 정렬 기준 위반",
+            '4': "수직/수평 정렬 불일치",
+            '5': "동일 계층 요소 정렬 기준 불일치",
+            '6': "텍스트 잘림",
+            '7': "아이콘 잘림",
+            '8': "중복 아이콘",
+            '9': "색상 조화 불일치",
+            '10': "공간 활용 불일치",
+            '11': "비례 부조화"
+        }
+        return issue_names.get(issue_type, f"타입 {issue_type}")
+
+    def _build_verification_guide(self) -> str:
+        """검증 가이드라인"""
+        guide = """
+        검증 시 고려사항:
+        1. 가시성 이슈: 텍스트와 배경의 대비가 WCAG 기준(4.5:1) 미만인가?
+        2. 정렬 이슈: 같은 타입 요소들이 일관된 정렬을 유지하는가?
+        3. 잘림 이슈: 텍스트나 아이콘이 할당된 영역을 벗어나는가?
+        4. 중복 아이콘: 동일한 아이콘이 불필요하게 반복되는가?
+        5. 심미적 이슈: 색상 조화, 공간 활용, 비례 등이 적절한가?
+
+        심각도 기준:
+        - High: 사용자 경험에 직접적 영향 (가독성 불가, 기능 접근 불가)
+        - Medium: 사용성 저하 (혼란 야기, 비효율적 인터페이스)
+        - Low: 미관상 문제 (디자인 일관성, 심미적 조화)
+        """
+        return guide
+
 class VisibilityDetector:
     """ Visibility 이슈(0, 1, 2) 검출 클래스"""
 
     def __init__(self, parent: 'LayoutDetector'):
         self.parent = parent
         self.base_visibility_threshold = parent.visibility_threshold
-        self.gray_cache = {}
+        self.base_affordance_score = parent.affordance_threshold
+        self.base_overlap_threshold = parent.overlap_threshold
 
     def detect_issues(self, elements: List[Dict], image: np.ndarray) -> List[Issue]:
         issues = []
-
         adaptive_contrast_threshold = self._calculate_contrast_threshold(image)
 
         for element in elements:
@@ -49,7 +581,7 @@ class VisibilityDetector:
             # 이슈 2: 상호작용 요소 시각적 구분성 (겹치는 요소 고려)
             if element.get('interactivity') and elem_type in ['button', 'imagebutton']:
                 affordance_score = self._calculate_button_affordance(element, image, overlapping_elements)
-                if affordance_score < 0.6:
+                if affordance_score < self.base_affordance_score:
                     issue = self.parent._create_issue(element, 2)
                     issues.append(issue)
 
@@ -64,7 +596,7 @@ class VisibilityDetector:
                 continue
 
             overlap_ratio = self._calculate_overlap_ratio(target_bbox, element['bbox'])
-            if overlap_ratio >= 0.9:
+            if overlap_ratio >= 0.5:
                 overlapping.append(element)
 
         return overlapping
@@ -98,7 +630,7 @@ class VisibilityDetector:
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             overall_contrast = np.std(gray) / 255.0
             # 전체 화면 대비가 낮으면 임계값을 낮춤
-            adaptive_threshold = max(3.0, min(7.0, overall_contrast * 10))
+            adaptive_threshold = max(2.5, min(5.0, overall_contrast * 8))
             return adaptive_threshold
         except:
             return 4.5
@@ -106,94 +638,301 @@ class VisibilityDetector:
     def _calculate_wcag_contrast_ratio(self, element: Dict, image: np.ndarray) -> float:
         """WCAG 표준에 따른 정확한 대비 비율 계산"""
         try:
-
-            visual_features = element.get('visual_features', {})
-            avg_color = visual_features.get('avg_color')
-
-            if avg_color and len(avg_color) >= 3:
-                element_luminance = self._calculate_relative_luminance(avg_color)
-            else:
-                element_luminance = self._get_element_luminance(element, image)
-
-            background_luminance = self._get_background_luminance(element, image)
-
-            if element_luminance is None or background_luminance is None:
-                return 1.0
-
-            # WCAG 대비 비율 공식: (L1 + 0.05) / (L2 + 0.05)
-            lighter = max(element_luminance, background_luminance)
-            darker = min(element_luminance, background_luminance)
-
-            contrast_ratio = (lighter + 0.05) / (darker + 0.05)
-            return contrast_ratio
-
-        except Exception:
-            return 1.0
-
-    def _get_element_luminance(self, element: Dict, image: np.ndarray) -> Optional[float]:
-        """요소의 상대 밝기 계산"""
-        try:
+            # 1. 요소 영역 추출
             bbox = element['bbox']
             h, w = image.shape[:2]
             x1, y1, x2, y2 = [int(coord * dim) for coord, dim in zip(bbox, [w, h, w, h])]
 
             if x1 >= x2 or y1 >= y2 or x1 < 0 or y1 < 0 or x2 > w or y2 > h:
-                return None
+                return 1.0
 
             element_region = image[y1:y2, x1:x2]
             if element_region.size == 0:
-                return None
+                return 1.0
 
-            # RGB 평균값 계산
-            avg_rgb = np.mean(element_region.reshape(-1, 3), axis=0)
+            # 색상 추출 로직만 사용
+            colors = self._extract_colors_with_visibility_logic(element_region)
 
-            # WCAG 상대 밝기 계산
-            return self._calculate_relative_luminance(avg_rgb)
+            if len(colors) < 2:
+                return 1.0
 
-        except (KeyError, TypeError, ValueError, IndexError) as e:
-            print(f"Error calculating element luminance: {e}")
-            return None
+            # 3. 추출된 색상들 간의 최대 대비 계산
+            max_contrast = 0
+            for i in range(len(colors)):
+                for j in range(i + 1, len(colors)):
+                    luminance1 = self._calculate_relative_luminance(colors[i])
+                    luminance2 = self._calculate_relative_luminance(colors[j])
 
-    def _get_background_luminance(self, element: Dict, image: np.ndarray) -> Optional[float]:
-        """요소 주변 배경의 상대 밝기 계산"""
+                    lighter = max(luminance1, luminance2)
+                    darker = min(luminance1, luminance2)
+
+                    contrast_ratio = (lighter + 0.05) / (darker + 0.05)
+                    max_contrast = max(max_contrast, contrast_ratio)
+
+            return max_contrast
+
+        except Exception as e:
+            print(f"WCAG 대비 계산 오류: {e}")
+            return 1.0
+
+    # def _get_element_luminance(self, element: Dict, image: np.ndarray) -> Optional[float]:
+    #     """요소의 상대 밝기 계산"""
+    #     try:
+    #         bbox = element['bbox']
+    #         h, w = image.shape[:2]
+    #         x1, y1, x2, y2 = [int(coord * dim) for coord, dim in zip(bbox, [w, h, w, h])]
+    #
+    #         if x1 >= x2 or y1 >= y2 or x1 < 0 or y1 < 0 or x2 > w or y2 > h:
+    #             return None
+    #
+    #         element_region = image[y1:y2, x1:x2]
+    #         if element_region.size == 0:
+    #             return None
+    #
+    #         # RGB 평균값 계산
+    #         avg_rgb = np.mean(element_region.reshape(-1, 3), axis=0)
+    #
+    #         # WCAG 상대 밝기 계산
+    #         return self._calculate_relative_luminance(avg_rgb)
+    #
+    #     except Exception:
+    #         return None
+    #
+    # def _get_background_luminance(self, element: Dict, image: np.ndarray) -> Optional[float]:
+    #     """요소 주변 배경의 상대 밝기 계산"""
+    #     try:
+    #         bbox = element['bbox']
+    #         h, w = image.shape[:2]
+    #         x1, y1, x2, y2 = [int(coord * dim) for coord, dim in zip(bbox, [w, h, w, h])]
+    #
+    #         background_margin = 10
+    #         bg_x1 = max(0, x1 - background_margin)
+    #         bg_y1 = max(0, y1 - background_margin)
+    #         bg_x2 = min(w, x2 + background_margin)
+    #         bg_y2 = min(h, y2 + background_margin)
+    #
+    #         background_region = image[bg_y1:bg_y2, bg_x1:bg_x2]
+    #         if background_region.size == 0:
+    #             return None
+    #
+    #         mask = np.ones((bg_y2 - bg_y1, bg_x2 - bg_x1), dtype=bool)
+    #         elem_start_x = max(0, x1 - bg_x1)
+    #         elem_start_y = max(0, y1 - bg_y1)
+    #         elem_end_x = min(mask.shape[1], x2 - bg_x1)
+    #         elem_end_y = min(mask.shape[0], y2 - bg_y1)
+    #
+    #         if (elem_end_x > elem_start_x and elem_end_y > elem_start_y):
+    #             mask[elem_start_y:elem_end_y, elem_start_x:elem_end_x] = False
+    #
+    #         # 배경 영역의 평균 RGB
+    #         background_pixels = background_region.reshape(-1, 3)[mask.flatten()]
+    #         if len(background_pixels) == 0:
+    #             return None
+    #
+    #         avg_bg_rgb = np.mean(background_pixels, axis=0)
+    #
+    #         # WCAG 상대 밝기 계산
+    #         return self._calculate_relative_luminance(avg_bg_rgb)
+    #
+    #     except Exception:
+    #         return None
+
+    def _extract_colors_with_visibility_logic(self, img_region: np.ndarray, num_colors: int = 3) -> List[List[int]]:
         try:
-            bbox = element['bbox']
-            h, w = image.shape[:2]
-            x1, y1, x2, y2 = [int(coord * dim) for coord, dim in zip(bbox, [w, h, w, h])]
+            if len(img_region.shape) == 3:
+                img_rgb = cv2.cvtColor(img_region, cv2.COLOR_BGR2RGB)
+            else:
+                img_rgb = img_region
 
-            background_margin = 10
-            # 요소 주변의 배경 영역 정의
-            bg_x1 = max(0, x1 - background_margin)
-            bg_y1 = max(0, y1 - background_margin)
-            bg_x2 = min(w, x2 + background_margin)
-            bg_y2 = min(h, y2 + background_margin)
+            # 이미지 특성 분석 (visibility.py와 동일)
+            img_hsv = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2HSV)
+            h, s, v = cv2.split(img_hsv)
 
-            background_region = image[bg_y1:bg_y2, bg_x1:bg_x2]
-            if background_region.size == 0:
-                return None
+            # 채도와 명도의 분산 계산
+            saturation_var = np.var(s)
+            value_var = np.var(v)
 
-            # 배경 마스크 생성 (요소 영역 제외)
-            mask = np.ones((bg_y2 - bg_y1, bg_x2 - bg_x1), dtype=bool)
-            elem_start_x = max(0, x1 - bg_x1)
-            elem_start_y = max(0, y1 - bg_y1)
-            elem_end_x = min(mask.shape[1], x2 - bg_x1)
-            elem_end_y = min(mask.shape[0], y2 - bg_y1)
+            # 수정된 고채도 픽셀 비율 - 명도가 충분히 높은 픽셀만 고려
+            bright_pixels_mask = v > 80
+            if np.any(bright_pixels_mask):
+                bright_s = s[bright_pixels_mask]
+                high_saturation_ratio = np.sum(bright_s > 30) / bright_s.size
+            else:
+                high_saturation_ratio = 0.0
 
-            if (elem_end_x > elem_start_x and elem_end_y > elem_start_y):
-                mask[elem_start_y:elem_end_y, elem_start_x:elem_end_x] = False
+            # 명도 대비 분석 (검정-흰색 조합 감지)
+            low_value_ratio = np.sum(v < 80) / v.size
+            high_value_ratio = np.sum(v > 180) / v.size
+            has_high_value_contrast = (low_value_ratio > 0.2 and high_value_ratio > 0.2) or value_var > 3000
 
-            # 배경 영역의 평균 RGB
-            background_pixels = background_region.reshape(-1, 3)[mask.flatten()]
-            if len(background_pixels) == 0:
-                return None
+            # RGB 기반 색상 분산도 체크
+            rgb_std = np.std(img_rgb.reshape(-1, 3), axis=0)
+            is_grayscale = (rgb_std < 15).all()
 
-            avg_bg_rgb = np.mean(background_pixels, axis=0)
+            # 색상 추출 방법 선택 (visibility.py 로직)
+            if (has_high_value_contrast and high_saturation_ratio <= 0.3) or is_grayscale:
+                colors = self._simple_color_extraction(img_rgb, num_colors)
+            elif high_saturation_ratio <= 0.4:
+                colors = self._lab_color_extraction(img_rgb, num_colors)
+            else:
+                colors = self._hsv_color_extraction(img_rgb, num_colors)
 
-            # WCAG 상대 밝기 계산
-            return self._calculate_relative_luminance(avg_bg_rgb)
+            return colors
+
+        except Exception as e:
+            print(f"색상 추출 오류: {e}")
+            return [[128, 128, 128], [64, 64, 64]]
+
+    def _simple_color_extraction(self, img_rgb: np.ndarray, num_colors: int) -> List[List[int]]:
+        """검정-흰색 같은 무채색 고대비 조합을 위한 간단한 색상 추출"""
+        gray = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2GRAY)
+        colors = []
+
+        # 매우 어두운 영역 (0~60)
+        very_dark_mask = gray < 60
+        if np.any(very_dark_mask):
+            dark_pixels = img_rgb[very_dark_mask]
+            dark_color = np.mean(dark_pixels, axis=0).astype(int)
+            colors.append(dark_color.tolist())
+
+        # 매우 밝은 영역 (200~255)
+        very_bright_mask = gray > 200
+        if np.any(very_bright_mask):
+            bright_pixels = img_rgb[very_bright_mask]
+            bright_color = np.mean(bright_pixels, axis=0).astype(int)
+            colors.append(bright_color.tolist())
+
+        # 중간 어두운 영역 (60~120)
+        if len(colors) < num_colors:
+            mid_dark_mask = (gray >= 60) & (gray <= 120)
+            if np.any(mid_dark_mask):
+                mid_dark_pixels = img_rgb[mid_dark_mask]
+                mid_dark_color = np.mean(mid_dark_pixels, axis=0).astype(int)
+                colors.append(mid_dark_color.tolist())
+
+        # 중간 밝은 영역 (150~200)
+        if len(colors) < num_colors:
+            mid_bright_mask = (gray >= 150) & (gray <= 200)
+            if np.any(mid_bright_mask):
+                mid_bright_pixels = img_rgb[mid_bright_mask]
+                mid_bright_color = np.mean(mid_bright_pixels, axis=0).astype(int)
+                colors.append(mid_bright_color.tolist())
+
+        # 여전히 부족하면 KMeans 사용
+        if len(colors) < 2:
+            try:
+                from sklearn.cluster import KMeans
+                pixels_reshaped = img_rgb.reshape(-1, 3)
+                kmeans = KMeans(n_clusters=max(2, num_colors), random_state=42, n_init=10)
+                kmeans.fit(pixels_reshaped)
+
+                colors = []
+                for center in kmeans.cluster_centers_:
+                    colors.append(center.astype(int).tolist())
+            except ImportError:
+                # sklearn이 없는 경우 기본 색상 사용
+                colors = [[0, 0, 0], [255, 255, 255]]
+
+        return colors[:num_colors]
+
+    def _hsv_color_extraction(self, img_rgb: np.ndarray, num_colors: int) -> List[List[int]]:
+        """HSV 색공간 기반 색상 추출 """
+        try:
+            img_hsv = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2HSV)
+            h_channel = img_hsv[:, :, 0]
+            hist_h = cv2.calcHist([h_channel], [0], None, [180], [0, 180])
+
+            # 피크 찾기
+            peaks = []
+            for i in range(1, len(hist_h) - 1):
+                if hist_h[i] > hist_h[i - 1] and hist_h[i] > hist_h[i + 1] and hist_h[i] > np.max(hist_h) * 0.1:
+                    peaks.append(i)
+
+            peaks = sorted(peaks, key=lambda x: hist_h[x], reverse=True)[:num_colors]
+
+            colors = []
+            for peak_h in peaks:
+                mask = np.abs(h_channel - peak_h) < 10
+                if np.any(mask):
+                    masked_pixels = img_rgb[mask]
+                    if len(masked_pixels) > 0:
+                        avg_color = np.mean(masked_pixels, axis=0).astype(int)
+                        colors.append(avg_color.tolist())
+
+            # 충분한 색상을 찾지 못한 경우 KMeans로 보완
+            if len(colors) < num_colors:
+                try:
+                    from sklearn.cluster import KMeans
+                    pixels_reshaped = img_rgb.reshape(-1, 3)
+                    kmeans = KMeans(n_clusters=num_colors, random_state=42, n_init=10)
+                    kmeans.fit(pixels_reshaped)
+
+                    for center in kmeans.cluster_centers_:
+                        if len(colors) < num_colors:
+                            colors.append(center.astype(int).tolist())
+                except ImportError:
+                    colors.extend([[128, 128, 128]] * (num_colors - len(colors)))
+
+            return colors[:num_colors]
 
         except Exception:
-            return None
+            return [[128, 128, 128], [64, 64, 64]]
+
+    def _lab_color_extraction(self, img_rgb: np.ndarray, num_colors: int) -> List[List[int]]:
+        """LAB 색공간 기반 색상 추출"""
+        try:
+            img_lab = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2LAB)
+            a_channel = img_lab[:, :, 1]
+            b_channel = img_lab[:, :, 2]
+
+            # histogram
+            hist_ab = cv2.calcHist([a_channel, b_channel], [0, 1], None, [32, 32], [0, 256, 0, 256])
+
+            # 피크 찾기
+            peaks = []
+            threshold = np.max(hist_ab) * 0.05
+
+            for i in range(1, hist_ab.shape[0] - 1):
+                for j in range(1, hist_ab.shape[1] - 1):
+                    if (hist_ab[i, j] > threshold and
+                            hist_ab[i, j] > hist_ab[i - 1, j] and hist_ab[i, j] > hist_ab[i + 1, j] and
+                            hist_ab[i, j] > hist_ab[i, j - 1] and hist_ab[i, j] > hist_ab[i, j + 1]):
+                        peaks.append((i, j, hist_ab[i, j]))
+
+            peaks = sorted(peaks, key=lambda x: x[2], reverse=True)[:num_colors]
+
+            colors = []
+            for a_bin, b_bin, _ in peaks:
+                a_center = a_bin * 8
+                b_center = b_bin * 8
+
+                a_mask = np.abs(a_channel - a_center) < 12
+                b_mask = np.abs(b_channel - b_center) < 12
+                region_mask = a_mask & b_mask
+
+                if np.any(region_mask):
+                    region_pixels = img_rgb[region_mask]
+                    avg_color = np.mean(region_pixels, axis=0).astype(int)
+                    colors.append(avg_color.tolist())
+
+            # LAB에서 충분한 색상을 찾지 못한 경우 KMeans로 보완
+            if len(colors) < num_colors:
+                try:
+                    from sklearn.cluster import KMeans
+                    pixels_reshaped = img_rgb.reshape(-1, 3)
+                    kmeans = KMeans(n_clusters=num_colors, random_state=42, n_init=10)
+                    kmeans.fit(pixels_reshaped)
+
+                    for center in kmeans.cluster_centers_:
+                        if len(colors) < num_colors:
+                            colors.append(center.astype(int).tolist())
+                except ImportError:
+                    colors.extend([[128, 128, 128]] * (num_colors - len(colors)))
+
+            return colors[:num_colors]
+
+        except Exception:
+            return [[128, 128, 128], [64, 64, 64]]
 
     def _calculate_relative_luminance(self, rgb: np.ndarray) -> float:
         """WCAG 표준 상대 밝기 계산"""
@@ -261,9 +1000,6 @@ class VisibilityDetector:
 
             affordance_score = 0.0
 
-            visual_features = element.get('visual_features', {})
-            edge_density = visual_features.get('edge_density', 0.5)
-
             # 1. 경계선 검출
             border_score = self._detect_border_affordance(element_region)
             affordance_score += border_score * 0.3
@@ -288,7 +1024,7 @@ class VisibilityDetector:
             return 0.0
 
     def _check_visual_distinction_penalty(self, element: Dict, overlapping: List[Dict]) -> float:
-        """겹치는 요소들과의 시각적 구별성 페널티 계산 """
+        """겹치는 요소들과의 시각적 구별성 페널티 계산"""
         element_features = element.get('visual_features', {})
         element_color = element_features.get('avg_color', [128, 128, 128])
         element_edge = element_features.get('edge_density', 0.5)
@@ -304,12 +1040,11 @@ class VisibilityDetector:
                 color_diff = np.mean([abs(a - b) for a, b in zip(element_color[:3], overlap_color[:3])])
                 edge_diff = abs(element_edge - overlap_edge)
 
-                # 차이가 작을수록 높은 페널티
                 if color_diff < 30 and edge_diff < 0.2:
                     penalty = 1.0 - (color_diff / 30 + edge_diff / 0.2) / 2
                     max_penalty = max(max_penalty, penalty)
 
-        return min(0.5, max_penalty)  # 최대 50% 페널티
+        return min(0.5, max_penalty)
 
     def _detect_border_affordance(self, element_region: np.ndarray) -> float:
         """테두리 검출"""
@@ -322,10 +1057,7 @@ class VisibilityDetector:
                 return 0.0
 
             border_pixels = np.concatenate([
-                edges[0, :],    # 상단
-                edges[-1, :],   # 하단
-                edges[:, 0],    # 좌측
-                edges[:, -1]    # 우측
+                edges[0, :], edges[-1, :], edges[:, 0], edges[:, -1]
             ])
 
             border_ratio = np.sum(border_pixels > 0) / len(border_pixels)
@@ -382,7 +1114,6 @@ class VisibilityDetector:
         if layout_role in ['main_content', 'navigation', 'toolbar']:
             return True
 
-        # 기존 키워드 검사
         resource_id = element.get('resource_id', '').lower()
         content = element.get('content', '').lower()
         highlight_keywords = ['selected', 'highlight', 'focus', 'active', 'current']
@@ -412,8 +1143,7 @@ class AlignmentDetector:
         self.parent = parent
         self.base_alignment_threshold = parent.alignment_threshold
 
-    def detect_issues(self, elements: List[Dict], ai_responses: Dict, layout_data: Dict = None) -> List[Issue]:
-
+    def detect_issues(self, elements: List[Dict], layout_data: Dict = None) -> List[Issue]:
         issues = []
 
         if layout_data:
@@ -426,15 +1156,14 @@ class AlignmentDetector:
                 if len(region_elements) < 3:
                     continue
 
-                # 이슈 3, 4 검사를 영역별로 수행
-                region_issues = self._check_region_specific_alignment(region_elements, region_name, ai_responses)
+                region_issues = self._check_region_specific_alignment(region_elements, region_name)
                 issues.extend(region_issues)
 
             # 이슈 5: 계층 구조 기반 정렬 검사
-            hierarchical_issues = self._check_hierarchical_alignment_from_json(hierarchy, layout_data, ai_responses)
+            hierarchical_issues = self._check_hierarchical_alignment_from_json(hierarchy, layout_data)
             issues.extend(hierarchical_issues)
         else:
-            # 기존 로직 유지
+
             if len(elements) < 3:
                 return issues
 
@@ -589,7 +1318,7 @@ class AlignmentDetector:
 
         return problematic
 
-    def _check_hierarchical_alignment_from_json(self, hierarchy: Dict, layout_data: Dict, ai_responses: Dict) -> List[
+    def _check_hierarchical_alignment_from_json(self, hierarchy: Dict, layout_data: Dict) -> List[
         Issue]:
         """JSON hierarchy를 활용한 계층 구조 정렬 검사 """
         issues = []
@@ -610,10 +1339,10 @@ class AlignmentDetector:
     def _detect_layout_patterns(self, elements: List[Dict]) -> Dict[str, List[List[Dict]]]:
         """레이아웃 패턴 감지"""
         patterns = {
+            'vertical_groups': [],
             'grid': [],
             'list': [],
-            'navigation': [],
-            'staggered': []
+            'navigation': []
         }
 
         grid_groups = self._find_grid_patterns(elements)
@@ -798,13 +1527,13 @@ class AlignmentDetector:
         avg_height = np.mean([elem['bbox'][3] - elem['bbox'][1] for elem in elements])
 
         # 크기에 비례한 임계값 설정(평균 크기의 5%)
-        size_based_threshold = min(avg_width, avg_height) * 0.05
+        size_based_threshold = min(avg_width, avg_height) * 0.1
 
         # 요소 개수에 따른 조정
         count_factor = max(0.5, 1.0 - len(elements) * 0.05)
         dynamic_threshold = size_based_threshold * count_factor
 
-        return max(0.005, min(0.05, dynamic_threshold))
+        return max(0.01, min(0.1, dynamic_threshold))
 
     def _check_contextual_alignment(self, elements: List[Dict], threshold: float) -> List[Dict]:
         """컨텍스트 고려한 정렬 검사"""
@@ -915,7 +1644,7 @@ class CutoffDetector:
 
     def __init__(self, parent: 'LayoutDetector'):
         self.parent = parent
-        self.crop_threshold = parent.crop_threshold
+        self.base_crop_threshold = parent.crop_threshold
 
     def detect_issues(self, elements: List[Dict], image: np.ndarray) -> List[Issue]:
         # XMLParser 초기화
@@ -1003,7 +1732,7 @@ class CutoffDetector:
             right_text_ratio = np.sum(right_edge < 128) / right_edge.size
 
             # 가장자리에 일정 비율 이상의 텍스트 픽셀이 있으면 잘림으로 판단
-            threshold = 0.15  # 15% 이상
+            threshold = 0.3  # 30% 이상
             return left_text_ratio > threshold or right_text_ratio > threshold
 
         except Exception:
@@ -1013,25 +1742,29 @@ class CutoffDetector:
         """아이콘 잘림 검출"""
         try:
             bbox = element['bbox']
-            visual_features = element.get('visual_features', {})
+            h, w = image.shape[:2]
+            x1, y1, x2, y2 = [int(coord * dim) for coord, dim in zip(bbox, [w, h, w, h])]
 
-            # 방법 1: 화면 경계와의 거리 확인
-            margins = [bbox[0], bbox[1], 1.0 - bbox[2], 1.0 - bbox[3]]
-            min_margin = min(margins)
+            crop_img = image[y1:y2, x1:x2]
+            if crop_img.size == 0:
+                return False
 
-            # 화면 가장자리에 가까우면 잘림으로 판단
-            if min_margin < self.crop_threshold:
-                return True
+            # cutoff.py의 로직 적용:
+            gray = cv2.cvtColor(crop_img, cv2.COLOR_BGR2GRAY)
+            edges = cv2.Canny(gray, 50, 150, apertureSize=3)
 
-            # 방법 2: JSON aspect_ratio 활용
-            aspect_ratio = visual_features.get('aspect_ratio', 1.0)
-            if aspect_ratio < 0.5 or aspect_ratio > 2.0:
-                return True
+            lines = cv2.HoughLinesP(edges, 1, np.pi / 180, threshold=10, minLineLength=2, maxLineGap=0.5)
 
-            # 방법 3: JSON edge_density 활용
-            edge_density = visual_features.get('edge_density', 0.5)
-            if edge_density > 0.8:
-                return self._calculate_icon_completeness(element, image) < 0.7
+            if lines is not None:
+                crop_h, crop_w = gray.shape
+                min_line_length_ratio = 0.05
+
+                for line in lines:
+                    x1_line, y1_line, x2_line, y2_line = line[0]
+                    line_length = np.sqrt((x2_line - x1_line) ** 2 + (y2_line - y1_line) ** 2)
+
+                    if line_length > min_line_length_ratio * max(crop_h, crop_w):
+                        return True
 
             return False
 
@@ -1134,10 +1867,14 @@ class LayoutDetector(Gemini):
     def __init__(self, output_dir: str):
 
         super().__init__()
-        self.contrast_threshold = 4.5
-        self.visibility_threshold = 0.6
-        self.alignment_threshold = 0.02
-        self.crop_threshold = 0.02
+        self.affordance_threshold = 0.3
+        self.visibility_threshold = 0.3
+        self.alignment_threshold = 0.05
+        self.crop_threshold = 0.05
+
+        self.overlap_threshold = 0.7
+        self.remove_overlapping = True
+
         self.max_issues_per_type = 3
 
         self.debug = True
@@ -1146,10 +1883,12 @@ class LayoutDetector(Gemini):
         if self.debug:
             os.makedirs(self.output_dir, exist_ok=True)
 
-        # 검출기들 초기화
         self.visibility_detector = VisibilityDetector(self)
         self.alignment_detector = AlignmentDetector(self)
         self.cutoff_detector = CutoffDetector(self)
+        self.duplicate_detector = DuplicateDetector(self)
+        self.aesthetic_detector = AestheticDetector(self)
+        self.context_builder = GeminiContextBuilder(self)
 
     def analyze_layout(self, image_path: str, json_path: str) -> List[Issue]:
         try:
@@ -1167,17 +1906,19 @@ class LayoutDetector(Gemini):
             if image is None:
                 raise ValueError(f"이미지를 로드할 수 없습니다: {image_path}")
 
-            print(f"=== JSON 기반 레이아웃 분석 시작 ===")
-            print(f"이미지: {os.path.basename(image_path)}")
-            print(f"JSON: {os.path.basename(json_path)}")
-
             # JSON에서 요소 추출
             elements = layout_data.get('skeleton', {}).get('elements', [])
+
             if not elements:
                 print("분석할 UI 요소가 없습니다.")
                 return []
-            print(f"총 {len(elements)}개 요소 분석")
 
+            if self.remove_overlapping:
+                filtered_elements = self._filter_overlapping_elements(elements)
+                print(f"중복 제거 후: {len(filtered_elements)}개 요소")
+            else:
+                filtered_elements = elements
+            print(f"총 {len(filtered_elements)}개 요소 분석")
 
             # 화면 특성 분석 (JSON 기반)
             screen_info = self._analyze_screen_characteristics_from_json(layout_data, image)
@@ -1186,28 +1927,41 @@ class LayoutDetector(Gemini):
             all_issues = []
 
             # 1. 가시성 이슈 검출 (0, 1, 2)
-            visibility_issues = self.visibility_detector.detect_issues(elements, image)
+            visibility_issues = self.visibility_detector.detect_issues(filtered_elements, image)
             all_issues.extend(visibility_issues)
             print(f"Visibility 이슈 {len(visibility_issues)}개 검출")
 
-            # 2. 정렬 이슈 검출 (3, 4, 5) - layout_data 전달
-            alignment_issues = self.alignment_detector.detect_issues(elements, layout_data)
+            # 2. 정렬 이슈 검출 (3, 4, 5)
+            alignment_issues = self.alignment_detector.detect_issues(filtered_elements, layout_data)
             all_issues.extend(alignment_issues)
             print(f"Alignment 이슈 {len(alignment_issues)}개 검출")
 
             # 3. 잘림 이슈 검출 (6, 7)
-            cutoff_issues = self.cutoff_detector.detect_issues(elements, image)
+            cutoff_issues = self.cutoff_detector.detect_issues(filtered_elements, image)
             all_issues.extend(cutoff_issues)
             print(f"Cut Off 이슈 {len(cutoff_issues)}개 검출")
 
-            # 4. Gemini로 각 후보 이슈 검증
-            # verified_issues = self._verify_issues_with_gemini(all_issues, image_path, layout_data)
+            # 4. 중복 아이콘 검출 (8)
+            duplicate_issues = self.duplicate_detector.detect_duplicate_icons(filtered_elements, image, layout_data)
+            all_issues.extend(duplicate_issues)
+            print(f"Duplicate Icon 이슈 {len(duplicate_issues)}개 검출")
 
-            # 5. 이슈 우선순위 및 필터링
-            final_issues = self._prioritize_and_filter_issues(all_issues, screen_info)
+            # 5. 심미적 이슈 검출 (9, 10, 11)
+            aesthetic_issues = self.aesthetic_detector.detect_aesthetic_issues(filtered_elements, image, layout_data)
+            all_issues.extend(aesthetic_issues)
+            print(f"Aesthetic 이슈 {len(aesthetic_issues)}개 검출")
+
+            print(f"총 후보 이슈: {len(all_issues)}개")
+
+            # 6. Gemini로 각 후보 이슈 검증
+            verified_issues = self._verify_issues_with_gemini(all_issues, image_path, layout_data)
+            print(f"Gemini 검증 완료: {len(verified_issues)}개 이슈 확인")
+
+            # 7. 이슈 우선순위 및 필터링
+            final_issues = self._prioritize_and_filter_issues(verified_issues, screen_info)
             print(f"최종 {len(final_issues)}개의 이슈 선별")
 
-            # 6. 디버그 시각화
+            # 8. 디버그 시각화
             if self.debug:
                 self._save_debug_info(layout_data, final_issues, image_path)
                 self.visualize_bboxes(image_path, final_issues, suffix="issues")
@@ -1220,8 +1974,62 @@ class LayoutDetector(Gemini):
             traceback.print_exc()
             return []
 
+    def _filter_overlapping_elements(self, elements: List[Dict]) -> List[Dict]:
+        """overlapping 요소 제거"""
+        if len(elements) <= 1:
+            return elements
+
+        filtered = []
+        used_indices = set()
+
+        for i, element in enumerate(elements):
+            if i in used_indices:
+                continue
+
+            filtered.append(element)
+            used_indices.add(i)
+
+            # 현재 요소와 겹치는 모든 요소들 제거 대상으로 표시
+            for j, other_element in enumerate(elements[i + 1:], i + 1):
+                if j in used_indices:
+                    continue
+
+                overlap_ratio = self._calculate_overlap_ratio(
+                    element['bbox'], other_element['bbox']
+                )
+
+                if overlap_ratio >= self.overlap_threshold:
+                    used_indices.add(j)  # 겹치는 요소는 제외
+
+        return filtered
+
+    def _calculate_overlap_ratio(self, bbox1: List[float], bbox2: List[float]) -> float:
+        """두 bbox 겹침 비율 계산"""
+        if not bbox1 or not bbox2 or len(bbox1) < 4 or len(bbox2) < 4:
+            return 0.0
+
+        x1_1, y1_1, x2_1, y2_1 = bbox1[:4]
+        x1_2, y1_2, x2_2, y2_2 = bbox2[:4]
+
+        # 겹치는 영역 계산
+        overlap_x1 = max(x1_1, x1_2)
+        overlap_y1 = max(y1_1, y1_2)
+        overlap_x2 = min(x2_1, x2_2)
+        overlap_y2 = min(y2_1, y2_2)
+
+        if overlap_x1 >= overlap_x2 or overlap_y1 >= overlap_y2:
+            return 0.0
+
+        overlap_area = (overlap_x2 - overlap_x1) * (overlap_y2 - overlap_y1)
+        area1 = (x2_1 - x1_1) * (y2_1 - y1_1)
+        area2 = (x2_2 - x1_2) * (y2_2 - y1_2)
+
+        # 작은 영역 기준으로 겹침 비율 계산
+        min_area = min(area1, area2)
+        return overlap_area / min_area if min_area > 0 else 0.0
+
     def _verify_issues_with_gemini(self, candidate_issues: List[Issue], image_path: str, layout_data: Dict) -> List[Issue]:
-        """Gemini로 후보 이슈를 검증하고 최종 판단"""
+        """Gemini 후보 이슈를 검증 하고 최종 판단"""
         verified_issues = []
         issue_descriptions = IssuePrompt()
 
@@ -1247,7 +2055,6 @@ class LayoutDetector(Gemini):
                     'component_id': issue.component_id,
                     'component_type': issue.component_type,
                     'bbox': issue.bbox,
-                    'location': issue.location_type
                 } for issue in type_issues], indent=2)}
                 """
 
