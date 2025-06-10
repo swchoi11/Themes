@@ -5,17 +5,17 @@ from tqdm import tqdm
 
 from src.classification import ImageXMLClassifier
 from src.layout import Layout
-from src.gemini import Gemini
-from src.utils.utils import check_size, init_process, move_to_not_processed, save_results, check_valid_issues
+from src.utils.utils import check_size, init_process, move_to_not_processed, save_results, check_valid_issues, unprocessed_issues, to_excel
 from src.utils.model import ResultModel
-
+from src.gemini_refactored import Gemini, IssueProcessor
 
 # 1. classification
 # classifier = ImageXMLClassifier()
 # classifier.check_classification()
 
-# for test_image in tqdm(glob.glob('./resource/defect/Design Issue/*.png')):
-# # for test_image in ['/home/user/dev/themes/resource/defect/Visibility Issue/Fail_V0_20250522_140512.png']:
+# result = []
+# for test_image in tqdm(glob.glob('./resource/defect/*.png')):
+# # # for test_image in ['/home/user/dev/themes/resource/com.android.intentresolver_ChooserActivityLauncher_20250521_161950.png']:
 #     json_filename = init_process()
     
 #     # 이미지 크기 확인
@@ -50,18 +50,20 @@ from src.utils.model import ResultModel
 #         )]
 
 
-#     result = []
 #     # ResultModel을 딕셔너리로 변환하여 전체 결과에 추가
 #     for issue in issues:
 #         result.append(issue.model_dump())
     
 #     # 매 이미지 처리 후 저장 (안전성을 위해)
 #     json_filename = f'./output/jsons/all_issues/{json_filename}'
-#     print(json_filename)
 #     save_results(result, json_filename)
 
+# # json 파일을 돌면서 제미나이 -> 최종 결과 산출
 
-json_filename = './output/jsons/all_issues/result-20250610w.json'
-gemini = Gemini(json_filename)
-output_path = gemini.sort_issues(json_filename)
-print(output_path)
+# json_filename = f'./output/jsons/all_issues/result-20250610.json'
+# processor = IssueProcessor()
+# output_path = processor.sort_issues(json_filename)
+output_path = './output/jsons/final_issue/result-20250610.json'
+# unprocessed_issues(output_path)
+# print(f"결과 파일: {output_path}")
+to_excel(output_path)

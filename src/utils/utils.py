@@ -7,7 +7,9 @@ import random
 import os
 import shutil
 import json
+import glob
 from datetime import datetime
+import pandas as pd
 
 def normalize_xml_content(xml_path: str) -> str:
     """
@@ -102,3 +104,38 @@ def check_valid_issues(issues):
             flag = True
             break
     return flag
+
+def unprocessed_issues(json_filename):
+    # 기존 JSON 파일 읽기
+    try:
+        with open(json_filename, 'r', encoding='utf-8') as f:
+            existing_data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        existing_data = []
+    
+    # 새로운 이슈들 추가
+    for filename in glob.glob('./output/images/not_processed/*.png'):
+        issue = {
+            "filename": filename,
+            "issue_type": "normal",
+            "component_id": 0,
+            "ui_component_id": "",
+            "ui_component_type": "",
+            "severity": "0",
+            "location_id": "",
+            "location_type": "",
+            "bbox": [],
+            "description_id": "0",
+            "description_type": "",
+            "description": "문제가 없습니다.",
+            "ai_description": ""
+        }
+        existing_data.append(issue)
+    
+    # 전체 데이터를 다시 저장
+    with open(json_filename, 'w', encoding='utf-8') as f:
+        json.dump(existing_data, f, ensure_ascii=False, indent=2)
+
+def to_excel(json_filename):
+    df = pd.read_json(json_filename)
+    df.to_excel('output.xlsx', index=False)
