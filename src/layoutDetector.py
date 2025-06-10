@@ -11,6 +11,7 @@ from collections import defaultdict
 from utils.schemas import Issue
 from common.eval_kpi import EvalKPI
 from common.prompt import IssuePrompt
+from common.logger import timefn
 from src.gemini import Gemini
 
 
@@ -19,12 +20,13 @@ class DuplicateDetector:
 
     def __init__(self, parent: 'LayoutDetector'):
         self.parent = parent
-        self.similarity_threshold = 0.95  # icon.py와 동일
+        self.similarity_threshold = 0.95
         self.default_image_cache = {}
 
+    @timefn
     def detect_duplicate_icons(self, elements: List[Dict], image: np.ndarray,
                                default_image: Optional[np.ndarray] = None) -> List[Issue]:
-        """중복 아이콘 검출 (icon.py 로직 기반)"""
+        """중복 아이콘 검출"""
         issues = []
 
         # 아이콘 크기 요소만 필터링
@@ -61,7 +63,7 @@ class DuplicateDetector:
                 )
 
                 if not is_normal_duplicate:
-                    # 중복 이슈 생성 (새 이슈 타입 8)
+                    # 중복 이슈 생성
                     for icon_idx in group:
                         element = icon_images[icon_idx]['element']
 
@@ -70,14 +72,14 @@ class DuplicateDetector:
                             for other_idx in group if other_idx != icon_idx
                         ]
 
-                        issue = self.parent._create_issue(element, 8)  # 새 이슈 타입
+                        issue = self.parent._create_issue(element, 8)
+                        issue.score = self.parent._map_score(2)  # "Fail with issue"
                         issue.ai_description = (
                             f"중복 아이콘 탐지: {len(group)}개의 동일한 아이콘. "
                             f"현재 위치: {element['bbox']}, "
                             f"동일 아이콘 위치: {', '.join(other_positions)} "
                             f"(디폴트와 다름)"
                         )
-                        issue.severity = 'medium'
                         issues.append(issue)
 
                         print(f"중복 아이콘 이슈: {element.get('id', 'unknown')}")
@@ -145,7 +147,7 @@ class DuplicateDetector:
         return duplicate_groups
 
     def _calculate_icon_similarity(self, img1: np.ndarray, img2: np.ndarray) -> float:
-        """아이콘 유사도 계산 (icon.py와 동일)"""
+        """아이콘 유사도 계산"""
         try:
             # 크기 정규화
             target_size = (32, 32)
@@ -244,9 +246,8 @@ class AestheticDetector:
     def __init__(self, parent: 'LayoutDetector'):
         self.parent = parent
 
-    def detect_aesthetic_issues(self, elements: List[Dict], image: np.ndarray,
-                                layout_data: Dict) -> List[Issue]:
-        """심미적 이슈 검출"""
+    @timefn
+    def detect_aesthetic_issues(self, elements: List[Dict], image: np.ndarray) -> List[Issue]:
         issues = []
 
         # 1. 색상 조화 검사
@@ -278,9 +279,9 @@ class AestheticDetector:
                 element_colors = self._get_element_colors(element, image)
 
                 if element_colors and self._is_color_discordant(element_colors, screen_colors):
-                    issue = self.parent._create_issue(element, 9)  # 새 이슈 타입
+                    issue = self.parent._create_issue(element, 9)
+                    issue.score = self.parent._map_score(2)  # "Fail with issue"
                     issue.ai_description = f"색상 조화 불일치: 요소 색상이 전체 테마와 부조화"
-                    issue.severity = 'low'
                     issues.append(issue)
 
         return issues
@@ -325,8 +326,7 @@ class AestheticDetector:
         except Exception:
             return []
 
-    def _is_color_discordant(self, element_colors: List[List[int]],
-                             screen_colors: List[List[int]]) -> bool:
+    def _is_color_discordant(self, element_colors: List[List[int]], screen_colors: List[List[int]]) -> bool:
         """색상 부조화 판별"""
         if not element_colors or not screen_colors:
             return False
@@ -370,9 +370,9 @@ class AestheticDetector:
                     if abs(spacing - mean_spacing) > spacing_std:
                         problematic_element = sorted_elements[i + 1]
 
-                        issue = self.parent._create_issue(problematic_element, 10)  # 새 이슈 타입
+                        issue = self.parent._create_issue(problematic_element, 10)
+                        issue.score = self.parent._map_score(2)  # "Fail with issue"
                         issue.ai_description = f"공간 활용 불일치: 간격 {spacing:.3f} (평균: {mean_spacing:.3f})"
-                        issue.severity = 'low'
                         issues.append(issue)
                         break
 
@@ -398,153 +398,13 @@ class AestheticDetector:
                 square_diff = abs(aspect_ratio - 1.0)
 
                 if golden_diff > 0.5 and square_diff > 0.3 and (aspect_ratio > 3.0 or aspect_ratio < 0.3):
-                    issue = self.parent._create_issue(element, 11)  # 새 이슈 타입
+                    issue = self.parent._create_issue(element, 11)
+                    issue.score = self.parent._map_score(2)  # "Fail with issue"
                     issue.ai_description = f"비례 부조화: 종횡비 {aspect_ratio:.2f} (극단적 비율)"
-                    issue.severity = 'low'
                     issues.append(issue)
 
         return issues
 
-
-class GeminiContextBuilder:
-    """Gemini가 인식하기 쉬운 형태로 컨텍스트 구성"""
-
-    def __init__(self, parent: 'LayoutDetector'):
-        self.parent = parent
-
-    def build_verification_context(self, issues: List[Issue], layout_data: Dict,
-                                   image_path: str) -> str:
-        """Gemini 검증용 컨텍스트 구성"""
-
-        # 1. 화면 구조 요약
-        screen_summary = self._build_screen_summary(layout_data)
-
-        # 2. 이슈별 상세 컨텍스트
-        issues_context = self._build_issues_context(issues)
-
-        # 3. 검증 가이드라인
-        verification_guide = self._build_verification_guide()
-
-        context = f"""
-        === 화면 분석 컨텍스트 ===
-        이미지 파일: {os.path.basename(image_path)}
-        
-        {screen_summary}
-        
-        === 검출된 이슈 목록 ===
-        {issues_context}
-        
-        === 검증 가이드라인 ===
-        {verification_guide}
-        
-        각 이슈에 대해 다음 정보로 응답해주세요:
-        1. 이슈 ID (component_id)
-        2. 실제 이슈 여부 (true/false)
-        3. 심각도 (high/medium/low)
-        4. 상세 설명 (사용자가 이해하기 쉬운 언어로)
-        
-        JSON 형태로 응답해주세요:
-        {{
-          "issues": [
-            {{
-              "component_id": "element_id",
-              "is_actual_issue": true,
-              "severity": "high",
-              "description": "구체적인 설명"
-            }}
-          ]
-        }}
-        """
-        return context
-
-    def _build_screen_summary(self, layout_data: Dict) -> str:
-        """화면 구조 요약"""
-        elements = layout_data.get('skeleton', {}).get('elements', [])
-        layout_regions = layout_data.get('layout_regions', {})
-
-        # 요소 통계
-        type_counts = {}
-        for element in elements:
-            elem_type = element.get('type', 'unknown')
-            type_counts[elem_type] = type_counts.get(elem_type, 0) + 1
-
-        # 활성 영역 정보
-        active_regions = [name for name, info in layout_regions.items()
-                          if info.get('elements')]
-
-        summary = f"""
-        화면 구조:
-        - 총 요소 수: {len(elements)}개
-        - 요소 타입별 분포: {', '.join([f'{t}({c}개)' for t, c in type_counts.items()])}
-        - 활성 화면 영역: {', '.join(active_regions)}
-        - 화면 복잡도: {'높음' if len(elements) > 50 else '보통' if len(elements) > 20 else '낮음'}
-        """
-        return summary
-
-    def _build_issues_context(self, issues: List[Issue]) -> str:
-        """이슈별 상세 컨텍스트"""
-        if not issues:
-            return "검출된 이슈가 없습니다."
-
-        context_parts = []
-
-        # 이슈 타입별 그룹화
-        issues_by_type = defaultdict(list)
-        for issue in issues:
-            issues_by_type[issue.issue_type].append(issue)
-
-        for issue_type, type_issues in issues_by_type.items():
-            issue_name = self._get_issue_name(issue_type)
-            context_parts.append(f"\n[{issue_name}] - {len(type_issues)}개")
-
-            for i, issue in enumerate(type_issues[:3]):  # 최대 3개만 표시
-                bbox_str = f"({issue.bbox[0]:.3f}, {issue.bbox[1]:.3f}, {issue.bbox[2]:.3f}, {issue.bbox[3]:.3f})"
-                context_parts.append(
-                    f"  {i + 1}. ID: {issue.component_id}, "
-                    f"타입: {issue.component_type}, "
-                    f"위치: {bbox_str}, "
-                    f"설명: {issue.ai_description}"
-                )
-
-            if len(type_issues) > 3:
-                context_parts.append(f"  ... 외 {len(type_issues) - 3}개")
-
-        return '\n'.join(context_parts)
-
-    def _get_issue_name(self, issue_type: str) -> str:
-        """이슈 타입에 따른 이름 반환"""
-        issue_names = {
-            '0': "텍스트/아이콘 대비 문제",
-            '1': "하이라이트 요소 대비 문제",
-            '2': "상호작용 요소 시각적 구분성",
-            '3': "일관된 정렬 기준 위반",
-            '4': "수직/수평 정렬 불일치",
-            '5': "동일 계층 요소 정렬 기준 불일치",
-            '6': "텍스트 잘림",
-            '7': "아이콘 잘림",
-            '8': "중복 아이콘",
-            '9': "색상 조화 불일치",
-            '10': "공간 활용 불일치",
-            '11': "비례 부조화"
-        }
-        return issue_names.get(issue_type, f"타입 {issue_type}")
-
-    def _build_verification_guide(self) -> str:
-        """검증 가이드라인"""
-        guide = """
-        검증 시 고려사항:
-        1. 가시성 이슈: 텍스트와 배경의 대비가 WCAG 기준(4.5:1) 미만인가?
-        2. 정렬 이슈: 같은 타입 요소들이 일관된 정렬을 유지하는가?
-        3. 잘림 이슈: 텍스트나 아이콘이 할당된 영역을 벗어나는가?
-        4. 중복 아이콘: 동일한 아이콘이 불필요하게 반복되는가?
-        5. 심미적 이슈: 색상 조화, 공간 활용, 비례 등이 적절한가?
-
-        심각도 기준:
-        - High: 사용자 경험에 직접적 영향 (가독성 불가, 기능 접근 불가)
-        - Medium: 사용성 저하 (혼란 야기, 비효율적 인터페이스)
-        - Low: 미관상 문제 (디자인 일관성, 심미적 조화)
-        """
-        return guide
 
 class VisibilityDetector:
     """ Visibility 이슈(0, 1, 2) 검출 클래스"""
@@ -555,7 +415,8 @@ class VisibilityDetector:
         self.base_affordance_score = parent.affordance_threshold
         self.base_overlap_threshold = parent.overlap_threshold
 
-    def detect_issues(self, elements: List[Dict], image: np.ndarray) -> List[Issue]:
+    @timefn
+    def detect_visibility_issues(self, elements: List[Dict], image: np.ndarray) -> List[Issue]:
         issues = []
         adaptive_contrast_threshold = self._calculate_contrast_threshold(image)
 
@@ -569,6 +430,7 @@ class VisibilityDetector:
                 required_ratio = adaptive_contrast_threshold if elem_type in ['text', 'textview'] else 1.0
                 if contrast_ratio < required_ratio:
                     issue = self.parent._create_issue(element, 0)
+                    issue.score = self.parent._map_score(2)  # "Fail with issue"
                     issues.append(issue)
 
             # 이슈 1: 하이라이트 요소 대비 문제
@@ -576,6 +438,7 @@ class VisibilityDetector:
                 highlight_ratio = self._calculate_highlight_contrast_ratio(element, image)
                 if highlight_ratio < adaptive_contrast_threshold:
                     issue = self.parent._create_issue(element, 1)
+                    issue.score = self.parent._map_score(2)  # "Fail with issue"
                     issues.append(issue)
 
             # 이슈 2: 상호작용 요소 시각적 구분성 (겹치는 요소 고려)
@@ -583,6 +446,7 @@ class VisibilityDetector:
                 affordance_score = self._calculate_button_affordance(element, image, overlapping_elements)
                 if affordance_score < self.base_affordance_score:
                     issue = self.parent._create_issue(element, 2)
+                    issue.score = self.parent._map_score(2)  # "Fail with issue"
                     issues.append(issue)
 
         return issues
@@ -675,68 +539,6 @@ class VisibilityDetector:
             print(f"WCAG 대비 계산 오류: {e}")
             return 1.0
 
-    # def _get_element_luminance(self, element: Dict, image: np.ndarray) -> Optional[float]:
-    #     """요소의 상대 밝기 계산"""
-    #     try:
-    #         bbox = element['bbox']
-    #         h, w = image.shape[:2]
-    #         x1, y1, x2, y2 = [int(coord * dim) for coord, dim in zip(bbox, [w, h, w, h])]
-    #
-    #         if x1 >= x2 or y1 >= y2 or x1 < 0 or y1 < 0 or x2 > w or y2 > h:
-    #             return None
-    #
-    #         element_region = image[y1:y2, x1:x2]
-    #         if element_region.size == 0:
-    #             return None
-    #
-    #         # RGB 평균값 계산
-    #         avg_rgb = np.mean(element_region.reshape(-1, 3), axis=0)
-    #
-    #         # WCAG 상대 밝기 계산
-    #         return self._calculate_relative_luminance(avg_rgb)
-    #
-    #     except Exception:
-    #         return None
-    #
-    # def _get_background_luminance(self, element: Dict, image: np.ndarray) -> Optional[float]:
-    #     """요소 주변 배경의 상대 밝기 계산"""
-    #     try:
-    #         bbox = element['bbox']
-    #         h, w = image.shape[:2]
-    #         x1, y1, x2, y2 = [int(coord * dim) for coord, dim in zip(bbox, [w, h, w, h])]
-    #
-    #         background_margin = 10
-    #         bg_x1 = max(0, x1 - background_margin)
-    #         bg_y1 = max(0, y1 - background_margin)
-    #         bg_x2 = min(w, x2 + background_margin)
-    #         bg_y2 = min(h, y2 + background_margin)
-    #
-    #         background_region = image[bg_y1:bg_y2, bg_x1:bg_x2]
-    #         if background_region.size == 0:
-    #             return None
-    #
-    #         mask = np.ones((bg_y2 - bg_y1, bg_x2 - bg_x1), dtype=bool)
-    #         elem_start_x = max(0, x1 - bg_x1)
-    #         elem_start_y = max(0, y1 - bg_y1)
-    #         elem_end_x = min(mask.shape[1], x2 - bg_x1)
-    #         elem_end_y = min(mask.shape[0], y2 - bg_y1)
-    #
-    #         if (elem_end_x > elem_start_x and elem_end_y > elem_start_y):
-    #             mask[elem_start_y:elem_end_y, elem_start_x:elem_end_x] = False
-    #
-    #         # 배경 영역의 평균 RGB
-    #         background_pixels = background_region.reshape(-1, 3)[mask.flatten()]
-    #         if len(background_pixels) == 0:
-    #             return None
-    #
-    #         avg_bg_rgb = np.mean(background_pixels, axis=0)
-    #
-    #         # WCAG 상대 밝기 계산
-    #         return self._calculate_relative_luminance(avg_bg_rgb)
-    #
-    #     except Exception:
-    #         return None
-
     def _extract_colors_with_visibility_logic(self, img_region: np.ndarray, num_colors: int = 3) -> List[List[int]]:
         try:
             if len(img_region.shape) == 3:
@@ -769,7 +571,7 @@ class VisibilityDetector:
             rgb_std = np.std(img_rgb.reshape(-1, 3), axis=0)
             is_grayscale = (rgb_std < 15).all()
 
-            # 색상 추출 방법 선택 (visibility.py 로직)
+            # 색상 추출 방법 선택
             if (has_high_value_contrast and high_saturation_ratio <= 0.3) or is_grayscale:
                 colors = self._simple_color_extraction(img_rgb, num_colors)
             elif high_saturation_ratio <= 0.4:
@@ -818,7 +620,7 @@ class VisibilityDetector:
                 mid_bright_color = np.mean(mid_bright_pixels, axis=0).astype(int)
                 colors.append(mid_bright_color.tolist())
 
-        # 여전히 부족하면 KMeans 사용
+        # KMeans 사용
         if len(colors) < 2:
             try:
                 from sklearn.cluster import KMeans
@@ -1143,7 +945,8 @@ class AlignmentDetector:
         self.parent = parent
         self.base_alignment_threshold = parent.alignment_threshold
 
-    def detect_issues(self, elements: List[Dict], layout_data: Dict = None) -> List[Issue]:
+    @timefn
+    def detect_alignment_issues(self, elements: List[Dict], layout_data: Dict = None) -> List[Issue]:
         issues = []
 
         if layout_data:
@@ -1181,18 +984,21 @@ class AlignmentDetector:
                 alignment_issues = self._check_contextual_alignment(group_elements, dynamic_threshold)
                 for elem in alignment_issues:
                     issue = self.parent._create_issue(elem, 3)
+                    issue.score = self.parent._map_score(2)  # "Fail with issue"
                     issues.append(issue)
 
                 # 이슈 4: 수직/수평 정렬 불일치
                 vertical_issues = self._check_vertical_alignment(group_elements, dynamic_threshold)
                 for elem in vertical_issues:
                     issue = self.parent._create_issue(elem, 4)
+                    issue.score = self.parent._map_score(2)  # "Fail with issue"
                     issues.append(issue)
 
                 # 이슈 5: 동일 계층 요소 정렬 기준 불일치
                 reference_issues = self._check_hierarchical_alignment(group_elements, dynamic_threshold)
                 for elem in reference_issues:
                     issue = self.parent._create_issue(elem, 5)
+                    issue.score = self.parent._map_score(2)  # "Fail with issue"
                     issues.append(issue)
 
         return issues
@@ -1207,6 +1013,7 @@ class AlignmentDetector:
             problematic = self._check_horizontal_alignment_enhanced(elements)
             for elem in problematic:
                 issue = self.parent._create_issue(elem, 4)
+                issue.score = self.parent._map_score(2)  # "Fail with issue"
                 issues.append(issue)
 
         elif region_name in ['content', 'main_content']:
@@ -1214,6 +1021,7 @@ class AlignmentDetector:
             problematic = self._check_left_alignment_enhanced(elements)
             for elem in problematic:
                 issue = self.parent._create_issue(elem, 3)
+                issue.score = self.parent._map_score(2)  # "Fail with issue"
                 issues.append(issue)
 
         elif region_name in ['bottom_navigation']:
@@ -1221,6 +1029,7 @@ class AlignmentDetector:
             problematic = self._check_even_distribution(elements)
             for elem in problematic:
                 issue = self.parent._create_issue(elem, 5)
+                issue.score = self.parent._map_score(2)  # "Fail with issue"
                 issues.append(issue)
 
         return issues
@@ -1332,6 +1141,7 @@ class AlignmentDetector:
                     problematic = self._check_left_alignment_enhanced(child_elements)
                     for elem in problematic:
                         issue = self.parent._create_issue(elem, 5)
+                        issue.score = self.parent._map_score(2)  # "Fail with issue"
                         issues.append(issue)
 
         return issues
@@ -1646,7 +1456,8 @@ class CutoffDetector:
         self.parent = parent
         self.base_crop_threshold = parent.crop_threshold
 
-    def detect_issues(self, elements: List[Dict], image: np.ndarray) -> List[Issue]:
+    @timefn
+    def detect_cutoff_issues(self, elements: List[Dict], image: np.ndarray) -> List[Issue]:
         # XMLParser 초기화
         issues = []
 
@@ -1657,12 +1468,14 @@ class CutoffDetector:
             if elem_type in ['textview', 'text'] and element.get('content'):
                 if self._detect_actual_text_truncation(element, image):
                     issue = self.parent._create_issue(element, 6)
+                    issue.score = self.parent._map_score(2)  # "Fail with issue"
                     issues.append(issue)
 
             # 이슈 7: 아이콘 잘림 검출
             if elem_type in ['imageview', 'icon', 'image']:
                 if self._is_icon_cropped(element, image):
                     issue = self.parent._create_issue(element, 7)
+                    issue.score = self.parent._map_score(2)  # "Fail with issue"
                     issues.append(issue)
 
         return issues
@@ -1862,6 +1675,22 @@ class CutoffDetector:
             return 0.5
 
 
+class ScoreConstants:
+    FAIL_CRITICAL = "Fail with Critical issue"  # 1등
+    FAIL_ISSUE = "Fail with issue"  # 2등
+    CONDITIONAL_PASS = "Conditional Pass"  # 3등
+    PASS_MINOR = "Pass with minor concern"  # 4등
+    PASS_NO_ISSUE = "Pass with no issue"  # 5등
+
+    SCORE_MAP = {
+        1: FAIL_CRITICAL,
+        2: FAIL_ISSUE,
+        3: CONDITIONAL_PASS,
+        4: PASS_MINOR,
+        5: PASS_NO_ISSUE
+    }
+
+
 class LayoutDetector(Gemini):
     """ layoutParser.py -> 레이아웃 이슈 검출기"""
     def __init__(self, output_dir: str):
@@ -1888,8 +1717,8 @@ class LayoutDetector(Gemini):
         self.cutoff_detector = CutoffDetector(self)
         self.duplicate_detector = DuplicateDetector(self)
         self.aesthetic_detector = AestheticDetector(self)
-        self.context_builder = GeminiContextBuilder(self)
 
+    @timefn
     def analyze_layout(self, image_path: str, json_path: str) -> List[Issue]:
         try:
             # 파일 유효성 검사
@@ -1927,17 +1756,17 @@ class LayoutDetector(Gemini):
             all_issues = []
 
             # 1. 가시성 이슈 검출 (0, 1, 2)
-            visibility_issues = self.visibility_detector.detect_issues(filtered_elements, image)
+            visibility_issues = self.visibility_detector.detect_visibility_issues(filtered_elements, image)
             all_issues.extend(visibility_issues)
             print(f"Visibility 이슈 {len(visibility_issues)}개 검출")
 
             # 2. 정렬 이슈 검출 (3, 4, 5)
-            alignment_issues = self.alignment_detector.detect_issues(filtered_elements, layout_data)
+            alignment_issues = self.alignment_detector.detect_alignment_issues(filtered_elements, layout_data)
             all_issues.extend(alignment_issues)
             print(f"Alignment 이슈 {len(alignment_issues)}개 검출")
 
             # 3. 잘림 이슈 검출 (6, 7)
-            cutoff_issues = self.cutoff_detector.detect_issues(filtered_elements, image)
+            cutoff_issues = self.cutoff_detector.detect_cutoff_issues(filtered_elements, image)
             all_issues.extend(cutoff_issues)
             print(f"Cut Off 이슈 {len(cutoff_issues)}개 검출")
 
@@ -1947,7 +1776,7 @@ class LayoutDetector(Gemini):
             print(f"Duplicate Icon 이슈 {len(duplicate_issues)}개 검출")
 
             # 5. 심미적 이슈 검출 (9, 10, 11)
-            aesthetic_issues = self.aesthetic_detector.detect_aesthetic_issues(filtered_elements, image, layout_data)
+            aesthetic_issues = self.aesthetic_detector.detect_aesthetic_issues(filtered_elements, image)
             all_issues.extend(aesthetic_issues)
             print(f"Aesthetic 이슈 {len(aesthetic_issues)}개 검출")
 
@@ -1955,16 +1784,16 @@ class LayoutDetector(Gemini):
 
             # 6. Gemini로 각 후보 이슈 검증
             verified_issues = self._verify_issues_with_gemini(all_issues, image_path, layout_data)
-            print(f"Gemini 검증 완료: {len(verified_issues)}개 이슈 확인")
+            print(f"Gemini 검증 완료: {len(verified_issues)}type 이슈 확인")
 
             # 7. 이슈 우선순위 및 필터링
             final_issues = self._prioritize_and_filter_issues(verified_issues, screen_info)
-            print(f"최종 {len(final_issues)}개의 이슈 선별")
+            print(f"최종 CV+Gemini {len(final_issues)}type 이슈 선별")
 
             # 8. 디버그 시각화
             if self.debug:
                 self._save_debug_info(layout_data, final_issues, image_path)
-                self.visualize_bboxes(image_path, final_issues, suffix="issues")
+                self.visualize_bboxes(image_path, final_issues)
 
             return final_issues
 
@@ -2028,12 +1857,12 @@ class LayoutDetector(Gemini):
         min_area = min(area1, area2)
         return overlap_area / min_area if min_area > 0 else 0.0
 
+    @timefn
     def _verify_issues_with_gemini(self, candidate_issues: List[Issue], image_path: str, layout_data: Dict) -> List[Issue]:
-        """Gemini 후보 이슈를 검증 하고 최종 판단"""
+        """Gemini로 후보 이슈를 검증하고 최종 판단"""
         verified_issues = []
         issue_descriptions = IssuePrompt()
 
-        # 이슈 타입별로 그룹화
         issues_by_type = defaultdict(list)
         for issue in candidate_issues:
             issues_by_type[issue.issue_type].append(issue)
@@ -2042,8 +1871,7 @@ class LayoutDetector(Gemini):
             print(f"이슈 타입 {issue_type}: {len(type_issues)}개 후보 검증 중...")
 
             try:
-                # 해당 이슈 타입의 프롬프트 가져오기
-                prompt = issue_descriptions.get(issue_type, "이 이슈를 분석해주세요.")
+                prompt = issue_descriptions.get(issue_type, "해당 이슈를 분석해주세요.")
 
                 # JSON 컨텍스트 추가
                 context_text = f"""
@@ -2065,10 +1893,50 @@ class LayoutDetector(Gemini):
                     text=context_text
                 )
 
+                print(f"Gemini 응답 타입: {type(gemini_response)}")
+                print(f"Gemini 응답 내용: {gemini_response}")
+
                 # Gemini 응답 처리
-                if hasattr(gemini_response, 'issues') and gemini_response.issues:
-                    # Gemini가 실제 이슈라고 판단한 경우만 추가
-                    for gemini_issue in gemini_response.issues:
+                # gemini_response가 단일 Issue 객체인 경우
+                if isinstance(gemini_response, Issue):
+                    print(f"단일 Issue 객체 수신: {gemini_response.component_id}")
+
+                    # 원본 후보 이슈와 매칭
+                    matched_candidate = self._match_candidate_issue(gemini_response, type_issues)
+                    if matched_candidate:
+                        # Gemini 결과로 업데이트
+                        verified_issue = self._update_issue_with_gemini_result(matched_candidate, gemini_response)
+                        verified_issues.append(verified_issue)
+                        print(f"이슈 확인: {verified_issue.component_id}")
+                    else:
+                        # 매칭되지 않아도 Gemini가 확인한 이슈이므로 추가
+                        verified_issues.append(gemini_response)
+                        print(f"새로운 이슈 추가: {gemini_response.component_id}")
+
+                # gemini_response가 Issue 리스트인 경우
+                elif isinstance(gemini_response, (list, tuple)):
+                    print(f"Issue 리스트 수신: {len(gemini_response)}개")
+
+                    for gemini_issue in gemini_response:
+                        if isinstance(gemini_issue, Issue):
+                            # 원본 후보 이슈와 매칭
+                            matched_candidate = self._match_candidate_issue(gemini_issue, type_issues)
+                            if matched_candidate:
+                                # Gemini 결과로 업데이트
+                                verified_issue = self._update_issue_with_gemini_result(matched_candidate, gemini_issue)
+                                verified_issues.append(verified_issue)
+                                print(f"이슈 확인: {verified_issue.component_id}")
+                            else:
+                                # 매칭되지 않아도 Gemini가 확인한 이슈이므로 추가
+                                verified_issues.append(gemini_issue)
+                                print(f"새로운 이슈 추가: {gemini_issue.component_id}")
+
+                # gemini_response에 issues 속성이 있는 경우
+                elif hasattr(gemini_response, 'issues'):
+                    issues = getattr(gemini_response, 'issues', [])
+                    print(f"issues 속성에서 {len(issues)}개 이슈 수신")
+
+                    for gemini_issue in issues:
                         # 원본 후보 이슈와 매칭
                         matched_candidate = self._match_candidate_issue(gemini_issue, type_issues)
                         if matched_candidate:
@@ -2076,31 +1944,52 @@ class LayoutDetector(Gemini):
                             verified_issue = self._update_issue_with_gemini_result(matched_candidate, gemini_issue)
                             verified_issues.append(verified_issue)
                             print(f"이슈 확인: {verified_issue.component_id}")
+
                 else:
                     print(f"이슈 타입 {issue_type}: Gemini가 이슈 없음으로 판단")
+                    print(f"응답 타입: {type(gemini_response)}, 응답: {gemini_response}")
 
             except Exception as e:
                 print(f"이슈 타입 {issue_type} Gemini 검증 실패: {e}")
+                import traceback
+                traceback.print_exc()
+
                 # 실패한 경우 원본 후보들을 기본 설명과 함께 추가
                 for candidate in type_issues:
                     candidate.ai_description = f"Gemini 검증 실패 - 기본 분석: {candidate.description_type}"
-                    verified_issues.extend(type_issues)
+                    verified_issues.append(candidate)
 
+        print(f"=== 최종 검증 결과 ===")
+        print(f"총 검증된 이슈 개수: {len(verified_issues)}")
         return verified_issues
 
     def _match_candidate_issue(self, gemini_issue, candidate_issues: List[Issue]) -> Optional[Issue]:
         """Gemini 결과와 후보 이슈를 매칭"""
-        for candidate in candidate_issues:
-            # component_id가 일치하거나 bbox가 유사한 경우
-            if (hasattr(gemini_issue, 'component_id') and
-                    gemini_issue.component_id == candidate.component_id):
-                return candidate
 
-            # bbox 기반 매칭 (좌표가 유사한 경우)
-            if (hasattr(gemini_issue, 'bbox') and
-                    self._bbox_similarity(gemini_issue.bbox, candidate.bbox) > 0.8):
-                return candidate
+        if isinstance(gemini_issue, Issue):
+            for candidate in candidate_issues:
+                if gemini_issue.component_id == candidate.component_id:
+                    print(f"component_id 매칭: {gemini_issue.component_id}")
+                    return candidate
 
+                # bbox 기반 매칭 (좌표가 유사한 경우)
+                if self._bbox_similarity(gemini_issue.bbox, candidate.bbox) > 0.8:
+                    print(f"bbox 매칭: {gemini_issue.component_id} <-> {candidate.component_id}")
+                    return candidate
+
+        else:
+            for candidate in candidate_issues:
+                # component_id가 일치하거나 bbox가 유사한 경우
+                if (hasattr(gemini_issue, 'component_id') and
+                        gemini_issue.component_id == candidate.component_id):
+                    return candidate
+
+                # bbox 기반 매칭 (좌표가 유사한 경우)
+                if (hasattr(gemini_issue, 'bbox') and
+                        self._bbox_similarity(gemini_issue.bbox, candidate.bbox) > 0.8):
+                    return candidate
+
+        print(f"매칭 실패: {getattr(gemini_issue, 'component_id', 'unknown')}")
         return None
 
     def _bbox_similarity(self, bbox1, bbox2) -> float:
@@ -2109,44 +1998,80 @@ class LayoutDetector(Gemini):
             if not bbox1 or not bbox2 or len(bbox1) != 4 or len(bbox2) != 4:
                 return 0.0
 
-            # 중심점과 크기 비교
-            center1 = [(bbox1[0] + bbox1[2]) / 2, (bbox1[1] + bbox1[3]) / 2]
-            center2 = [(bbox2[0] + bbox2[2]) / 2, (bbox2[1] + bbox2[3]) / 2]
+            # bbox 형식: [x1, y1, x2, y2]
+            x1_inter = max(bbox1[0], bbox2[0])
+            y1_inter = max(bbox1[1], bbox2[1])
+            x2_inter = min(bbox1[2], bbox2[2])
+            y2_inter = min(bbox1[3], bbox2[3])
 
-            size1 = [(bbox1[2] - bbox1[0]), (bbox1[3] - bbox1[1])]
-            size2 = [(bbox2[2] - bbox2[0]), (bbox2[3] - bbox2[1])]
+            # 교집합 영역 계산
+            if x2_inter <= x1_inter or y2_inter <= y1_inter:
+                intersection = 0.0
+            else:
+                intersection = (x2_inter - x1_inter) * (y2_inter - y1_inter)
 
-            # 중심점 거리
-            center_dist = ((center1[0] - center2[0]) ** 2 + (center1[1] - center2[1]) ** 2) ** 0.5
+            # 각 bbox의 영역 계산
+            area1 = (bbox1[2] - bbox1[0]) * (bbox1[3] - bbox1[1])
+            area2 = (bbox2[2] - bbox2[0]) * (bbox2[3] - bbox2[1])
 
-            # 크기 유사도
-            size_similarity = min(size1[0] / size2[0], size2[0] / size1[0]) * min(size1[1] / size2[1], size2[1] / size1[1])
+            # 합집합 영역 계산
+            union = area1 + area2 - intersection
 
-            # 전체 유사도
-            similarity = max(0, 1 - center_dist) * size_similarity
-            return min(1.0, similarity)
+            # IoU 계산
+            if union == 0:
+                return 0.0
 
-        except:
+            iou = intersection / union
+            return min(1.0, max(0.0, iou))
+
+        except Exception as e:
+            print(f"bbox 유사도 계산 오류: {e}")
             return 0.0
 
     def _update_issue_with_gemini_result(self, candidate_issue: Issue, gemini_issue) -> Issue:
         """후보 이슈를 Gemini 결과로 업데이트"""
-        updated_issue = candidate_issue
 
-        # Gemini 결과로 업데이트
-        if hasattr(gemini_issue, 'severity'):
-            updated_issue.severity = self._map_severity(gemini_issue.severity)
+        updated_issue = Issue(
+            filename=candidate_issue.filename,
+            issue_type=candidate_issue.issue_type,
+            component_id=candidate_issue.component_id,
+            component_type=candidate_issue.component_type,
+            ui_component_id=candidate_issue.ui_component_id,
+            ui_component_type=candidate_issue.ui_component_type,
+            score=candidate_issue.score,
+            location_id=candidate_issue.location_id,
+            location_type=candidate_issue.location_type,
+            bbox=candidate_issue.bbox,
+            description_id=candidate_issue.description_id,
+            description_type=candidate_issue.description_type,
+            ai_description=candidate_issue.ai_description
+        )
 
-        if hasattr(gemini_issue, 'ai_description'):
-            updated_issue.ai_description = gemini_issue.ai_description
-        elif hasattr(gemini_issue, 'description'):
-            updated_issue.ai_description = gemini_issue.description
+        if isinstance(gemini_issue, Issue):
+            # Gemini에서 더 상세한 정보가 있으면 업데이트
+            if gemini_issue.ai_description:
+                updated_issue.ai_description = gemini_issue.ai_description
+
+            if gemini_issue.score:
+                updated_issue.score = gemini_issue.score
+
+            if gemini_issue.component_type:
+                updated_issue.component_type = gemini_issue.component_type
+
         else:
-            updated_issue.ai_description = f"Gemini 검증 완료 - 이슈 타입 {candidate_issue.issue_type} 확인됨"
+            # Gemini 결과로 업데이트
+            if hasattr(gemini_issue, 'score'):
+                updated_issue.score = self._map_score(gemini_issue.score)
 
-        # 추가 정보 업데이트 가능
-        if hasattr(gemini_issue, 'component_type') and gemini_issue.component_type:
-            updated_issue.component_type = gemini_issue.component_type
+            if hasattr(gemini_issue, 'ai_description'):
+                updated_issue.ai_description = gemini_issue.ai_description
+            elif hasattr(gemini_issue, 'description'):
+                updated_issue.ai_description = gemini_issue.description
+            else:
+                updated_issue.ai_description = f"Gemini 검증 완료 - 이슈 타입 {candidate_issue.issue_type} 확인됨"
+
+            if hasattr(gemini_issue, 'component_type') and gemini_issue.component_type:
+                updated_issue.component_type = gemini_issue.component_type
 
         return updated_issue
 
@@ -2186,41 +2111,33 @@ class LayoutDetector(Gemini):
             raise ValueError(f"JSON 파일 형식 오류: {json_path}, {str(e)}")
 
     def _prioritize_and_filter_issues(self, issues: List[Issue], screen_info: Dict) -> List[Issue]:
-        """화면 특성을 고려한 이슈 우선순위 및 필터링"""
+        """화면 특성을 고려한 이슈 우선순위 및 필터링 (EvalKPI 활용)"""
+        try:
+            complexity = screen_info.get('complexity', 0.5)
 
-        complexity = screen_info['complexity']
+            # 복잡도에 따른 이슈 개수 조정
+            if complexity > 0.7:
+                max_issues_per_type = 2
+            elif complexity < 0.3:
+                max_issues_per_type = 4
+            else:
+                max_issues_per_type = getattr(self, 'max_issues_per_type', 3)
 
-        if complexity > 0.7:
-            max_issues_per_type = 2
-        elif complexity < 0.3:
-            max_issues_per_type = 4
-        else:
-            max_issues_per_type = self.max_issues_per_type
+            valid_issues = EvalKPI.filter_valid_issues(issues)
+            print(f"유효한 이슈 필터링 후: {len(valid_issues)}개")
 
-        # 이슈 타입별 그룹화
-        issues_by_type = defaultdict(list)
-        for issue in issues:
-            issues_by_type[issue.issue_type].append(issue)
+            final_issues = EvalKPI.prioritize_issues(valid_issues, max_issues_per_type)
+            print(f"최종 우선순위 적용 후: {len(final_issues)}개")
 
-        final_issues = []
-        severity_order = {'high': 3, 'medium': 2, 'low': 1}
+            final_issues = self._remove_duplicate_issues(final_issues)
 
-        for issue_type, type_issues in issues_by_type.items():
-            # 심각도와 위치를 고려한 정렬
-            sorted_issues = sorted(
-                type_issues,
-                key=lambda x: (
-                    severity_order.get(x.severity, 0),
-                    -self._calculate_visibility_weight(x.bbox),
-                    x.bbox[0]
-                ),
-                reverse=True
-            )
+            return final_issues
 
-            filtered_issues = self._remove_duplicate_issues(sorted_issues[:max_issues_per_type])
-            final_issues.extend(filtered_issues)
-
-        return final_issues
+        except Exception as e:
+            print(f"이슈 필터링 중 오류: {e}")
+            import traceback
+            traceback.print_exc()
+            return []
 
     def _calculate_visibility_weight(self, bbox: List[float]) -> float:
         """요소 위치의 시각적 중요도 계산"""
@@ -2286,7 +2203,7 @@ class LayoutDetector(Gemini):
                     'component_type': issue.component_type,
                     'ui_component_id': issue.ui_component_id,
                     'ui_component_type': issue.ui_component_type,
-                    'severity': issue.severity,
+                    'score': issue.score,
                     'location_id': issue.location_id,
                     'location_type': issue.location_type,
                     'bbox': issue.bbox,
@@ -2303,10 +2220,10 @@ class LayoutDetector(Gemini):
             }
         }
 
-        debug_path = os.path.join(self.output_dir, f"debug_{filename}.json")
+        debug_path = os.path.join(self.output_dir, f"{filename}.json")
         with open(debug_path, 'w', encoding='utf-8') as f:
             json.dump(debug_info, f, ensure_ascii=False, indent=2)
-        print(f"디버그 정보 저장: {debug_path}")
+        print(f"JSON 저장: {debug_path}")
 
     def verify_bboxes(self, issues: List[Issue], xml_elements: List[Dict], json_elements: List[Dict]):
         """Verify that issue bounding boxes match XML or JSON bounding boxes"""
@@ -2332,7 +2249,7 @@ class LayoutDetector(Gemini):
             if not matched:
                 print(f"No match found for component {component_id}: {issue_bbox}")
 
-    def visualize_bboxes(self, image_path: str, issues: List[Issue], suffix: str = ""):
+    def visualize_bboxes(self, image_path: str, issues: List[Issue]):
         """Visualize bounding boxes of detected issues on the image."""
         if not self.debug:
             return
@@ -2353,26 +2270,116 @@ class LayoutDetector(Gemini):
                 '5': (0, 0, 255),  # 파랑 - 계층 정렬
                 '6': (255, 0, 255),  # 자홍 - 텍스트 잘림
                 '7': (128, 0, 128),  # 보라 - 아이콘 잘림
+                '8': (255, 128, 0),  # 주황 - 중복 아이콘
+                '9': (128, 255, 0),  # 연두 - 색상 조화
+                '10': (0, 128, 255),  # 하늘 - 공간 활용
+                '11': (255, 0, 128)  # 분홍 - 비례 조화
             }
 
-            for issue in issues:
-                bbox = issue.bbox
-                x1, y1, x2, y2 = [int(coord * dim) for coord, dim in zip(bbox, [w, h, w, h])]
+            valid_issues_count = 0
 
-                # 이슈 타입별 색상으로 사각형 그리기
-                color = colors.get(issue.issue_type, (128, 128, 128))
-                thickness = 3 if issue.severity == 'high' else 2
-                cv2.rectangle(image, (x1, y1), (x2, y2), color, thickness)
+            for i, issue in enumerate(issues):
+                try:
+                    # bbox 검증
+                    bbox = getattr(issue, 'bbox', None)
+                    if not bbox or len(bbox) < 4:
+                        print(f"이슈 {i}: bbox 데이터 없음 또는 불완전 - {bbox}")
+                        continue
 
-                label = f"Issue {issue.issue_type} ({issue.severity})"
-                cv2.putText(image, label, (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.4, color, 1)
+                    # 좌표 변환 및 검증
+                    try:
+                        x1, y1, x2, y2 = [int(coord * dim) for coord, dim in zip(bbox[:4], [w, h, w, h])]
+                    except (ValueError, TypeError) as e:
+                        print(f"이슈 {i}: 좌표 변환 실패 - bbox: {bbox}, 에러: {e}")
+                        continue
 
-            output_path = os.path.join(self.output_dir, f"debug_{suffix}_{os.path.basename(image_path)}")
-            cv2.imwrite(output_path, image)
-            print(f"Debug image saved: {output_path}")
+                    # 좌표 유효성 검사
+                    if x1 >= x2 or y1 >= y2 or x1 < 0 or y1 < 0 or x2 > w or y2 > h:
+                        print(f"이슈 {i}: 유효하지 않은 좌표 - ({x1}, {y1}, {x2}, {y2}), 이미지 크기: ({w}, {h})")
+                        continue
+
+                    # 이슈 타입별 색상 선택
+                    issue_type = str(getattr(issue, 'issue_type', 'unknown'))
+                    color = colors.get(issue_type, (128, 128, 128))  # 기본 회색
+
+                    # 점수에 따른 두께 설정
+                    score = getattr(issue, 'score', 'Conditional Pass')
+                    if score in ['Fail with Critical issue', 'Fail with issue']:
+                        thickness = 3
+                    else:
+                        thickness = 2
+
+                    # 사각형 그리기
+                    cv2.rectangle(image, (x1, y1), (x2, y2), color, thickness)
+
+                    # 라벨 텍스트
+                    component_id = getattr(issue, 'component_id', 'unknown')
+                    label = f"T{issue_type}:{component_id[:8]}"
+
+                    # 텍스트 배경 사각형 그리기 (가독성 향상)
+                    font = cv2.FONT_HERSHEY_SIMPLEX
+                    font_scale = 0.4
+                    font_thickness = 1
+
+                    (text_width, text_height), baseline = cv2.getTextSize(label, font, font_scale, font_thickness)
+
+                    # 텍스트 위치 계산 (bbox 위쪽)
+                    text_x = x1
+                    text_y = max(text_height + 5, y1 - 5)  # 이미지 상단을 벗어나지 않도록
+
+                    # 텍스트 배경
+                    cv2.rectangle(image,
+                                  (text_x - 2, text_y - text_height - 2),
+                                  (text_x + text_width + 2, text_y + baseline + 2),
+                                  color, -1)
+
+                    # 텍스트 (흰색)
+                    cv2.putText(image, label, (text_x, text_y), font, font_scale, (255, 255, 255), font_thickness)
+
+                    valid_issues_count += 1
+
+                except Exception as issue_error:
+                    print(f"이슈 {i} 시각화 중 에러: {str(issue_error)}")
+                    continue
+
+            print(f"총 {len(issues)}개 이슈 중 {valid_issues_count}개 시각화 완료")
+
+            # 결과 이미지 저장
+            output_path = os.path.join(self.output_dir, f"debug_{os.path.basename(image_path)}")
+            success = cv2.imwrite(output_path, image)
+
+            if success:
+                print(f"Debug image saved: {output_path}")
+            else:
+                print(f"Failed to save debug image: {output_path}")
 
         except Exception as e:
             print(f"Error visualizing bounding boxes: {str(e)}")
+            import traceback
+            traceback.print_exc()
+
+    def _safe_get_bbox_coordinates(self, bbox, image_width: int, image_height: int) -> Optional[
+        Tuple[int, int, int, int]]:
+        """안전하게 bbox 좌표를 추출하고 검증"""
+        try:
+            if not bbox or len(bbox) < 4:
+                return None
+
+            # 상대 좌표를 절대 좌표로 변환
+            x1 = max(0, min(int(bbox[0] * image_width), image_width - 1))
+            y1 = max(0, min(int(bbox[1] * image_height), image_height - 1))
+            x2 = max(x1 + 1, min(int(bbox[2] * image_width), image_width))
+            y2 = max(y1 + 1, min(int(bbox[3] * image_height), image_height))
+
+            # 유효성 검사
+            if x1 >= x2 or y1 >= y2:
+                return None
+
+            return (x1, y1, x2, y2)
+
+        except (ValueError, TypeError, IndexError):
+            return None
+
 
     def _create_issue(self, element: Dict, issue_type: int) -> Issue:
         """이슈 객체 생성 헬퍼 함수"""
@@ -2383,7 +2390,7 @@ class LayoutDetector(Gemini):
         ui_component_id, ui_component_type = self._calc_ui_component(elem_type)
         location_id, location_type = self._calc_location(bbox)
         description_id, description_type = self._get_description(str(issue_type))
-        severity = 'medium'
+        score = '3'
         ai_description = description_type
 
         return Issue(
@@ -2393,7 +2400,7 @@ class LayoutDetector(Gemini):
             component_type=elem_type,
             ui_component_id=ui_component_id,
             ui_component_type=ui_component_type,
-            severity=severity,
+            score=score,
             location_id=location_id,
             location_type=location_type,
             bbox=bbox,
@@ -2454,22 +2461,9 @@ class LayoutDetector(Gemini):
         description_type = EvalKPI.DESCRIPTION.get(issue_type, "Unknown issue")
         return description_id, description_type
 
-    def _map_severity(self, severity_input) -> str:
-        if isinstance(severity_input, str):
-            if severity_input.isdigit():
-                severity_input = float(severity_input)
-            elif severity_input.lower() in ['high', 'medium', 'low']:
-                return severity_input.lower()
-            else:
-                return 'medium'
-        if isinstance(severity_input, (int, float)):
-            if severity_input >= 0.8 or severity_input >= 3:
-                return 'high'
-            elif severity_input >= 0.5 or severity_input >= 2:
-                return 'medium'
-            else:
-                return 'low'
-        return 'medium'
+    def _map_score(self, score_input) -> str:
+        """점수를 표준 문자열로 변환"""
+        return EvalKPI.map_score_to_string(score_input)
 
 
 def save_results_to_csv(filename, issues: List[Issue], output_path: str):
@@ -2492,7 +2486,7 @@ def save_results_to_csv(filename, issues: List[Issue], output_path: str):
         # 컬럼 정의
         columns = [
             'filename', 'issue_type', 'component_id', 'component_type',
-            'ui_component_id', 'ui_component_type', 'severity',
+            'ui_component_id', 'ui_component_type', 'score',
             'location_id', 'location_type', 'bbox',
             'description_id', 'description_type', 'ai_description'
         ]
@@ -2579,23 +2573,23 @@ def batch_analyze_json_only(image_dir: str, json_dir: str, output_dir: str) -> D
 
 if __name__ == "__main__":
     # 기존 방식 (XML + JSON)
-    image_paths = glob.glob("D:/hnryu/Themes/resource/image/*.png")
+    image_paths = glob.glob("../resource/image/*.png")
 
     print(f"총 {len(image_paths)}개 이미지 처리 시작...")
     all_issues = []
 
-    for image_path in image_paths[:5]:
+    for image_path in image_paths[:3]:
 
         filename = os.path.splitext(os.path.basename(image_path))[0]
-        xml_path = f"D:/hnryu/Themes/resource/xml/{filename}.xml"
-        json_path = f"D:/hnryu/Themes/output/json/{filename}.json"
+        xml_path = f"../resource/xml/{filename}.xml"
+        json_path = f"../output/json/{filename}.json"
 
         print(f"\n=== 처리 중: {filename} ===")
         print(f"  이미지: {image_path}")
         print(f"  JSON: {json_path}")
         print(f"  XML: {xml_path}")
 
-        output_dir = "D:/hnryu/Themes/output/result/20250608"
+        output_dir = "../output/result/eval"
         # 이슈 검출 실행
         detector = LayoutDetector(output_dir=output_dir)
         issues = detector.analyze_layout(image_path, json_path)
