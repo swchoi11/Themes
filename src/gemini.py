@@ -1,28 +1,27 @@
 import os
-import glob
+import sys
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import time
 import json
 from typing import Optional, List
 from dotenv import load_dotenv
 from google import genai
-from google.genai import types
 
-import os
-import sys
-
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from common.logger import timefn
 from common.prompt import Prompt
 from common.logger import init_logger
 from utils.schemas import Issue
 
 logger = init_logger()
 
+
 class Gemini:
     def __init__(self):
         load_dotenv()
         self.client = genai.Client(api_key=os.getenv('API_KEY'))
-        self.model = 'gemini-2.5-flash-preview-05-20'
-
+        self.model = 'gemini-2.5-flash-preview-05-20'   # 'gemini-2.5-pro-preview-06-05'
         self.max_retries = 5
         self.initial_delay = 1
 
@@ -42,11 +41,12 @@ class Gemini:
         return wrapper
 
     @retry_with_delay
+    @timefn
     def _call_gemini_image(self, prompt, image) -> Issue:
         target_image = self.client.files.upload(file=image)
-        logger.info(f"image 업로드 완료: {image}")
+        # logger.info(f"image 업로드 완료: {image}")
 
-        logger.info(f"gemini 호출 시작")
+        # logger.info(f"gemini 호출 시작")
         response = self.client.models.generate_content(
             model=self.model,
             contents=[
@@ -58,15 +58,16 @@ class Gemini:
                 "response_schema": Issue.model_json_schema(),
             }
         )
-        logger.info(f"gemini 호출 완료")
+        # logger.info(f"gemini 호출 완료")
         return Issue.model_validate(json.loads(response.text))
 
     @retry_with_delay
+    @timefn
     def _call_gemini_image_text(self, prompt, image, text) -> Issue:
         target_image = self.client.files.upload(file=image)
-        logger.info(f"image 업로드 완료: {image}")
+        # logger.info(f"image 업로드 완료: {image}")
 
-        logger.info(f"gemini 호출 시작")
+        # logger.info(f"gemini 호출 시작")
         response = self.client.models.generate_content(
             model=self.model,
             contents=[
@@ -79,7 +80,7 @@ class Gemini:
                 "response_schema": Issue.model_json_schema(),
             }
         )
-        logger.info(f"gemini 호출 완료")
+        # logger.info(f"gemini 호출 완료")
         return Issue.model_validate(json.loads(response.text))
 
     def generate_response(self, prompt, image, text: Optional[str] = None) -> Issue:

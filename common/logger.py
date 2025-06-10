@@ -4,22 +4,14 @@ from colorlog import ColoredFormatter
 import time
 import functools
 
-APP_LOGGER_NAME = 'THEMES'
+APP_LOGGER_NAME = 'THEMES@hnryu'
+
 
 def init_logger(
         log_level=logging.INFO,
         log_format=None
 ):
-    """
-    콘솔 로거를 초기화합니다.
 
-    Args:
-        log_level (int): 로깅 레벨 (기본값: INFO)
-        log_format (str): 로그 포맷 문자열 (기본값: None)
-
-    Returns:
-        logging.Logger: 초기화된 로거 객체
-    """
     if log_format is None:
         log_format = (
             '%(asctime)s - '
@@ -63,9 +55,6 @@ def is_initialized(logger_name):
 
 
 def timefn(fn):
-    """
-        함수의 실행 시간을 측정하고 로깅하는 데코레이터입니다.
-    """
 
     @functools.wraps(fn)
     def measure_time(*args, **kwargs):
