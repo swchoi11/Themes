@@ -272,7 +272,7 @@ class Gemini:
                 cv2.imwrite('./output/images/header_img.png', header_img)
                 result = self.generate_response(Prompt.clock_issue(), 
                                                 './output/images/header_img.png', './output/images/clock_img.png',
-                                                issue_type="design",index="A")
+                                                issue_type="design",description_id="A")
                 issues.append(result)
                 os.remove('./output/images/clock_img.png')
                 os.remove('./output/images/header_img.png')
@@ -311,7 +311,13 @@ class Gemini:
         for filename, file_issues in issues_by_file.items():
             print(f"파일 {filename}의 이슈 {len(file_issues)}개 처리 중...")
             try:
-                sorted_issues = self.sort_issues_by_file(filename,file_issues)
+                valid_issues = []
+                for issue in file_issues:
+                    if issue['bbox'] != []:
+                        valid_issues.append(issue)
+
+                sorted_issues = self.sort_issues_by_file(filename,valid_issues)
+                print(sorted_issues)
                 if sorted_issues:
                     final_issues.extend(sorted_issues)
                 else:
@@ -332,9 +338,8 @@ class Gemini:
     def sort_issues_by_file(self, image_path, issues) -> ResultModel:
         prompt = Prompt.sort_detected_issues_prompt()
         issue_text = json.dumps(issues, ensure_ascii=False, indent=2)
+
         issue_text = str(issue_text)
-        # print(issue_text)
-        
         response = self.generate_response(prompt, image_path, text=issue_text)
         
         return response
