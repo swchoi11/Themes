@@ -155,7 +155,7 @@ def IssuePrompt():
                     "component_type": "컴포넌트명 (예: main_button, header_text 등)",
                     "ui_component_id": "UI 컴포넌트 ID (0~B 중 해당하는 값)",
                     "ui_component_type": "UI 컴포넌트 타입 (Button, TextView, ImageView 등)",
-                    "severity": "심각도 점수 (1-5, 5가 가장 심각)",
+                    "score": "심각도 순위 int (1(Fail with Critical issue), 2(Fail with issue), 3(Conditional Pass), 4(Pass with minor concern), 5(Pass with no issue))",
                     "location_id": "위치 ID (0~8 중 해당하는 9분위 영역)",
                     "location_type": "위치 타입 (TL, TC, TR, ML, MC, MR, BL, BC, BR)",
                     "bbox": [x1, y1, x2, y2],
@@ -197,7 +197,7 @@ def IssuePrompt():
                     "component_type": "컴포넌트명 (예: highlighted_item, selected_button 등)",
                     "ui_component_id": "UI 컴포넌트 ID (0~B 중 해당하는 값)",
                     "ui_component_type": "UI 컴포넌트 타입 (Button, TextView, ImageView 등)",
-                    "severity": "심각도(int)",
+                    "score": "심각도 순위 int(1(Fail with Critical issue), 2(Fail with issue), 3(Conditional Pass), 4(Pass with minor concern), 5(Pass with no issue))",
                     "location_id": "위치 ID (0~8 중 해당하는 9분위 영역)",
                     "location_type": "위치 타입 (TL, TC, TR, ML, MC, MR, BL, BC, BR)",
                     "bbox": [x1, y1, x2, y2],
@@ -240,7 +240,7 @@ def IssuePrompt():
                     "component_type": "컴포넌트명 (예: action_button, clickable_item 등)",
                     "ui_component_id": "UI 컴포넌트 ID (0, 2, 3, 6, 7, B 등 상호작용 가능한 요소)",
                     "ui_component_type": "UI 컴포넌트 타입 (Button, RadioButton, CheckBox, Switch, ToggleButton, ImageButton 등)",
-                    "severity": "심각도(int)",
+                    "score": "심각도 순위 int (1(Fail with Critical issue), 2(Fail with issue), 3(Conditional Pass), 4(Pass with minor concern), 5(Pass with no issue))",
                     "location_id": "위치 ID (0~8 중 해당하는 9분위 영역)",
                     "location_type": "위치 타입 (TL, TC, TR, ML, MC, MR, BL, BC, BR)",
                     "bbox": [x1, y1, x2, y2],
@@ -284,7 +284,7 @@ def IssuePrompt():
                     "component_type": "컴포넌트명 (예: button_group, text_layout 등)",
                     "ui_component_id": "UI 컴포넌트 ID (0, 1, 5, B 등 정렬 대상 요소)",
                     "ui_component_type": "UI 컴포넌트 타입 (Button, ImageView, TextView, ImageButton 등)",
-                    "severity": "심각도(int)",
+                    "score": "심각도 순위 int (1(Fail with Critical issue), 2(Fail with issue), 3(Conditional Pass), 4(Pass with minor concern), 5(Pass with no issue))",
                     "location_id": "위치 ID (0~8 중 해당하는 9분위 영역)",
                     "location_type": "위치 타입 (TL, TC, TR, ML, MC, MR, BL, BC, BR)",
                     "bbox": [x1, y1, x2, y2],
@@ -326,7 +326,7 @@ def IssuePrompt():
                     "component_type": "컴포넌트명 (예: list_item, card_component 등)",
                     "ui_component_id": "UI 컴포넌트 ID (컴포넌트 내부 요소 타입에 따라)",
                     "ui_component_type": "UI 컴포넌트 타입 (해당 컴포넌트 내부 요소 타입)",
-                    "severity": "심각도(int)",
+                    "score": "심각도 순위 int (1(Fail with Critical issue), 2(Fail with issue), 3(Conditional Pass), 4(Pass with minor concern), 5(Pass with no issue))",
                     "location_id": "위치 ID (0~8 중 해당하는 9분위 영역)",
                     "location_type": "위치 타입 (TL, TC, TR, ML, MC, MR, BL, BC, BR)",
                     "bbox": [x1, y1, x2, y2],
@@ -369,7 +369,7 @@ def IssuePrompt():
                     "component_type": "컴포넌트명 (예: sibling_elements, same_level_items 등)",
                     "ui_component_id": "UI 컴포넌트 ID (동일 계층 요소 타입에 따라)",
                     "ui_component_type": "UI 컴포넌트 타입 (동일 계층 요소들의 타입)",
-                    "severity": "심각도(int)",
+                    "score": "심각도 순위 int (1(Fail with Critical issue), 2(Fail with issue), 3(Conditional Pass), 4(Pass with minor concern), 5(Pass with no issue))",
                     "location_id": "위치 ID (0~8 중 해당하는 9분위 영역)",
                     "location_type": "위치 타입 (TL, TC, TR, ML, MC, MR, BL, BC, BR)",
                     "bbox": [x1, y1, x2, y2],
@@ -413,7 +413,7 @@ def IssuePrompt():
                     "component_type": "컴포넌트명 (예: text_container, label_field 등)",
                     "ui_component_id": "4 또는 5",
                     "ui_component_type": "EditText 또는 TextView",
-                    "severity": "심각도(int)",
+                    "score": "심각도 순위 int (1(Fail with Critical issue), 2(Fail with issue), 3(Conditional Pass), 4(Pass with minor concern), 5(Pass with no issue))",
                     "location_id": "위치 ID (0~8 중 해당하는 9분위 영역)",
                     "location_type": "위치 타입 (TL, TC, TR, ML, MC, MR, BL, BC, BR)",
                     "bbox": [x1, y1, x2, y2],
@@ -457,7 +457,7 @@ def IssuePrompt():
                     "component_type": "컴포넌트명 (예: nav_icon, menu_icon 등)",
                     "ui_component_id": "UI 컴포넌트 ID (1 또는 B - ImageView 또는 ImageButton)",
                     "ui_component_type": "UI 컴포넌트 타입 (ImageView 또는 ImageButton)",
-                    "severity": "심각도(int)",
+                    "score": "심각도 순위 int (1(Fail with Critical issue), 2(Fail with issue), 3(Conditional Pass), 4(Pass with minor concern), 5(Pass with no issue))",
                     "location_id": "위치 ID (0~8 중 해당하는 9분위 영역)",
                     "location_type": "위치 타입 (TL, TC, TR, ML, MC, MR, BL, BC, BR)",
                     "bbox": [x1, y1, x2, y2],
@@ -467,6 +467,161 @@ def IssuePrompt():
                      아이콘의 [구체적 부분 예: 오른쪽 곡선 부분]이 [컨테이너/화면] 경계를 벗어나 완전한 형태로 표시되지 않고 있습니다.
                      이로 인해 아이콘의 인식성이 저하되고 사용자가 기능을 정확히 파악하기 어려울 수 있습니다. [추가 문제점 예: 대칭성이 깨져 시각적 균형감도 해침])"
                     
+                }
+            ]
+        }
+        """,
+        '8': """
+        갤럭시S, 갤럭시 폴드 휴대폰의 스크린샷을 분석하여 잘못된 아이콘 사용 문제를 찾아주세요.
+
+        [잘못된 아이콘 사용 검사 기준]
+        - 서로 다른 기능을 가진 요소들이 동일한 아이콘을 사용하는 경우
+        - 사용자가 기능을 혼동할 수 있는 아이콘 중복 사용
+        - 표준 아이콘 가이드라인에서 벗어난 사용
+
+        [구체적 확인 사항]
+        1. **다른 기능, 같은 아이콘**: 전화 기능과 연락처 기능이 같은 아이콘을 사용하는가?
+        2. **설정 아이콘 오용**: 다른 설정 기능들이 모두 동일한 톱니바퀴 아이콘을 사용하는가?
+        3. **네비게이션 아이콘 혼용**: 뒤로가기와 메뉴가 같은 화살표 아이콘을 사용하는가?
+        4. **액션 아이콘 중복**: 삭제, 취소, 닫기가 모두 X 아이콘을 사용하는가?
+        5. **미디어 아이콘 오용**: 재생, 녹음, 통화가 같은 원형 아이콘을 사용하는가?
+        6. **소셜 아이콘 혼용**: 공유, 좋아요, 북마크가 같은 하트 아이콘을 사용하는가?
+        7. **시스템 아이콘 오용**: 알림, 경고, 오류가 같은 느낌표 아이콘을 사용하는가?
+
+        ** 위 문제 중 하나라도 발견되면: ** 
+        [출력 형식]
+        {
+            "issues": [
+                {
+                    "issue_type": 8,
+                    "component_id": "해당 컴포넌트의 고유 ID",
+                    "component_type": "컴포넌트명 (예: misused_icon, confusing_icon 등)",
+                    "ui_component_id": "1 또는 B",
+                    "ui_component_type": "ImageView 또는 ImageButton", 
+                    "score": "심각도 순위 int (1(Fail with Critical issue), 2(Fail with issue), 3(Conditional Pass), 4(Pass with minor concern), 5(Pass with no issue))",
+                    "location_id": "위치 ID (0~8)",
+                    "location_type": "위치 타입 (TL, TC, TR, ML, MC, MR, BL, BC, BR)",
+                    "bbox": [x1, y1, x2, y2],
+                    "description_id": "8",
+                    "description_type": "역할이 다른 기능 요소에 동일한 아이콘 이미지로 중복 존재",
+                    "ai_description": "서로 다른 기능인 [기능1]과 [기능2]가 동일한 [아이콘 설명] 아이콘을 사용하여 사용자에게 혼란을 줄 수 있습니다."
+                }
+            ]
+        }
+        """,
+
+        '9': """
+        갤럭시S, 갤럭시 폴드 휴대폰의 스크린샷을 분석하여 달력 아이콘의 텍스트 오버플로우 문제를 찾아주세요.
+
+        [달력 아이콘 검사 기준]
+        - 달력/캘린더 앱 아이콘 식별
+        - 아이콘 내 요일 텍스트(월,화,수,목,금,토,일) 확인
+        - 텍스트가 아이콘 테두리를 벗어나는지 검사
+
+        [구체적 확인 사항]
+        1. **요일 글자 오버플로우**: 달력 아이콘에서 요일 표시가 아이콘 경계를 벗어나는가?
+        2. **날짜 숫자 오버플로우**: 달력 아이콘의 날짜 표시가 테두리를 넘는가?
+        3. **월 표시 오버플로우**: 달력 아이콘의 월 정보가 경계를 벗어나는가?
+        4. **아이콘 크기 부족**: 달력 정보를 담기에 아이콘 크기가 부적절한가?
+        5. **폰트 크기 과대**: 달력 아이콘 내 텍스트가 아이콘 크기에 비해 너무 큰가?
+
+        ※ 엄격하게 판단: 아이콘 배경보다 텍스트가 명확히 바깥으로 나간 경우만 이슈로 판정
+
+        ** 위 문제 중 하나라도 발견되면: ** 
+        [출력 형식]
+        {
+            "issues": [
+                {
+                    "issue_type": 9,
+                    "component_id": "해당 컴포넌트의 고유 ID",
+                    "component_type": "calendar_icon",
+                    "ui_component_id": "1",
+                    "ui_component_type": "ImageView", 
+                    "score": "심각도 순위 int (1(Fail with Critical issue), 2(Fail with issue), 3(Conditional Pass), 4(Pass with minor concern), 5(Pass with no issue))",
+                    "location_id": "위치 ID (0~8)",
+                    "location_type": "위치 타입",
+                    "bbox": [x1, y1, x2, y2],
+                    "description_id": "9", 
+                    "description_type": "달력 아이콘에서 요일 글자가 테두리를 벗어남",
+                    "ai_description": "달력 아이콘에서 [구체적 요일/날짜]가 아이콘의 [방향] 테두리를 벗어나 표시되어 시각적 완성도가 떨어집니다."
+                }
+            ]
+        }
+        """,
+
+        'A': """
+        갤럭시S, 갤럭시 폴드 휴대폰의 스크린샷을 분석하여 시간/날짜 정보 불일치 문제를 찾아주세요.
+
+        [시간/날짜 일치성 검사 기준]
+        - 상단 상태바의 현재 시간/날짜 확인
+        - 앱 내 달력/시계 아이콘의 표시 시간 확인  
+        - 두 정보 간의 일치 여부 판별
+
+        [구체적 확인 사항]
+        1. **달력 앱 날짜 불일치**: 달력 앱 아이콘의 날짜가 상태바 날짜와 다른가?
+        2. **시계 앱 시간 불일치**: 시계 앱 아이콘의 시침/분침이 상태바 시간과 다른가?
+        3. **위젯 시간 불일치**: 홈 화면 시계 위젯이 실제 시간과 다른가?
+        4. **일정 앱 날짜 오류**: 일정 관리 앱의 날짜 표시가 현재 날짜와 다른가?
+        5. **알람 앱 시간 표시 오류**: 알람 앱 아이콘의 시간이 현재 시간과 맞지 않는가?
+
+        ※ 이미지에 표시된 정보만을 기준으로 엄격하게 판단하고 추측하지 마세요
+
+        ** 위 문제 중 하나라도 발견되면: ** 
+        [출력 형식]
+        {
+            "issues": [
+                {
+                    "issue_type": "A",
+                    "component_id": "해당 컴포넌트의 고유 ID", 
+                    "component_type": "time_date_icon",
+                    "ui_component_id": "1",
+                    "ui_component_type": "ImageView",
+                    "score": "심각도 순위 int (1(Fail with Critical issue), 2(Fail with issue), 3(Conditional Pass), 4(Pass with minor concern), 5(Pass with no issue))",
+                    "location_id": "위치 ID (0~8)",
+                    "location_type": "위치 타입",
+                    "bbox": [x1, y1, x2, y2],
+                    "description_id": "A",
+                    "description_type": "앱 내 달력, 시간 아이콘이 status bar 등에 보이는 실제 현재 날짜, 시각과 매칭되지 않음",
+                    "ai_description": "[앱명] 아이콘이 표시하는 [시간/날짜]가 상태바의 실제 [시간/날짜]와 일치하지 않아 사용자에게 혼란을 줄 수 있습니다."
+                }
+            ]
+        }
+        """,
+
+        'B': """
+        갤럭시S, 갤럭시 폴드 휴대폰의 스크린샷을 분석하여 화면 비율 및 여백 문제를 찾아주세요.
+
+        [화면 비율 및 여백 검사 기준]
+        - 콘텐츠 영역과 전체 화면 비율 분석
+        - 불필요한 여백 영역 식별 (20% 이상)
+        - 콘텐츠 밀도와 공간 활용도 평가
+
+        [구체적 확인 사항]
+        1. **과도한 상하 여백**: 화면 상하에 콘텐츠 대비 과도한 빈 공간이 있는가?
+        2. **과도한 좌우 여백**: 화면 좌우에 활용되지 않는 넓은 여백이 있는가?
+        3. **중앙 집중형 레이아웃 문제**: 작은 콘텐츠가 큰 화면 중앙에만 배치되어 공간 낭비가 있는가?
+        4. **폴드 화면 미활용**: 갤럭시 폴드의 넓은 화면을 제대로 활용하지 못하는가?
+        5. **태블릿 모드 부적응**: 큰 화면에서 스마트폰용 레이아웃을 그대로 사용하는가?
+        6. **콘텐츠 밀도 부족**: 표시할 수 있는 정보량에 비해 실제 표시된 정보가 부족한가?
+        7. **화면 비율 부조화**: 화면의 가로세로 비율과 콘텐츠 배치가 어울리지 않는가?
+
+        ** 위 문제 중 하나라도 발견되면: ** 
+        [출력 형식]
+        {
+            "issues": [
+                {
+                    "issue_type": "B",
+                    "component_id": "해당 컴포넌트의 고유 ID",
+                    "component_type": "layout_container", 
+                    "ui_component_id": "8",
+                    "ui_component_type": "Layout",
+                    "score": "심각도 순위 int (1(Fail with Critical issue), 2(Fail with issue), 3(Conditional Pass), 4(Pass with minor concern), 5(Pass with no issue))",
+                    "location_id": "위치 ID (0~8)",
+                    "location_type": "위치 타입",
+                    "bbox": [x1, y1, x2, y2],
+                    "description_id": "B",
+                    "description_type": "콘텐츠와 화면 비율이 맞지 않아 불필요한 여백이 많이 발생함",
+                    "ai_description": "화면의 [비율/영역]에서 콘텐츠 대비 [%]의 과도한 여백이 발생하여 화면 공간이 효율적으로 활용되지 않습니다."
                 }
             ]
         }
