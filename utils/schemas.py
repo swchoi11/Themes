@@ -34,7 +34,7 @@ class Issue(BaseModel):
     component_type: str
     ui_component_id: str        # EvalKPI.UI_COMPONENT.keys()
     ui_component_type : str     # EvalKPI.UI_COMPONENT.value()
-    severity: str
+    score: str
     location_id: str            # EvalKPI.LOCATION.keys()
     location_type: str          # EvalKPI.LOCATION.value()
     bbox: List[float]
