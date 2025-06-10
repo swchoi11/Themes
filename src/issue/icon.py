@@ -17,7 +17,9 @@ class Icon:
         else:
             self.image_path = file_path.replace('.xml', '.png')
             self.xml_path = file_path
-        
+
+        self.output_path = f"./output/images/{os.path.basename(self.image_path)}"
+            
         # Detect 모듈 초기화
         self.detector = Detect(self.image_path)
         
@@ -90,29 +92,15 @@ class Icon:
                         group_bounds.append(bounds)
                         group_info.append(f"{icon['type']} at {bounds}")
                     
-                    # logger.info(f"중복 아이콘 그룹 발견 ({len(duplicate_group)}개):")
                     
-                    # 중복된 아이콘들을 imshow로 표시
                     for i, icon_idx in enumerate(duplicate_group):
                         icon = components[icon_idx]
                         x1, y1, x2, y2 = icon['bounds']
                         icon_img = self.image[y1:y2, x1:x2]
-                        
-                        # if icon_img.size > 0:
-                        #     # 아이콘 이미지를 창에 표시
-                        #     window_name = f"중복 아이콘 {i+1}/{len(duplicate_group)} - 위치: {icon['bounds']}"
-                        #     # cv2.imshow(window_name, icon_img)
-                        #     print(f"  - 아이콘 {i+1}: 위치 {icon['bounds']}")
-                    
-                    # 키 입력 대기 (아무 키나 누르면 다음으로)
-                    # print("아무 키나 누르면 계속...")
-                    # cv2.waitKey(0)
-                    # cv2.destroyAllWindows()
                     
                     # 전체 그룹에 대해 디폴트 검증 (디폴트 이미지를 매개변수로 전달)
                     all_bounds_str = [str(bounds) for bounds in group_bounds]
                     is_normal_duplicate = self.check_default_duplicate(all_bounds_str, default_image)
-                    # logger.info(f"디폴트 검증 결과: {is_normal_duplicate}")
                     
                     # 검증 결과에 따라 이슈 생성
                     if not is_normal_duplicate:
@@ -143,8 +131,7 @@ class Icon:
                             cv2.rectangle(self.image, (icon['bounds'][0], icon['bounds'][1]), (icon['bounds'][2], icon['bounds'][3]), (0, 255, 255), 2)
                             cv2.putText(self.image, f"duplicate", (icon['bounds'][0], icon['bounds'][1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
                             
-                        file_name = os.path.basename(self.image_path)
-                        cv2.imwrite(f"./output/images/{file_name}", self.image)
+                        cv2.imwrite(self.output_path, self.image)
                     else:
                         logger.info(f"디폴트 이미지에서도 동일한 중복이 발견되어 정상으로 판정됨")
                         issue = ResultModel(
@@ -190,7 +177,6 @@ class Icon:
             # 각 바운딩박스에서 디폴트 이미지 추출
             default_crops = []
             for bounds_str in duplicate_bounds:
-                # 문자열에서 좌표 추출: "(89, 950, 184, 1045)" → [89, 950, 184, 1045]
                 bounds_str = bounds_str.strip("()").replace(" ", "")
                 coords = [int(x) for x in bounds_str.split(',')]
                 x1, y1, x2, y2 = coords

@@ -7,6 +7,7 @@ import random
 import os
 import shutil
 import json
+from datetime import datetime
 
 def normalize_xml_content(xml_path: str) -> str:
     """
@@ -76,28 +77,28 @@ def init_process():
     os.makedirs('./output/jsons/all_issues', exist_ok=True)
     os.makedirs('./output/jsons/final_issue', exist_ok=True)
     os.makedirs('./output/classification', exist_ok=True)
+    json_filename = f'result-{datetime.now().strftime("%Y%m%d")}.json'
+    return json_filename
 
 def move_to_not_processed(test_image: str):
     file_name = os.path.basename(test_image)
     xml_path = test_image.replace('.png', '.xml')
     
     # 이미지와 XML 파일 이동
-    shutil.move(test_image, f'./output/images/not_processed/{file_name}')
+    shutil.copy2(test_image, f'./output/images/not_processed/{file_name}')
     if os.path.exists(xml_path):
         xml_name = os.path.basename(xml_path)
-        shutil.move(xml_path, f'./output/images/not_processed/{xml_name}')
-
-def load_existing_results(filename):
-    """기존 JSON 파일 로드"""
-    if os.path.exists(filename):
-        try:
-            with open(filename, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except (json.JSONDecodeError, FileNotFoundError):
-            return []
-    return []
+        shutil.copy2(xml_path, f'./output/images/not_processed/{xml_name}')
 
 def save_results(all_results, filename):
     """결과를 JSON 파일에 저장"""
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(all_results, f, ensure_ascii=False, indent=2)
+
+def check_valid_issues(issues):
+    flag = False
+    for issue in issues:
+        if issue.bbox != []:
+            flag = True
+            break
+    return flag

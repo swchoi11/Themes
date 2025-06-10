@@ -19,6 +19,7 @@ class Visibility():
         self.file_name = self.image_path.replace('.png', '')
         
         self.num_colors = 3
+        self.output_path = f"./output/images/{os.path.basename(self.image_path)}"
         
         detect = Detect(file_path)
         
@@ -307,12 +308,10 @@ class Visibility():
             if issues:
                 min_contrast = min(issues, key=lambda x: x.description.split(":")[-1])
                 
-                file_name = os.path.basename(self.image_path)
-                output_path = f"./output/images/{file_name}"
-
+                
                 cv2.rectangle(self.img, (min_contrast.issue_location[0], min_contrast.issue_location[1]), (min_contrast.issue_location[2], min_contrast.issue_location[3]), (0, 255, 0), 2)
                 cv2.putText(self.img, f"contrast: {min_contrast.issue_description.split(':')[-1]}", (min_contrast.issue_location[0], min_contrast.issue_location[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-                cv2.imwrite(output_path, self.img)
+                cv2.imwrite(self.output_path, self.img)
                 
                 issue = ResultModel(
                     filename = self.image_path,

@@ -1,11 +1,9 @@
+import os
 import cv2
 import numpy as np
 from xml.etree import ElementTree as ET
 import json
-import re
-from typing import List, Tuple, Dict, Optional
-from src.match import Match
-from src.utils.utils import get_bounds
+from typing import List
 from src.utils.model import ResultModel
 from src.utils.detect import Detect
 from src.gemini import Gemini
@@ -22,21 +20,24 @@ class Align:
         
         # Detect 모듈 초기화
         self.detector = Detect(self.image_path)
+        file_name = os.path.basename(self.image_path)
+        self.output_path = f'./output/images/{file_name}'
             
     def run_alignment_check(self) -> List[ResultModel]:
 
         groups = self.get_bound_groups()
-        # print(groups)
+
         if not groups:
             return []
 
         text = self.groups_to_text(groups)
-        # print(text)
 
         gemini = Gemini(self.image_path)
 
         response = gemini.generate_response(Prompt.alignment_check_prompt(), text=text)
         response = json.loads(response)
+        
+        results = []
 
         for res in response:
             # print(res)
@@ -44,14 +45,13 @@ class Align:
                 img = cv2.imread(self.image_path)
                 h, w = img.shape[:2]  # h: 높이, w: 너비
                 
-                # bounds가 [y1, y2] 형태라고 가정 (수직 구간)
                 y1, y2 = res['bounds'][0], res['bounds'][1]
                 
                 # 전체 이미지 너비에 걸쳐 수직 구간을 표시
-                cv2.rectangle(img, (0, int(y1)), (w, int(y2)), (0, 0, 255), 2)
-                                
-                cv2.imwrite(f"alignment_issue.png", img)
-                # print(f"정렬 문제 발견: y축 범위 {y1}-{y2}")
+                cv2.rectangle(img, (0, int(y1)), (w, int(y2)), (52, 195, 235), 2)
+                cv2.putText(img, "alignment issue", (0, int(y1)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (52, 195, 235), 2)                                
+                cv2.imwrite(self.output_path, img)
+
                 result = ResultModel(
                     filename=self.image_path,
                     issue_type='alignment',
@@ -67,19 +67,31 @@ class Align:
                     description=f"정렬 문제 발견: y축 범위 {y1}-{y2}",
                     ai_description=""
                 )
-                return result
-        return []
+                results.append(result)
+        
+        if not results:
+            results = [ResultModel(
+                filename=self.image_path,
+                issue_type="alignment",
+                component_id=0,
+                ui_component_id="",
+                ui_component_type="",
+                severity="high",
+                location_id="",
+                location_type="",
+                bbox=[],
+                description_id="4",
+                description_type="컴포넌트 내부 요소들의 수직/수평 정렬이 균일하지 않음",
+                description="",
+                ai_description=""
+            )]
+
+        return results
 
     
     def get_bound_groups(self):
         components = self.detector.get_valid_components()
-        img = cv2.imread(self.image_path)
-
-        for comp in components:
-            x1, y1, x2, y2 = comp['bounds']
-            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255), 2)
-        cv2.imwrite("components.png", img)
-
+        
         sorted_components = sorted(components, key=lambda x: x['bounds'][1])
 
         groups = []
@@ -174,16 +186,6 @@ class Align:
             
             # 같은 bounds를 가진 다른 그룹이 있는지 확인
             duplicate_count = sum(1 for g in groups if g['bounds'] == bounds)
-            if duplicate_count > 1:
-                print(f"  ⚠️  경고: 같은 bounds {bounds}를 가진 그룹이 {duplicate_count}개 있음!")
-        
-        # 통계 출력
-        unique_bounds = set(group['bounds'] for group in groups)
-        
-        # if len(unique_bounds) < len(groups):
-        #     print("❌ 누적이 제대로 되지 않음 - 같은 bounds의 그룹이 여러 개 존재")
-        # else:
-        #     print("✅ 누적이 제대로 됨 - 각 bounds마다 하나의 그룹만 존재")
 
 # 다이얼러 전용 정렬 확인 함수 (기존 코드 유지)
 def get_dial_alignment(image_path: str):

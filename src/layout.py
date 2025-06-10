@@ -60,12 +60,12 @@ class Layout:
             # 5. 동일 계층 요소간의 정렬
             # 6. 텍스트가 할당된 영역을 초과
             # 8. 완벽하게 동일한 아이콘이 있음
-        print("icon 검증 완료")
+        logger.info("icon 검증 완료")
 
         # 3-3. 정렬 이슈 검증 --> src/issue/alignment.py(고도화 필요)
         align = Align(self.image_path)
         issues.extend(align.run_alignment_check())
-        print(issues)
+        logger.info("alignment 검증 완료")
 
         return issues
 
