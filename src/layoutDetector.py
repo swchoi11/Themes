@@ -16,7 +16,7 @@ from src.gemini import Gemini
 
 
 class DuplicateDetector:
-    """중복 아이콘 이슈((8) 검출 클래스"""
+    """중복 아이콘 이슈(8) 검출 클래스"""
 
     def __init__(self, parent: 'LayoutDetector'):
         self.parent = parent
@@ -198,6 +198,27 @@ class DuplicateDetector:
             return False
 
         try:
+            # default_image가 딕셔너리인 경우 numpy 배열로 변환
+            if isinstance(default_image, dict):
+                # 딕셔너리에서 실제 이미지 데이터 추출
+                if 'image' in default_image:
+                    default_image = default_image['image']
+                elif 'data' in default_image:
+                    default_image = default_image['data']
+                else:
+                    print("디폴트 이미지 딕셔너리에서 이미지 데이터를 찾을 수 없습니다")
+                    return False
+
+            # numpy 배열인지 확인
+            if not isinstance(default_image, np.ndarray):
+                print(f"디폴트 이미지가 numpy 배열이 아닙니다: {type(default_image)}")
+                return False
+
+            # 이미지가 비어있는지 확인
+            if default_image.size == 0:
+                print("디폴트 이미지가 비어있습니다")
+                return False
+
             # 각 그룹 멤버의 좌표에서 디폴트 이미지 추출
             default_crops = []
 
@@ -237,6 +258,9 @@ class DuplicateDetector:
 
         except Exception as e:
             print(f"디폴트 검증 오류: {e}")
+            print(f"default_image 타입: {type(default_image)}")
+            if hasattr(default_image, 'keys'):
+                print(f"default_image 키들: {list(default_image.keys())}")
             return False
 
 
@@ -2355,7 +2379,7 @@ class LayoutDetector(Gemini):
             print(f"총 {len(issues)}개 이슈 중 {valid_issues_count}개 시각화 완료")
 
             # 결과 이미지 저장
-            output_path = os.path.join(self.output_dir, f"debug_{os.path.basename(image_path)}")
+            output_path = os.path.join(self.output_dir, f"{os.path.basename(image_path)}")
             success = cv2.imwrite(output_path, image)
 
             if success:
@@ -2389,6 +2413,7 @@ class LayoutDetector(Gemini):
 
         except (ValueError, TypeError, IndexError):
             return None
+
 
     def _create_issue(self, element: Dict, issue_type: int) -> Issue:
         """이슈 객체 생성 헬퍼 함수"""
@@ -2553,7 +2578,6 @@ def save_tuple_data_to_csv(tuple_data, output_path: str):
                 cleaned_issue['bbox'] = str(bbox)  # 리스트를 문자열로 변환
             else:
                 cleaned_issue['bbox'] = str(bbox)
-
             cleaned_issue['description_id'] = str(issue.get('description_id', ''))
             cleaned_issue['description_type'] = str(issue.get('description_type', ''))
             cleaned_issue['ai_description'] = str(issue.get('ai_description', ''))
@@ -2598,7 +2622,7 @@ if __name__ == "__main__":
     all_issues = []
     first_issues = []
 
-    for image_path in image_paths[:2]:
+    for image_path in image_paths:
 
         filename = os.path.splitext(os.path.basename(image_path))[0]
         xml_path = f"../resource/xml/{filename}.xml"
@@ -2609,7 +2633,7 @@ if __name__ == "__main__":
         print(f"  JSON: {json_path}")
         print(f"  XML: {xml_path}")
 
-        output_dir = "../output/result/eval"
+        output_dir = "../output/result/gemini-2.5-flash"
         # 이슈 검출 실행
         detector = LayoutDetector(output_dir=output_dir)
         issues = detector.analyze_layout(image_path, json_path)

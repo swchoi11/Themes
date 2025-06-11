@@ -133,7 +133,8 @@ class EvalKPI:
             gemini_response = gemini.generate_response(
                 prompt=prompt,
                 image=image_path,
-                text=""
+                text="",
+                model="gemini-2.5-flash-preview-05-20"
             )
 
             print(f"Gemini 최우선 이슈 선별 응답: {gemini_response}")

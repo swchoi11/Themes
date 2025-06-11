@@ -20,9 +20,9 @@ logger = init_logger()
 class Gemini:
     def __init__(self):
         load_dotenv()
-        self.client = genai.Client(api_key=os.getenv('API_KEY'))
-        self.model = 'gemini-2.5-flash-preview-05-20'   # 'gemini-2.5-pro-preview-06-05'
-        self.max_retries = 5
+        self.client = genai.Client(api_key=os.getenv('API_KEY31'))
+        self.model = 'gemini-2.0-flash'  #'gemini-2.5-flash-preview-05-20' | 'gemini-2.5-pro-preview-06-05'
+        self.max_retries = 10
         self.initial_delay = 1
 
     def retry_with_delay(func):
@@ -42,13 +42,13 @@ class Gemini:
 
     @retry_with_delay
     @timefn
-    def _call_gemini_image(self, prompt, image) -> Issue:
+    def _call_gemini_image(self, prompt, image, model=None) -> Issue:
         target_image = self.client.files.upload(file=image)
         # logger.info(f"image 업로드 완료: {image}")
 
         # logger.info(f"gemini 호출 시작")
         response = self.client.models.generate_content(
-            model=self.model,
+            model=model if model else self.model,
             contents=[
                 prompt,
                 target_image,
@@ -63,13 +63,13 @@ class Gemini:
 
     @retry_with_delay
     @timefn
-    def _call_gemini_image_text(self, prompt, image, text) -> Issue:
+    def _call_gemini_image_text(self, prompt, image, text, model) -> Issue:
         target_image = self.client.files.upload(file=image)
         # logger.info(f"image 업로드 완료: {image}")
 
         # logger.info(f"gemini 호출 시작")
         response = self.client.models.generate_content(
-            model=self.model,
+            model=model if model else self.model,
             contents=[
                 prompt,
                 target_image,
@@ -83,11 +83,11 @@ class Gemini:
         # logger.info(f"gemini 호출 완료")
         return Issue.model_validate(json.loads(response.text))
 
-    def generate_response(self, prompt, image, text: Optional[str] = None) -> Issue:
+    def generate_response(self, prompt, image, text: Optional[str] = None, model: Optional[str]=None) -> Issue:
         if not text is None:
-            return self._call_gemini_image_text(prompt, image, text)
+            return self._call_gemini_image_text(prompt, image, text, model)
         else:
-            return self._call_gemini_image(prompt, image)
+            return self._call_gemini_image(prompt, image, model)
 
     def detect_all_issues(self, image) -> List[Issue]:
         issues = []
