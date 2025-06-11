@@ -28,7 +28,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # 출력 디렉토리 생성
-RUN mkdir -p output output/jsons output/jsons/all_issues
+RUN mkdir -p output output/jsons output/jsons/all_issues output/jsons/final_issues output/excels output/excels/all_issues output/excels/final_issues output/images output/images/not_detected output/images/not_processed
 
 # Python 경로 설정
 ENV PYTHONPATH=/app
