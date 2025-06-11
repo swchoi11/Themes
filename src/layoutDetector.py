@@ -1704,7 +1704,7 @@ class LayoutDetector(Gemini):
         self.overlap_threshold = 0.7
         self.remove_overlapping = True
 
-        self.max_issues_per_type = 3
+        self.max_issues_per_type = 10
 
         self.debug = True
         self.output_dir = output_dir
@@ -1873,6 +1873,16 @@ class LayoutDetector(Gemini):
             try:
                 prompt = issue_descriptions.get(issue_type, "해당 이슈를 분석해주세요.")
 
+                enhanced_prompt = f"""
+                {prompt}
+
+                **중요**: 다음 중 하나에 해당하면 반드시 명시해주세요:
+                1. 이슈가 발견되지 않은 경우: "No issue found" 또는 "문제가 발견되지 않았습니다"
+                2. 정상적으로 표시된 경우: "Appears normal" 또는 "정상적으로 보입니다"  
+                3. 기준을 충족하는 경우: "Meets requirements" 또는 "기준을 충족합니다"
+
+                """
+
                 # JSON 컨텍스트 추가
                 context_text = f"""
                 Layout Data Context:
@@ -1888,7 +1898,7 @@ class LayoutDetector(Gemini):
 
                 # Gemini API 호출
                 gemini_response = self.generate_response(
-                    prompt=prompt,
+                    prompt=enhanced_prompt,
                     image=image_path,
                     text=context_text
                 )
@@ -2380,7 +2390,6 @@ class LayoutDetector(Gemini):
         except (ValueError, TypeError, IndexError):
             return None
 
-
     def _create_issue(self, element: Dict, issue_type: int) -> Issue:
         """이슈 객체 생성 헬퍼 함수"""
         elem_type = element.get('type', 'unknown')
@@ -2466,7 +2475,7 @@ class LayoutDetector(Gemini):
         return EvalKPI.map_score_to_string(score_input)
 
 
-def save_results_to_csv(filename, issues: List[Issue], output_path: str):
+def save_results_to_csv(issues: List[Issue], output_path: str):
     try:
         results = []
         for issue in issues:
@@ -2475,10 +2484,6 @@ def save_results_to_csv(filename, issues: List[Issue], output_path: str):
                 issue_dict = issue.__dict__.copy()
             else:
                 issue_dict = asdict(issue)
-
-            if 'filename' not in issue_dict or issue_dict['filename'] is None:
-                issue_dict['filename'] = filename
-
             results.append(issue_dict)
 
         df = pd.DataFrame(results)
@@ -2501,95 +2506,110 @@ def save_results_to_csv(filename, issues: List[Issue], output_path: str):
         print(f"Error saving results to CSV: {str(e)}")
 
 
-def batch_analyze(file_triplets: List[Tuple[str, str, str]]) -> Dict[str, List[Issue]]:
-    """배치 분석 함수"""
-    results = {}
-    for i, (image_path, json_path, xml_path) in enumerate(file_triplets, 1):
-        print(f"\n=== 배치 분석 {i}/{len(file_triplets)} ===")
-        print(f"파일명: {os.path.basename(image_path)}")
-        try:
-            detector = LayoutDetector()
-            # JSON 우선, XML은 선택적
-            issues = detector.analyze_layout(image_path, json_path, xml_path)
-            file_key = os.path.basename(image_path).split('.')[0]
+def save_tuple_data_to_csv(tuple_data, output_path: str):
+    """
+    튜플 형태의 데이터를 CSV로 저장하는 함수
+    """
+    try:
+        # 데이터를 이슈별로 분리
+        issues = []
+        current_issue = {}
 
-            # filename 설정
-            filename = os.path.basename(image_path)
-            for issue in issues:
-                issue.filename = filename
+        print(f"총 튜플 개수: {len(tuple_data)}")
 
-            results[file_key] = issues
-            print(f"완료: {len(issues)}개 이슈 검출")
-        except Exception as e:
-            print(f"오류: {str(e)}")
-            results[f"error_{i}"] = []
-    return results
+        for key, value in tuple_data:
+            # filename이 나오면 새로운 이슈 시작 (첫 번째가 아닌 경우)
+            if key == 'filename' and current_issue and 'filename' in current_issue:
+                issues.append(current_issue.copy())
+                current_issue = {}
 
+            current_issue[key] = value
 
-def batch_analyze_json_only(image_dir: str, json_dir: str, output_dir: str) -> Dict[str, List[Issue]]:
-    """JSON만 사용하는 배치 분석 함수"""
-    detector = LayoutDetector(output_dir)
-    results = {}
+        # 마지막 이슈 추가
+        if current_issue:
+            issues.append(current_issue)
 
-    image_files = []
-    for ext in ['*.png', '*.jpg', '*.jpeg']:
-        image_files.extend(glob.glob(os.path.join(image_dir, ext)))
+        print(f"분리된 이슈 개수: {len(issues)}")
 
-    print(f"총 {len(image_files)}개 이미지 발견")
+        # 데이터 정리 및 표준화
+        cleaned_issues = []
+        for i, issue in enumerate(issues):
+            cleaned_issue = {}
 
-    for image_path in image_files:
-        filename = os.path.splitext(os.path.basename(image_path))[0]
-        json_path = os.path.join(json_dir, f"{filename}.json")
+            # 필수 컬럼들 처리
+            cleaned_issue['filename'] = issue.get('filename', f'unknown_{i}')
+            cleaned_issue['issue_type'] = str(issue.get('issue_type', ''))
+            cleaned_issue['component_id'] = str(issue.get('component_id', ''))
+            cleaned_issue['component_type'] = str(issue.get('component_type', ''))
+            cleaned_issue['ui_component_id'] = str(issue.get('ui_component_id', ''))
+            cleaned_issue['ui_component_type'] = str(issue.get('ui_component_type', ''))
+            cleaned_issue['score'] = str(issue.get('score', ''))
+            cleaned_issue['location_id'] = str(issue.get('location_id', ''))
+            cleaned_issue['location_type'] = str(issue.get('location_type', ''))
 
-        if not os.path.exists(json_path):
-            print(f"JSON 파일 없음: {json_path}")
-            continue
+            # bbox 처리 - 리스트 형태로 유지
+            bbox = issue.get('bbox', [])
+            if isinstance(bbox, (list, tuple)):
+                cleaned_issue['bbox'] = str(bbox)  # 리스트를 문자열로 변환
+            else:
+                cleaned_issue['bbox'] = str(bbox)
 
-        print(f"\n=== 분석 중: {filename} ===")
+            cleaned_issue['description_id'] = str(issue.get('description_id', ''))
+            cleaned_issue['description_type'] = str(issue.get('description_type', ''))
+            cleaned_issue['ai_description'] = str(issue.get('ai_description', ''))
 
-        try:
-            issues = detector.analyze_layout(image_path, json_path)
+            cleaned_issues.append(cleaned_issue)
 
-            # filename 설정
-            image_filename = os.path.basename(image_path)
-            for issue in issues:
-                issue.filename = image_filename
+        # DataFrame 생성
+        df = pd.DataFrame(cleaned_issues)
 
-            results[filename] = issues
+        # 컬럼 순서 정의
+        column_order = [
+            'filename', 'issue_type', 'component_id', 'component_type',
+            'ui_component_id', 'ui_component_type', 'score',
+            'location_id', 'location_type', 'bbox',
+            'description_id', 'description_type', 'ai_description'
+        ]
 
-            print(f"완료: {len(issues)}개 이슈 검출")
+        # 존재하는 컬럼만 선택하여 순서 맞추기
+        available_columns = [col for col in column_order if col in df.columns]
+        df = df[available_columns]
 
-            # 개별 결과 저장
-            if issues:
-                individual_csv = os.path.join(output_dir, f"{filename}_issues.csv")
-                save_results_to_csv(image_filename, issues, individual_csv)
+        print(f"DataFrame 생성: {len(df)}행 x {len(df.columns)}열")
+        print(f"컬럼: {list(df.columns)}")
 
-        except Exception as e:
-            print(f"오류: {str(e)}")
-            results[filename] = []
+        # CSV 저장
+        df.to_csv(output_path, index=False, encoding='utf-8-sig')
+        print(f"CSV 저장 완료: {output_path}")
 
-    return results
+        return df
 
+    except Exception as e:
+        print(f"CSV 저장 중 오류: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return None
 
 if __name__ == "__main__":
     # 기존 방식 (XML + JSON)
-    image_paths = glob.glob("D:/hnryu/Themes/resource/image/*.png")
+    image_paths = glob.glob("../resource/image/*.png")
 
     print(f"총 {len(image_paths)}개 이미지 처리 시작...")
     all_issues = []
+    first_issues = []
 
-    for image_path in image_paths[:3]:
+    for image_path in image_paths[:2]:
 
         filename = os.path.splitext(os.path.basename(image_path))[0]
-        xml_path = f"D:/hnryu/Themes/resource/xml/{filename}.xml"
-        json_path = f"D:/hnryu/Themes/output/json/{filename}.json"
+        xml_path = f"../resource/xml/{filename}.xml"
+        json_path = f"../output/json/{filename}.json"
 
         print(f"\n=== 처리 중: {filename} ===")
         print(f"  이미지: {image_path}")
         print(f"  JSON: {json_path}")
         print(f"  XML: {xml_path}")
 
-        output_dir = "D:/hnryu/Themes/output/result/eval"
+        output_dir = "../output/result/eval"
         # 이슈 검출 실행
         detector = LayoutDetector(output_dir=output_dir)
         issues = detector.analyze_layout(image_path, json_path)
@@ -2602,13 +2622,24 @@ if __name__ == "__main__":
         if issues:
             all_issues.extend(issues)
 
+        priority = EvalKPI.select_final_priority_issue(issues, image_path)
+        first_issues.extend(priority)
+
     if all_issues:
         output_csv = f"{output_dir}/total_issue_results.csv"
-        save_results_to_csv("integrated", all_issues, output_csv)
+        save_results_to_csv(all_issues, output_csv)
         print(f"\n통합 결과 저장 완료: {output_csv}")
         print(f"총 {len(all_issues)}개 이슈 발견")
     else:
         print("\n발견된 이슈가 없습니다.")
+
+    if first_issues:
+        first_output_csv = f"{output_dir}/first_issue_results.csv"
+        save_tuple_data_to_csv(first_issues, first_output_csv)
+        print(f"\n검수 결과 저장 완료: {first_output_csv}")
+        print(f"총 {len(first_issues)}개 검수 완료")
+    else:
+        print("\n최종 검수 중 발견된 이슈가 없습니다.")
 
     # JSON만 사용하는 새로운 방식 예시
     # results = batch_analyze_json_only(
