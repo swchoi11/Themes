@@ -8,6 +8,10 @@ from src.layout import Layout
 from src.utils.utils import check_size, init_process, move_to_not_processed, save_results, check_valid_issues, unprocessed_issues, to_excel
 from src.utils.model import ResultModel
 from src.gemini import Gemini, IssueProcessor
+from src.utils.preproc import from_bucket_image_list
+
+# 0. 데이터 준비
+from_bucket_image_list()
 
 # 1. classification
 # classifier = ImageXMLClassifier()
@@ -15,8 +19,8 @@ from src.gemini import Gemini, IssueProcessor
 # classifier.check_classification()
 # 
 result = []
-# for test_image in tqdm(glob.glob('./resource/testset/*.png')):
-for test_image in ['./resource/testset/Fail_C7_20250519_183025.png']:
+for test_image in tqdm(glob.glob('./resource/testset/*.png')):
+# for test_image in ['./resource/testset/Fail_C7_20250519_183025.png']:
     json_filename = init_process()
     
 #    이미지 크기 확인
@@ -49,11 +53,11 @@ for test_image in ['./resource/testset/Fail_C7_20250519_183025.png']:
             description_type="",
             description="문제가 없습니다."
         )]
+        result.append(issues[0].model_dump())
     else:
         for issue in issues:
-            if issue.bbox != []:
-                issue = gemini.issue_score(issue)
-                result.append(issue.model_dump())
+            issue = gemini.issue_score(issue)
+            result.append(issue.model_dump())
 
     
 #    매 이미지 처리 후 저장 (안전성을 위해)

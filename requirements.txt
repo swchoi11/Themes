@@ -7,6 +7,8 @@ colorlog==6.9.0
 google-ai-generativelanguage==0.6.18
 google-api-core==2.25.0
 google-auth==2.40.3
+google-cloud-compute==1.15.0
+google-cloud-storage==2.10.0
 google-genai==1.19.0
 googleapis-common-protos==1.70.0
 grpcio==1.73.0
