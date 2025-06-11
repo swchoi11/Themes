@@ -16,7 +16,7 @@ from src.gemini import Gemini
 
 
 class DuplicateDetector:
-    """중복 아이콘 검출 클래스"""
+    """중복 아이콘 이슈((8) 검출 클래스"""
 
     def __init__(self, parent: 'LayoutDetector'):
         self.parent = parent
@@ -241,7 +241,7 @@ class DuplicateDetector:
 
 
 class AestheticDetector:
-    """심미적 이슈 검출 클래스"""
+    """심미적 이슈(9, 10, 11) 검출 클래스"""
 
     def __init__(self, parent: 'LayoutDetector'):
         self.parent = parent
@@ -2573,7 +2573,7 @@ def batch_analyze_json_only(image_dir: str, json_dir: str, output_dir: str) -> D
 
 if __name__ == "__main__":
     # 기존 방식 (XML + JSON)
-    image_paths = glob.glob("../resource/image/*.png")
+    image_paths = glob.glob("D:/hnryu/Themes/resource/image/*.png")
 
     print(f"총 {len(image_paths)}개 이미지 처리 시작...")
     all_issues = []
@@ -2581,15 +2581,15 @@ if __name__ == "__main__":
     for image_path in image_paths[:3]:
 
         filename = os.path.splitext(os.path.basename(image_path))[0]
-        xml_path = f"../resource/xml/{filename}.xml"
-        json_path = f"../output/json/{filename}.json"
+        xml_path = f"D:/hnryu/Themes/resource/xml/{filename}.xml"
+        json_path = f"D:/hnryu/Themes/output/json/{filename}.json"
 
         print(f"\n=== 처리 중: {filename} ===")
         print(f"  이미지: {image_path}")
         print(f"  JSON: {json_path}")
         print(f"  XML: {xml_path}")
 
-        output_dir = "../output/result/eval"
+        output_dir = "D:/hnryu/Themes/output/result/eval"
         # 이슈 검출 실행
         detector = LayoutDetector(output_dir=output_dir)
         issues = detector.analyze_layout(image_path, json_path)
