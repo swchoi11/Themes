@@ -19,7 +19,7 @@ from_bucket_image_list()
 # classifier.check_classification()
 # 
 result = []
-for test_image in tqdm(glob.glob('./resource/testset/*.png')):
+for test_image in tqdm(glob.glob('./resource/*.png')):
 # for test_image in ['./resource/testset/Fail_C7_20250519_183025.png']:
     json_filename = init_process()
     
