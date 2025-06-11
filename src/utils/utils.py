@@ -10,6 +10,7 @@ import json
 import glob
 from datetime import datetime
 import pandas as pd
+from src.utils.model import EvalKPI, ResultModel
 
 def normalize_xml_content(xml_path: str) -> str:
     """
@@ -92,6 +93,21 @@ def move_to_not_processed(test_image: str):
         xml_name = os.path.basename(xml_path)
         shutil.copy2(xml_path, f'./output/images/not_processed/{xml_name}')
 
+    return ResultModel(
+        filename=test_image,
+        issue_type="not_processed",
+        component_id=0,
+        ui_component_id="",
+        ui_component_type="",
+        score="5",
+        location_id="",
+        location_type="",
+        bbox=[],
+        description_id="",
+        description_type="",
+        description="사이즈가 맞지 않아 처리 하지 않습니다. 폴드만 처리됩니다."
+    )
+
 def save_results(all_results, filename):
     """결과를 JSON 파일에 저장"""
     with open(filename, 'w', encoding='utf-8') as f:
@@ -127,7 +143,7 @@ def unprocessed_issues(json_filename):
             "bbox": [],
             "description_id": "0",
             "description_type": "",
-            "description": "문제가 없습니다.",
+            "description": "사이즈가 맞지 않아 처리 하지 않습니다. 폴드만 처리됩니다.",
             "ai_description": ""
         }
         existing_data.append(issue)
@@ -138,4 +154,40 @@ def unprocessed_issues(json_filename):
 
 def to_excel(json_filename):
     df = pd.read_json(json_filename)
-    df.to_excel('output.xlsx', index=False)
+    output_path = json_filename.replace('.json', '.xlsx').replace('jsons','excels') 
+    df.to_excel(output_path, index=False)
+
+
+def bbox_to_location(bbox, image_height, image_width):
+
+    top = (image_height // 3, image_width // 3)
+    middle = (image_height // 3 * 2, image_width // 3 * 2)
+    bottom = (image_height // 3 * 3, image_width // 3 * 3)
+
+    x1, x2, y1, y2 = bbox
+    center_x = (x1 + x2) // 2
+    center_y = (y1 + y2) // 2
+    location = ""
+
+    if center_x < top[1] :
+        location += 'T'
+    elif center_x < middle[1] :
+        location += 'M'
+    else:
+        location += 'B'
+
+    if center_y < top[0] :
+        location += 'L'
+    elif center_y < middle[0] :
+        location += 'C'
+    else:
+        location += 'R'
+
+    # 위치 코드에 해당하는 키를 찾아 반환
+    for key, value in EvalKPI.LOCATION.items():
+        if value == location:
+            return key
+    
+    # 기본값 반환 (찾지 못한 경우)
+    return '4'  # 'MC' (Middle Center)
+

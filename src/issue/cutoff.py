@@ -2,7 +2,8 @@ import numpy as np
 import cv2
 import os
 from src.utils.detect import Detect
-from src.utils.model import ResultModel
+from src.utils.model import ResultModel, EvalKPI
+from src.utils.utils import bbox_to_location
 from src.utils.logger import init_logger
 
 logger = init_logger()
@@ -50,39 +51,40 @@ class Cutoff:
                         
                         bounds_str += f"({x1}, {y1}, {x2}, {y2})"
                         break  # 한 컴포넌트에서 이슈를 찾으면 다음 컴포넌트로
-                        
+
+            location_id = bbox_to_location([x1, y1, x2, y2], self.img.shape[0], self.img.shape[1])
+            location_type = EvalKPI.LOCATION[location_id]
+
             result = ResultModel(
                 filename=self.image_path,
-                issue_type='design',
+                issue_type='cutoff',
                 component_id=int(component['index']),
-                ui_component_id="",
-                ui_component_type=component['type'],
-                severity="",
-                location_id="",
-                location_type="",
+                ui_component_id="2",
+                ui_component_type="RadioButton",
+                score="",
+                location_id=location_id,
+                location_type=location_type,
                 bbox=[x1, y1, x2, y2],
                 description_id="7",
                 description_type="아이콘의 가장자리가 보이지 않음거나 잘려보임(이미지 제외)",
-                description=f"컴포넌트 영역 {bounds_str}에서 컷오프 이슈 발생 : {component['type']}",
-                ai_description=""
+                description=f"컴포넌트 영역 {bounds_str}에서 컷오프 이슈 발생 : {component['type'] or 'Unknown'}",
             )
         issues.append(result)
 
         if not issues:
             issues = [ResultModel(
                 filename=self.image_path,
-                issue_type='design',
+                issue_type='cutoff',
                 component_id=0,
                 ui_component_id="",
                 ui_component_type="",
-                severity="",
+                score="",
                 location_id="",
                 location_type="",
                 bbox=[],
                 description_id="7",
                 description_type="아이콘의 가장자리가 보이지 않음거나 잘려보임(이미지 제외)",
                 description="",
-                ai_description=""
             )]
 
         return issues

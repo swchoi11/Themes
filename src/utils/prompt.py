@@ -6,12 +6,20 @@ class Prompt:
 
         이슈가 없는 경우 None을 반환해 주세요.
         아이콘의 테두리를 벗어났는지 여부는 엄격하게 판단해야 합니다. 아이콘을 이루는 배경보다 글자가 바깥으로 나가있는 경우에만 이슈가 있다고 판단하세요.        
-        이슈가 있는 경우 이런 형식의 응답을 반환해 주세요.
+        이슈가 있는 경우 이런 형식의 응답을 반환해 주세요. 
+
+        score 값은 이슈의 심각도 정도를 말합니다. 이에 대한 측도는 다음과 같습니다.
+        - 1: (Fail with Critical issue)
+        - 2: (Fail with issue)
+        - 3: (Conditional Pass)
+        - 4: (Pass with minor concern)
+        - 5: (Pass with no issue)
+
+        description 값은 이슈의 설명을 말합니다. 자세히 작성해주세요.
         
         예시)
-        severity: high
-        bbox: [0.01875, 0.014784, 0.15125, 0.038978]
-        ai_description: 앱 라이브러리의 캘린더 앱의 달력 아이콘에서 글자가 테두리를 벗어나 있습니다. 
+        score: 1
+        description: 앱 라이브러리의 캘린더 앱의 달력 아이콘에서 글자가 테두리를 벗어나 있습니다. 
         """
     
     @staticmethod
@@ -24,11 +32,18 @@ class Prompt:
         이슈가 있다고 판단되는 경우에는 구체적으로 어떤 시간으로 추정되는지 근거를 대세요.
         매칭되고 정상인 경우 None을 반환해 주세요.
 
-        이슈가 있는 경우 이런 형식의 응답을 반환해 주세요.
+        score 값은 이슈의 심각도 정도를 말합니다. 이에 대한 측도는 다음과 같습니다.
+        - 1: (Fail with Critical issue)
+        - 2: (Fail with issue)
+        - 3: (Conditional Pass)
+        - 4: (Pass with minor concern)
+        - 5: (Pass with no issue)
+
+        description 값은 이슈의 설명을 말합니다. 자세히 작성해주세요.
+        
         예시)
-        severity: 0.8
-        bbox: [0.01875, 0.014784, 0.15125, 0.038978]
-        ai_description: 바탕화면 시계 앱이 표시하는 시간은 12:34이나, 상단의 시각은 08:00입니다. 
+        score: 1
+        description: 바탕화면 시계 앱이 표시하는 시간은 12:34이나, 상단의 시각은 08:00입니다. 
         """
 
     @staticmethod
@@ -44,10 +59,21 @@ class Prompt:
         이슈가 있는 경우 이런 형식의 응답을 반환해 주세요. 이슈 번호는 13로 고정해 주세요.
         거의 보이지 않는 경우에만 이슈가 있다고 판단해야 합니다. 거의 보이지 않는 경우란, 색상 대비값이 0.05 이하인 경우입니다.
         
+        score 값은 이슈의 심각도 정도를 말합니다. 이에 대한 측도는 다음과 같습니다.
+        - 1: (Fail with Critical issue)
+        - 2: (Fail with issue)
+        - 3: (Conditional Pass)
+        - 4: (Pass with minor concern)
+        - 5: (Pass with no issue)
+        
+        bbox 값은 이슈가 발생한 지점의 위치를 말합니다. 실제 이미지의 좌표를 0~1사이로 정규화하여 제공해주세요.
+        description 값은 이슈의 설명을 말합니다. 자세히 작성해주세요.
+
+
         예시)
-        severity: 0.8
+        score: 1
         bbox: [0.01875, 0.014784, 0.15125, 0.038978]
-        ai_description: 상태 표시줄 또는 빠른 설정 화면에 와이파이 버튼이 표시되지 않음
+        description: 상태 표시줄 또는 빠른 설정 화면에 와이파이 버튼이 표시되지 않음
         """
     
     @staticmethod
@@ -110,7 +136,27 @@ class Prompt:
         * 각 bounds 항목에 대해 독립적으로 판단하고, 그 결과를 리스트에 순서대로 포함시키세요.
         * 컴포넌트가 1개인 경우 true를 반환합니다. 
         """
+
+    @staticmethod
+    def issue_score_prompt():
+        return """
+        다음 이미지와 이미지에서 검출된 이슈를 보고, 이슈의 심각도를 판단해 주세요. 
+        이미지에는 검출된 이슈와 관련된 바운딩 박스가 그려져있습니다. 전체 이미지와의 관계 속에서 이 이슈의 심각도를 판단해주세요.
+        
     
+
+        score 값은 이슈의 심각도 정도를 말합니다. 이에 대한 측도는 다음과 같습니다.
+        - 1: (Fail with Critical issue)
+        - 2: (Fail with issue)
+        - 3: (Conditional Pass)
+        - 4: (Pass with minor concern)
+        - 5: (Pass with no issue)
+        
+        description 값은 이슈의 설명을 말합니다. 기존의 설명을 통합하여 자세하게 작성해주세요.
+        한국어로 작성해주세요.
+        """
+
+
     @staticmethod
     def sort_detected_issues_prompt():
         return """

@@ -6,6 +6,8 @@ from tqdm import tqdm
 from src.utils.model import ResultModel
 from src.utils.detect import Detect
 from src.utils.logger import init_logger
+from src.utils.utils import bbox_to_location
+from src.utils.model import EvalKPI
 
 logger = init_logger()
 
@@ -283,21 +285,20 @@ class Visibility():
 
                 if not contrast_result:
                     try:
-                        resource_id = component.get('resource-id', 'unknown')
+                        resource_id = component.get('resource_id', 'unknown')
                         issue = ResultModel(
                             filename=self.image_path,
                             issue_type = "visibility",
                             component_id = int(index),
-                            ui_component_id = "",
-                            ui_component_type = component['type'],
-                            severity = "high",
+                            ui_component_id = "5",
+                            ui_component_type = "TextView",
+                            score = "",
                             location_id = "",
                             location_type = "",
                             bbox=component['bounds'],
                             description_id = "0",
                             description_type = "텍스트, 아이콘과 배경 간 대비가 낮아 가독성이 떨어짐",
-                            description=f"{component['type']}, {resource_id}에서 가독성 이슈 발생 - 색상 대비 부족:{max_contrast}",
-                            ai_description = ""
+                            description=f"{component.get('type', 'Unknown')}, {resource_id}에서 가독성 이슈 발생 - 색상 대비 부족:{max_contrast}"
                         )
                         issues.append(issue)
                     except Exception as e:
@@ -313,20 +314,22 @@ class Visibility():
                 cv2.putText(self.img, f"contrast: {min_contrast.issue_description.split(':')[-1]}", (min_contrast.issue_location[0], min_contrast.issue_location[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
                 cv2.imwrite(self.output_path, self.img)
                 
+                location_id = bbox_to_location(min_contrast.bbox, self.img.shape[0], self.img.shape[1])
+                location_type = EvalKPI.LOCATION[location_id]
+
                 issue = ResultModel(
                     filename = self.image_path,
                     issue_type = "visibility",
                     component_id = min_contrast.component_id,
                     ui_component_id = "",
                     ui_component_type = min_contrast.ui_component_type,
-                    severity = "high",
+                    score = "",
                     location_id = "",
                     location_type = "",
                     bbox = min_contrast.bbox,
                     description_id = "0",
                     description_type = "텍스트, 아이콘과 배경 간 대비가 낮아 가독성이 떨어짐",
-                    description = min_contrast.description,
-                    ai_description = ""
+                    description = min_contrast.description
                 )
             else:
                 issue = ResultModel(
@@ -335,14 +338,13 @@ class Visibility():
                     component_id = 0,
                     ui_component_id = "",
                     ui_component_type = "",
-                    severity = "",
+                    score = "",
                     location_id = "",
                     location_type = "",
                     bbox = [],
                     description_id = "0",
                     description_type = "텍스트, 아이콘과 배경 간 대비가 낮아 가독성이 떨어짐",
-                    description = "",
-                    ai_description = ""
+                    description = ""
                 )
 
             return [issue]

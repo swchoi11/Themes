@@ -7,19 +7,18 @@ class ResultModel(BaseModel):
     component_id: int
     ui_component_id: str        # EvalKPI.UI_COMPONENT.keys()
     ui_component_type : str     # EvalKPI.UI_COMPONENT.value()
-    severity: str
+    score: str
     location_id: str            # EvalKPI.LOCATION.keys()
     location_type: str          # EvalKPI.LOCATION.value()
     bbox: List[float]
     description_id: str         # EvalKPI.DESCRIPTION.keys()
     description_type: str       # EvalKPI.DESCRIPTION.value()
     description: str = ""
-    ai_description: str         # Gemini.response.text()
 
 class Result(BaseModel):
-    severity: str = ""
+    score: str = ""
     bbox: List[int] = []
-    ai_description: str = ""
+    description: str = ""
     
 class EvalKPI:
     """ PoC 평가 기준 정의"""

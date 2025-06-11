@@ -40,7 +40,7 @@ class Detect:
                             'index': idx,
                             'type': node.get('class'),
                             'content': node.get('text'),
-                            'resource_id': node.get('resource-id'),
+                            'resource_id': node.get('resource_id'),
                             'bounds': bounds
                         }
                         components.append(component)
@@ -136,7 +136,7 @@ class Detect:
                             'index': idx,
                             'type': node.get('class'),
                             'content': node.get('text'),
-                            'resource_id': node.get('resource-id'),
+                            'resource_id': node.get('resource_id'),
                             'bounds': bounds
                         }
                         valid_components.append(valid_component)
@@ -172,7 +172,7 @@ class Detect:
                 width = abs(bounds[2] - bounds[0])
                 height = abs(bounds[3] - bounds[1])
                 node_class = node.get('class')
-                resource_id = node.get('resource-id', '')
+                resource_id = node.get('resource_id', '')
                 
                 # 조건 1: ImageView이면서 적절한 크기
                 is_imageview_icon = (node_class == 'android.widget.ImageView' and 
@@ -221,7 +221,9 @@ class Detect:
         all_nodes = self._all_nodes(self.root)
         clock_components = []
         for node in all_nodes:
-            if 'icon' in node.get('resource-id') and 'Clock' in node.get('text'):
+            resource_id = node.get('resource_id')
+            text = node.get('text')
+            if resource_id and text and 'icon' in resource_id and 'Clock' in text:
                 clock_components.append(node)
         return clock_components
     
@@ -229,7 +231,9 @@ class Detect:
         all_nodes = self._all_nodes(self.root)
         calender_components = []
         for node in all_nodes:
-            if 'icon' in node.get('resource-id') and 'Calendar' in node.get('text'):
+            resource_id = node.get('resource_id')
+            text = node.get('text')
+            if resource_id and text and 'icon' in resource_id and 'Calendar' in text:
                 calender_components.append(node)
         return calender_components
     

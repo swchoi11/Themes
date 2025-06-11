@@ -3,10 +3,10 @@ import cv2
 import numpy as np
 from typing import List, Dict, Optional
 from src.utils.detect import Detect
-from src.utils.model import ResultModel
-from src.match import Match
+from src.utils.model import ResultModel, EvalKPI
+from src.utils.match import Match
 from src.utils.logger import init_logger
-
+from src.utils.utils import bbox_to_location
 logger = init_logger()
 
 class Icon:
@@ -111,20 +111,22 @@ class Icon:
                             other_bounds = [str(bounds) for i, bounds in enumerate(group_bounds) if i != duplicate_group.index(icon_idx)]
                             bounds_list_str = ", ".join(other_bounds)
                             
+                            location_id = bbox_to_location(icon['bounds'], self.image.shape[0], self.image.shape[1])
+                            location_type = EvalKPI.LOCATION[location_id]
+
                             issue = ResultModel(
                                 filename = self.image_path,
                                 issue_type='design',
-                                component_id=0,
-                                ui_component_id="",
-                                ui_component_type="horizontal_section",
-                                severity="high",
-                                location_id="",
-                                location_type="",
+                                component_id=icon['index'],
+                                ui_component_id="B",
+                                ui_component_type="ImageButton",
+                                score="",
+                                location_id=location_id,
+                                location_type=location_type,
                                 bbox=icon['bounds'],
                                 description_id="8",
                                 description_type="역할이 다른 기능 요소에 동일한 아이콘 이미지로 중복 존재",
-                                description=f"수평 구간에서 중복 아이콘 탐지: {len(duplicate_group)}개의 동일한 아이콘이 해당 수평 구간에서 발견됨. 중복 아이콘 위치들: [{bounds_list_str}] (디폴트와 다름)",
-                                ai_description=""
+                                description=f"수평 구간에서 중복 아이콘 탐지: {len(duplicate_group)}개의 동일한 아이콘이 해당 수평 구간에서 발견됨. 중복 아이콘 위치들: [{bounds_list_str}] (디폴트와 다름)"
                             )
 
                             issues.append(issue)
@@ -140,14 +142,13 @@ class Icon:
                             component_id=0,
                             ui_component_id="",
                             ui_component_type="",
-                            severity="high",
+                            score="",
                             location_id="",
                             location_type="",
                             bbox=[],
                             description_id="8",
                             description_type="역할이 다른 기능 요소에 동일한 아이콘 이미지로 중복 존재",
-                            description="",
-                            ai_description=""
+                            description=""
                         )
                         issues.append(issue)
         except Exception as e:
@@ -207,7 +208,6 @@ class Icon:
                 diff = cv2.absdiff(base_image, compare_image)
                 similarity = 1.0 - (np.mean(diff) / 255.0)
                 
-                # print(f"  이미지 0 vs 이미지 {i}: 유사도 {similarity:.3f}")
                 
                 # 유사도가 0.95 이상이면 동일한 것으로 판정
                 if similarity < 0.99:
@@ -247,7 +247,7 @@ class Icon:
                 similarity_matrix[j][i] = similarity
         
         # 유사도 임계값 (0.8 이상이면 중복으로 판정)
-        threshold = 0.95
+        threshold = 0.99
         
         # 중복 그룹 찾기
         duplicate_groups = []

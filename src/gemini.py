@@ -13,9 +13,9 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.utils.prompt import Prompt
 from src.utils.logger import init_logger
-from src.utils.model import ResultModel, Result
+from src.utils.model import ResultModel, Result, EvalKPI
 from src.utils.detect import Detect
-from src.utils.utils import get_bounds
+from src.utils.utils import get_bounds, bbox_to_location
 import cv2
 import os
 
@@ -130,24 +130,33 @@ class ImageAnalyzer:
         self.xml_path = image_path.replace('.png', '.xml')
         self.gemini_client = GeminiClient()
     
-    def _create_result_model(self, result: Result, issue_type: str, description_id: str) -> ResultModel:
+    def _create_result_model(self, result: Result, component_info: dict) -> ResultModel:
         """Result를 ResultModel로 변환하는 헬퍼 메서드"""
         return ResultModel(
             filename=self.image_path,
-            issue_type=issue_type,
-            component_id=0,
-            ui_component_id="",
-            ui_component_type="",
-            severity=result.severity,
-            location_id="",
-            location_type="",
+            issue_type=component_info.get('issue_type', ''),
+            component_id=component_info.get('component_id', 0),
+            ui_component_id=component_info.get('ui_component_id', ''),
+            ui_component_type=component_info.get('ui_component_type', ''),
+            score=result.score,
+            location_id=component_info.get('location_id', ''),
+            location_type=component_info.get('location_type', ''),
             bbox=result.bbox,
-            description_id=description_id,
-            description_type="",
-            description="상호작용 가능한 요소가 시각적으로 명확히 구분되지 않음",
-            ai_description=result.ai_description
+            description_id=component_info.get('description_id', ''),
+            description_type=component_info.get('description_type', ''),
+            description=component_info.get('description', '')
         )
     
+    def issue_score(self,  issue: ResultModel) -> ResultModel:
+        """이슈 점수 계산"""
+        prompt = Prompt.issue_score_prompt()
+        issue_text = json.dumps(issue.model_dump(), ensure_ascii=False, indent=2)
+
+        result = self.gemini_client.call_gemini_image_text(prompt, self.image_path, issue_text)
+        issue.score = result.score
+        issue.description = result.description
+        return issue
+
     def design_issues(self) -> List[ResultModel]:
         """디자인 이슈 분석"""
         issues = []
@@ -189,7 +198,23 @@ class ImageAnalyzer:
                 Prompt.calender_text_issue(), 
                 './output/images/calender_img.png'
             )
-            issues.append(self._create_result_model(result, "design", "9"))
+
+            location_id = bbox_to_location(bound, img.shape[0], img.shape[1])
+            location_type = EvalKPI.LOCATION[location_id]
+
+            component_info = {
+                "issue_type": "design",
+                "component_id": comp.get('index', 0),
+                "description_id": "9",
+                "description_type": "달력 아이콘에서 요일 글자가 테두리를 벗어남",
+                "ui_component_type": "ImageButton",
+                "ui_component_id": "B",
+                "bbox": bound,
+                "location_id": location_id,
+                "location_type": location_type,
+            }
+
+            issues.append(self._create_result_model(result, component_info))
         return issues
     
     def _analyze_clock_components(self, components) -> List[ResultModel]:
@@ -208,11 +233,26 @@ class ImageAnalyzer:
                 './output/images/header_img.png', 
                 './output/images/clock_img.png'
             )
-            issues.append(self._create_result_model(result, "design", "A"))
-            
+
+            location_id = bbox_to_location(bound, img.shape[0], img.shape[1])
+            location_type = EvalKPI.LOCATION[location_id]
+
+            component_info = {
+                "issue_type": "design",
+                "component_id": comp.get('index', 0),
+                "description_id": "A",
+                "description_type": "앱 내 달력, 시간 아이콘이 status bar 등에 보이는 실제 현재 날짜, 시각과 매칭되지 않음",
+                "ui_component_type": "ImageButton",
+                "ui_component_id": "B",
+                "bbox": bound,
+                "location_id": location_id,
+                "location_type": location_type,
+            }
             # 임시 파일 정리
             os.remove('./output/images/clock_img.png')
             os.remove('./output/images/header_img.png')
+        
+            issues.append(self._create_result_model(result, component_info))
         return issues
 
 
@@ -249,14 +289,13 @@ class IssueProcessor:
                         "component_id": 0,
                         "ui_component_id": "",
                         "ui_component_type": "",
-                        "severity": "0",
+                        "score": "0",
                         "location_id": "",
                         "location_type": "",
                         "bbox": [],
                         "description_id": "",
                         "description_type": "",
-                        "description": "문제가 없습니다.",
-                        "ai_description": ""
+                        "description": "문제가 없습니다."
                     }
                     final_issues.append(normal_issue)
                     
@@ -295,8 +334,8 @@ class IssueProcessor:
             # (Gemini의 응답을 기반으로 최종 이슈 결정)
             # 여기서는 첫 번째 이슈를 기본으로 하고 AI 설명만 업데이트
             selected_issue = issues[0].copy()  # 첫 번째 이슈를 기본으로
-            selected_issue['ai_description'] = result.ai_description
-            selected_issue['severity'] = result.severity
+            selected_issue['description'] = result.description
+            selected_issue['score'] = result.score
             
             return selected_issue
             
@@ -328,6 +367,11 @@ class Gemini:
         if self.analyzer is None:
             raise ValueError("이미지 분석기가 초기화되지 않았습니다.")
         return self.analyzer.layout_issues()
+    
+    def issue_score(self, issue: ResultModel) -> ResultModel:
+        if self.analyzer is None:
+            raise ValueError("이미지 분석기가 초기화되지 않았습니다.")
+        return self.analyzer.issue_score(issue)
     
     def sort_issues(self, json_filename: str) -> str:
         return self.processor.sort_issues(json_filename) 

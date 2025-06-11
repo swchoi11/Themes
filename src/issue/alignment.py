@@ -6,8 +6,10 @@ import json
 from typing import List
 from src.utils.model import ResultModel
 from src.utils.detect import Detect
-from src.gemini import Gemini
+from src.gemini import GeminiClient
 from src.utils.prompt import Prompt
+from src.utils.utils import bbox_to_location
+from src.utils.model import EvalKPI
 
 class Align:
     def __init__(self, file_path: str):
@@ -32,9 +34,9 @@ class Align:
 
         text = self.groups_to_text(groups)
 
-        gemini = Gemini(self.image_path)
+        gemini = GeminiClient()
 
-        response = gemini.generate_response(Prompt.alignment_check_prompt(), text=text)
+        response = gemini.call_gemini_text(Prompt.alignment_check_prompt(), text=text)
         response = json.loads(response)
         
         results = []
@@ -52,20 +54,22 @@ class Align:
                 cv2.putText(img, "alignment issue", (0, int(y1)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (52, 195, 235), 2)                                
                 cv2.imwrite(self.output_path, img)
 
+                location_id = bbox_to_location([0, y1, w, y2], h, w)
+                location_type = EvalKPI.LOCATION[location_id]
+
                 result = ResultModel(
                     filename=self.image_path,
                     issue_type='alignment',
                     component_id=0,
-                    ui_component_id="",
-                    ui_component_type="",
-                    severity="high",
+                    ui_component_id="B",
+                    ui_component_type="ImageButton",
+                    score="",
                     location_id="",
                     location_type="",
                     bbox=[0, y1, w, y2],
                     description_id="4",
                     description_type="컴포넌트 내부 요소들의 수직/수평 정렬이 균일하지 않음",
-                    description=f"정렬 문제 발견: y축 범위 {y1}-{y2}",
-                    ai_description=""
+                    description=f"정렬 문제 발견: y축 범위 {y1}-{y2}"
                 )
                 results.append(result)
         
@@ -76,14 +80,13 @@ class Align:
                 component_id=0,
                 ui_component_id="",
                 ui_component_type="",
-                severity="high",
+                score="",
                 location_id="",
                 location_type="",
                 bbox=[],
                 description_id="4",
                 description_type="컴포넌트 내부 요소들의 수직/수평 정렬이 균일하지 않음",
-                description="",
-                ai_description=""
+                description=""
             )]
 
         return results
