@@ -96,8 +96,7 @@ class XMLParser:
             all_nodes = self.tree.getroot().findall('.//node')
             print(f"Total nodes in XML: {len(all_nodes)}")
             for i, node in enumerate(all_nodes):
-                print(
-                    f"Node {i}: class={node.get('class')}, bounds={node.get('bounds')}, text={node.get('text')}, clickable={node.get('clickable')}")
+                print(f"Node {i}: class={node.get('class')}, bounds={node.get('bounds')}, text={node.get('text')}, clickable={node.get('clickable')}")
             return len(all_nodes)
         except Exception as e:
             print(f"Error checking XML structure: {e}")
@@ -141,7 +140,7 @@ class XMLParser:
         return f'{component_type}_{self.component_counters[component_type]}'
 
     def _normalize_bbox(self, bounds: Tuple[int, int, int, int]) -> List[float]:
-        print(self.image_width, self.image_height)
+        # print(self.image_width, self.image_height)
         x1, y1, x2, y2 = bounds
         x1 = min(max(x1, 0), self.image_width)
         y1 = min(max(y1, 0), self.image_height)
@@ -216,14 +215,13 @@ class XMLParser:
         def collect_components(component: UIComponent):
             if component:
                 components.append(component)
-                print(
-                    f"Collected component: {component.id}, type: {component.type}, children: {component.children}, bbox: {component.bbox}")
+                # print( f"Collected component: {component.id}, type: {component.type}, children: {component.children}, bbox: {component.bbox}")
                 for child_id in component.children:
                     child_component = next((c for c in components if c.id == child_id), None)
                     if child_component:
                         collect_components(child_component)
-                    else:
-                        print(f"Child {child_id} not found in components")
+                    # else:
+                    #     print(f"Child {child_id} not found in components")
 
         try:
             print("Starting XML parsing...")

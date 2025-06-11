@@ -63,7 +63,7 @@ class SkeletonUIExtractor:
     def __init__(self, config: Dict):
         self.config = config
         device = 'cuda' if torch.cuda.is_available() else 'cpu'
-        print(device)
+        print("사용 가능한 자원:", device)
 
         # 모델 초기화
         self.som_model = get_yolo_model(model_path=config['som_model_path'])
@@ -77,7 +77,7 @@ class SkeletonUIExtractor:
         self.hierarchy_builder = HierarchyBuilder()
         self.component_detector = ComponentDetector()
 
-        print("SkeletonUIExtractor 초기화 완료!")
+        print("SkeletonUIExtractor 초기화 완료!!!!!!!!!!!!!!!!")
 
     def extract_skeleton(self, image: Union[str, Image.Image, np.ndarray]) -> LayoutStructure:
         """스켈레톤 UI 구조 추출"""
@@ -1008,7 +1008,7 @@ class LayoutAwareParser:
                 # XMLParser 생성
                 xml_parser = XMLParser(image_path=image_path, xml_path=xml_path)
                 # xml_parser.check_xml_structure()
-                print(xml_parser.check_bounds_validity())
+                # xml_parser.check_bounds_validity()
                 xml_components = xml_parser.get_components()
                 print(f"XML에서 {len(xml_components)}개 컴포넌트 추출")
 
@@ -1104,10 +1104,10 @@ class LayoutAwareParser:
 
     def _merge_skeleton_with_xml(self, ui_elements: List[UIElement], xml_components: List, xml_parser_instance=None) -> \
     List[UIElement]:
-        print(f"-------------------- * XML 병합 시작 * --------------------")
-        print(f"UI Elements 개수: {len(ui_elements)}")
-        print(f"XML Components 개수: {len(xml_components) if xml_components else 0}")
-        print(f"XML Parser Instance: {xml_parser_instance is not None}")
+        # print(f"-------------------- * XML 병합 시작 * --------------------")
+        # print(f"UI Elements 개수: {len(ui_elements)}")
+        # print(f"XML Components 개수: {len(xml_components) if xml_components else 0}")
+        # print(f"XML Parser Instance: {xml_parser_instance is not None}")
 
         if not xml_components:
             return ui_elements
@@ -1180,16 +1180,16 @@ class LayoutAwareParser:
                     for xml_comp in merged_xml_components:
                         if self._is_spatially_overlapping(ui_elem.bbox, xml_comp.bbox):
                             should_add = False
-                            overlap_ratio = self._calculate_overlap_ratio(ui_elem.bbox, xml_comp.bbox)
-                            print(f"기존 UI Element 제외 (공간적 겹침): {ui_elem.id} <-> {xml_comp.id}")
-                            print(f"  UI bbox: {ui_elem.bbox}")
-                            print(f"  XML bbox: {xml_comp.bbox}")
-                            print(f"  ROI: {overlap_ratio:.3f}")
+                            # overlap_ratio = self._calculate_overlap_ratio(ui_elem.bbox, xml_comp.bbox)
+                            # print(f"기존 UI Element 제외 (공간적 겹침): {ui_elem.id} <-> {xml_comp.id}")
+                            # print(f"  UI bbox: {ui_elem.bbox}")
+                            # print(f"  XML bbox: {xml_comp.bbox}")
+                            # print(f"  ROI: {overlap_ratio:.3f}")
                             break
 
                     if should_add:
                         merged_ui_elements.append(ui_elem)
-                        print(f"기존 UI Element 추가: {ui_elem.id}")
+                        # print(f"기존 UI Element 추가: {ui_elem.id}")
 
                 print(f"최종 병합 결과: {len(merged_ui_elements)}개")
                 return merged_ui_elements
@@ -1203,7 +1203,7 @@ class LayoutAwareParser:
         return self._fallback_direct_merge(unique_ui_elements, valid_xml_components)
 
     def _calculate_overlap_ratio(self, bbox1, bbox2):
-        """두 bounding box의 겹침 비율 계산 (디버깅용)"""
+        """두 bounding box의 겹침 비율 계산"""
         if not bbox1 or not bbox2 or len(bbox1) < 4 or len(bbox2) < 4:
             return 0.0
 
@@ -1616,7 +1616,7 @@ class LayoutAwareParser:
                 return depths[elem_id]
 
             if elem_id in visited:
-                print(f"순환 참조 감지: {elem_id}")
+                # print(f"순환 참조 감지: {elem_id}")
                 depths[elem_id] = 0
                 return 0
 
@@ -1776,7 +1776,7 @@ if __name__ == "__main__":
     img_paths = glob.glob(f"{rootDir}/image/*.png", recursive=True)
     broken_files = []
 
-    for image_path in tqdm(img_paths[:5]):
+    for image_path in tqdm(img_paths):
         filename = os.path.splitext(os.path.basename(image_path))[0]
         xml_path=f"{rootDir}/xml/{filename}.xml"
         config['filename'] = filename
@@ -1790,6 +1790,10 @@ if __name__ == "__main__":
             broken_files.append(os.path.basename(image_path))
             print(f"해당 파일은 손상 되었습니다.: {image_path}")
             continue
+
+        if not os.path.isfile(xml_path):
+            continue
+
         result = parser.parse_by_layout(image=image_path, xml_path=xml_path)
         with open(f"{OUT_DIR}/{filename}.json", "w", encoding="utf-8") as f:
             json.dump(result, f, ensure_ascii=False, indent=2)
