@@ -15,7 +15,6 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
 
 # requirements.txt 먼저 복사 (레이어 캐싱 최적화)
 COPY requirements.txt .
