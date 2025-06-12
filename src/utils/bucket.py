@@ -36,6 +36,7 @@ def from_bucket_image_list(prefix: str = "image_list") :
     try:
         # Storage 클라이언트 초기화
         client = storage.Client.from_service_account_json('./service_account.json')
+        
         bucket = client.bucket(BUCKET_NAME)
         blob = bucket.blob(f"{prefix}/vm{INSTANCE_NUM}_image_list.csv")        
         
