@@ -1,4 +1,5 @@
 import os
+import glob
 from google.cloud import storage
 from typing import List, Optional
 from dotenv import load_dotenv
@@ -6,6 +7,9 @@ from google.cloud import compute_v1
 import subprocess
 import socket
 import json
+from src.utils.logger import init_logger
+
+logger = init_logger()
 
 load_dotenv()
 BUCKET_NAME = os.getenv('BUCKET_NAME')
@@ -53,25 +57,58 @@ def download_file_from_bucket(source_blob_name: str, destination_file_name: str)
     except Exception as e:
         print(f"파일 다운로드 중 오류 발생: {e}")
         return False
+
 def upload_to_bucket(json_filename: str):
     try:
-        client = storage.Client.from_service_account_json('')
+        client = storage.Client()
         bucket = client.bucket(BUCKET_NAME)
 
         filename = os.path.basename(json_filename).replace('.json', '')
     
         result_files = [
-            f'./output/jsons/all_issues/{filename}.json',
-            f'./output/jsons/final_issue/{filename}.json',
-            f'./output/excels/all_issues/{filename}.xlsx',
-            f'./output/excels/final_issue/{filename}.xlsx',
-            f'./output/images/'
-        ]        
+            f'output/jsons/all_issues/{filename}.json',
+            f'output/jsons/final_issue/{filename}.json',
+            f'output/excels/all_issues/{filename}.xlsx',
+            f'output/excels/final_issue/{filename}.xlsx',
+            ]        
         
+        result_files.extend(glob.glob('output/images/*.png'))
+        result_files.extend(glob.glob('output/images/not_processed/*.png'))
+
+
         for result_file in result_files:
-            blob = bucket.blob(f"result/vm_{INSTANCE_NUM}/{result_file}")
+            input_file = result_file.replace('output/', '')
+            blob = bucket.blob(f"result/vm{INSTANCE_NUM}/{input_file}")
             blob.upload_from_filename(result_file)
 
     except Exception as e:
         print(f"파일 업로드 중 오류 발생: {e}")
         return False
+    
+def gcloud_auth_login():
+    try:
+        result = subprocess.run([
+            'gcloud', 'auth', 'list',
+            '--filter=status:ACTIVE',
+            '--format=value(account)']
+            , capture_output=True, text=True)
+        
+        if result.returncode == 0 and result.stdout.strip():
+            logger.info("이미 로그인 됨")
+            return True
+        else:
+            logger.info("로그인 필요")
+            result = subprocess.run([
+                'gcloud', 'auth', 'application-default', 'login',
+            ], capture_output=True, text=True)
+
+            if result.returncode == 0:
+                logger.info("로그인 성공")
+                return True
+            else:
+                logger.error("로그인 실패")
+                return False
+    except Exception as e:
+        print(f"gcloud 인증 로그인 중 오류 발생: {e}")
+        return False
+    
