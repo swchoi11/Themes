@@ -18,7 +18,7 @@ BUCKET_NAME = os.getenv('BUCKET_NAME')
 def test_image_list():
     image_list_file_path = glob.glob('./resource/vm*_image_list.csv')
 
-    if len(image_list_file_path) > 0:
+    if len(image_list_file_path) > 1:
         logger.info("이미지 파일이 유일하지 않습니다.")
         return []
     
