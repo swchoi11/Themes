@@ -4,6 +4,8 @@ import json
 import cv2
 import numpy as np
 import pandas as pd
+
+import ast
 from typing import Dict, List, Optional, Tuple
 from dataclasses import asdict
 from collections import defaultdict
@@ -2379,7 +2381,7 @@ class LayoutDetector(Gemini):
             print(f"총 {len(issues)}개 이슈 중 {valid_issues_count}개 시각화 완료")
 
             # 결과 이미지 저장
-            output_path = os.path.join(self.output_dir, f"{os.path.basename(image_path)}")
+            output_path = os.path.join(self.output_dir, f"temp_{os.path.basename(image_path)}")
             success = cv2.imwrite(output_path, image)
 
             if success:
@@ -2525,7 +2527,12 @@ def save_results_to_csv(issues: List[Issue], output_path: str):
         available_columns = [col for col in columns if col in df.columns]
         df = df[available_columns]
 
-        df.to_csv(output_path, index=False, encoding='utf-8-sig')
+        if os.path.exists(output_path):
+            existing_df = pd.read_csv(output_path)
+            combined_df = pd.concat([existing_df, df], ignore_index=True)
+            combined_df.to_csv(output_path, index=False, encoding='utf-8-sig')
+        else:
+            df.to_csv(output_path, index=False, encoding='utf-8-sig')
         print(f"Results saved to CSV: {output_path}")
     except Exception as e:
         print(f"Error saving results to CSV: {str(e)}")
@@ -2603,7 +2610,12 @@ def save_tuple_data_to_csv(tuple_data, output_path: str):
         print(f"컬럼: {list(df.columns)}")
 
         # CSV 저장
-        df.to_csv(output_path, index=False, encoding='utf-8-sig')
+        if os.path.exists(output_path):
+            existing_df = pd.read_csv(output_path)
+            combined_df = pd.concat([existing_df, df], ignore_index=True)
+            combined_df.to_csv(output_path, index=False, encoding='utf-8-sig')
+        else:
+            df.to_csv(output_path, index=False, encoding='utf-8-sig')
         print(f"CSV 저장 완료: {output_path}")
 
         return df
@@ -2614,6 +2626,135 @@ def save_tuple_data_to_csv(tuple_data, output_path: str):
         traceback.print_exc()
         return None
 
+
+def visualize_selected_issues(self, image_path: str, csv_path: str):
+    """CSV에서 최종 선택된 이슈들만 시각화하는 함수"""
+    if not self.debug:
+        return
+
+    try:
+        # CSV에서 해당 이미지의 이슈들 읽기
+        df = pd.read_csv(csv_path)
+        image_filename = os.path.basename(image_path)
+
+        image_issues = df[df['filename'] == image_filename]
+
+        if image_issues.empty:
+            print(f"CSV에서 {image_filename}에 대한 이슈를 찾을 수 없습니다.")
+            return
+
+        print(f"{image_filename}에 대한 최종 선택된 이슈: {len(image_issues)}개")
+
+        # 이미지 로드
+        image = cv2.imread(image_path)
+        if image is None:
+            print(f"Cannot load image for visualization: {image_path}")
+            return
+
+        h, w = image.shape[:2]
+        colors = {
+            '0': (255, 0, 0),  # 빨강 - 텍스트 대비
+            '1': (255, 165, 0),  # 주황 - 하이라이트 대비
+            '2': (255, 255, 0),  # 노랑 - 버튼 시각성
+            '3': (0, 255, 0),  # 초록 - 정렬 일관성
+            '4': (0, 255, 255),  # 청록 - 수직 정렬
+            '5': (0, 0, 255),  # 파랑 - 계층 정렬
+            '6': (255, 0, 255),  # 자홍 - 텍스트 잘림
+            '7': (128, 0, 128),  # 보라 - 아이콘 잘림
+            '8': (255, 128, 0),  # 주황 - 중복 아이콘
+            '9': (128, 255, 0),  # 연두 - 색상 조화
+            '10': (0, 128, 255),  # 하늘 - 공간 활용
+            '11': (255, 0, 128)  # 분홍 - 비례 조화
+        }
+
+        valid_issues_count = 0
+
+        for idx, row in image_issues.iterrows():
+            try:
+                # bbox 문자열을 리스트로 변환
+                bbox_str = row.get('bbox', '[]')
+                try:
+                    # 문자열로 저장된 리스트를 실제 리스트로 변환
+                    if isinstance(bbox_str, str):
+                        bbox = ast.literal_eval(bbox_str)
+                    else:
+                        bbox = bbox_str
+                except (ValueError, SyntaxError):
+                    print(f"이슈 {idx}: bbox 파싱 실패 - {bbox_str}")
+                    continue
+
+                if not bbox or len(bbox) < 4:
+                    print(f"이슈 {idx}: bbox 데이터 없음 또는 불완전 - {bbox}")
+                    continue
+
+                # 좌표 변환 및 검증
+                try:
+                    x1, y1, x2, y2 = [int(coord * dim) for coord, dim in zip(bbox[:4], [w, h, w, h])]
+                except (ValueError, TypeError) as e:
+                    print(f"이슈 {idx}: 좌표 변환 실패 - bbox: {bbox}, 에러: {e}")
+                    continue
+
+                # 좌표 유효성 검사
+                if x1 >= x2 or y1 >= y2 or x1 < 0 or y1 < 0 or x2 > w or y2 > h:
+                    print(f"이슈 {idx}: 유효하지 않은 좌표 - ({x1}, {y1}, {x2}, {y2}), 이미지 크기: ({w}, {h})")
+                    continue
+
+                # 이슈 타입별 색상 선택
+                issue_type = str(row.get('issue_type', 'unknown'))
+                color = colors.get(issue_type, (128, 128, 128))  # 기본 회색
+
+                # 점수에 따른 두께 설정
+                score = row.get('score', 'Conditional Pass')
+                if score in ['Fail with Critical issue', 'Fail with issue']:
+                    thickness = 3
+                else:
+                    thickness = 2
+
+                # 사각형 그리기
+                cv2.rectangle(image, (x1, y1), (x2, y2), color, thickness)
+
+                # 라벨 텍스트
+                component_id = row.get('component_id', 'unknown')
+                label = f"T{issue_type}:{str(component_id)[:8]}"
+
+                # 텍스트 배경 사각형 그리기
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                font_scale = 0.4
+                font_thickness = 1
+
+                (text_width, text_height), baseline = cv2.getTextSize(label, font, font_scale, font_thickness)
+
+                text_x = x1
+                text_y = max(text_height + 5, y1 - 5)  # 이미지 상단을 벗어나지 않도록
+
+                cv2.rectangle(image,
+                              (text_x - 2, text_y - text_height - 2),
+                              (text_x + text_width + 2, text_y + baseline + 2),
+                              color, -1)
+                cv2.putText(image, label, (text_x, text_y), font, font_scale, (255, 255, 255), font_thickness)
+
+                valid_issues_count += 1
+
+            except Exception as issue_error:
+                print(f"이슈 {idx} 시각화 중 에러: {str(issue_error)}")
+                continue
+
+        print(f"총 {len(image_issues)}개 선택된 이슈 중 {valid_issues_count}개 시각화 완료")
+
+        output_path = os.path.join(self.output_dir, f"final_{os.path.basename(image_path)}")
+        success = cv2.imwrite(output_path, image)
+
+        if success:
+            print(f"Final image saved: {output_path}")
+        else:
+            print(f"Failed to save: {output_path}")
+
+    except Exception as e:
+        print(f"Error visualizing selected issues: {str(e)}")
+        import traceback
+        traceback.print_exc()
+
+
 if __name__ == "__main__":
     # 기존 방식 (XML + JSON)
     image_paths = glob.glob("../resource/image/*.png")
@@ -2622,7 +2763,7 @@ if __name__ == "__main__":
     all_issues = []
     first_issues = []
 
-    for image_path in image_paths:
+    for image_path in image_paths[:1]:
 
         filename = os.path.splitext(os.path.basename(image_path))[0]
         xml_path = f"../resource/xml/{filename}.xml"
@@ -2649,21 +2790,22 @@ if __name__ == "__main__":
         priority = EvalKPI.select_final_priority_issue(issues, image_path)
         first_issues.extend(priority)
 
-    if all_issues:
-        output_csv = f"{output_dir}/total_issue_results.csv"
-        save_results_to_csv(all_issues, output_csv)
-        print(f"\n통합 결과 저장 완료: {output_csv}")
-        print(f"총 {len(all_issues)}개 이슈 발견")
-    else:
-        print("\n발견된 이슈가 없습니다.")
+        if all_issues:
+            output_csv = f"{output_dir}/total_issue_results.csv"
+            save_results_to_csv(all_issues, output_csv)
+            print(f"\n통합 결과 저장 완료: {output_csv}")
+            print(f"총 {len(all_issues)}개 이슈 발견")
+        else:
+            print("\n발견된 이슈가 없습니다.")
 
-    if first_issues:
-        first_output_csv = f"{output_dir}/first_issue_results.csv"
-        save_tuple_data_to_csv(first_issues, first_output_csv)
-        print(f"\n검수 결과 저장 완료: {first_output_csv}")
-        print(f"총 {len(first_issues)}개 검수 완료")
-    else:
-        print("\n최종 검수 중 발견된 이슈가 없습니다.")
+        if first_issues:
+            first_output_csv = f"{output_dir}/first_issue_results.csv"
+            save_tuple_data_to_csv(first_issues, first_output_csv)
+            visualize_selected_issues(image_path, first_output_csv)
+            print(f"\n검수 결과 저장 완료: {first_output_csv}")
+            print(f"총 {len(first_issues)}개 검수 완료")
+        else:
+            print("\n최종 검수 중 발견된 이슈가 없습니다.")
 
     # JSON만 사용하는 새로운 방식 예시
     # results = batch_analyze_json_only(
