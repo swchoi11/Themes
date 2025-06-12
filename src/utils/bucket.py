@@ -35,19 +35,29 @@ image_list_file_path = './resource/image_list.csv'
 def from_bucket_image_list(prefix: str = "image_list") :
     try:
         # Storage 클라이언트 초기화
-        client = storage.Client()
+        client = storage.Client.from_service_account_json('./service_account.json')
         bucket = client.bucket(BUCKET_NAME)
         blob = bucket.blob(f"{prefix}/vm{INSTANCE_NUM}_image_list.csv")        
         
         blob.download_to_filename(image_list_file_path)
+        return image_list_file_path
     
     except Exception as e:
         print(f"버킷에서 파일 목록을 가져오는 중 오류 발생: {e}")
         return []
 
+def test_image_list():
+    image_list_file_path = from_bucket_image_list()
+
+    with open(image_list_file_path, 'r') as file:
+        image_list = file.readlines()
+        return image_list
+
+
+
 def download_file_from_bucket(source_blob_name: str, destination_file_name: str) -> bool:
     try:
-        client = storage.Client()
+        client = storage.Client.from_service_account_json('./service_account.json')
         bucket = client.bucket(BUCKET_NAME)
         blob = bucket.blob(source_blob_name)
                 
@@ -60,7 +70,7 @@ def download_file_from_bucket(source_blob_name: str, destination_file_name: str)
 
 def upload_to_bucket(json_filename: str):
     try:
-        client = storage.Client()
+        client = storage.Client.from_service_account_json('./service_account.json')
         bucket = client.bucket(BUCKET_NAME)
 
         filename = os.path.basename(json_filename).replace('.json', '')
@@ -83,32 +93,5 @@ def upload_to_bucket(json_filename: str):
 
     except Exception as e:
         print(f"파일 업로드 중 오류 발생: {e}")
-        return False
-    
-def gcloud_auth_login():
-    try:
-        result = subprocess.run([
-            'gcloud', 'auth', 'list',
-            '--filter=status:ACTIVE',
-            '--format=value(account)']
-            , capture_output=True, text=True)
-        
-        if result.returncode == 0 and result.stdout.strip():
-            logger.info("이미 로그인 됨")
-            return True
-        else:
-            logger.info("로그인 필요")
-            result = subprocess.run([
-                'gcloud', 'auth', 'application-default', 'login',
-            ], capture_output=True, text=True)
-
-            if result.returncode == 0:
-                logger.info("로그인 성공")
-                return True
-            else:
-                logger.error("로그인 실패")
-                return False
-    except Exception as e:
-        print(f"gcloud 인증 로그인 중 오류 발생: {e}")
         return False
     
