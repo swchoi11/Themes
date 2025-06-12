@@ -202,9 +202,12 @@ def bbox_to_location(bbox, image_height, image_width):
     return '4'  # 'MC' (Middle Center)
 
 def check_all_issues_json(json_filename, test_image_list):
+    if not os.path.isfile(json_filename):
+        return test_image_list
     
     with open(json_filename, 'r', encoding='utf-8') as f:
         data = json.load(f)
+    
     if data == [] or len(data) == 0:
         return test_image_list
     
