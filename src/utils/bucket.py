@@ -53,3 +53,25 @@ def download_file_from_bucket(source_blob_name: str, destination_file_name: str)
     except Exception as e:
         print(f"파일 다운로드 중 오류 발생: {e}")
         return False
+def upload_to_bucket(json_filename: str):
+    try:
+        client = storage.Client.from_service_account_json('')
+        bucket = client.bucket(BUCKET_NAME)
+
+        filename = os.path.basename(json_filename).replace('.json', '')
+    
+        result_files = [
+            f'./output/jsons/all_issues/{filename}.json',
+            f'./output/jsons/final_issue/{filename}.json',
+            f'./output/excels/all_issues/{filename}.xlsx',
+            f'./output/excels/final_issue/{filename}.xlsx',
+            f'./output/images/'
+        ]        
+        
+        for result_file in result_files:
+            blob = bucket.blob(f"result/vm_{INSTANCE_NUM}/{result_file}")
+            blob.upload_from_filename(result_file)
+
+    except Exception as e:
+        print(f"파일 업로드 중 오류 발생: {e}")
+        return False

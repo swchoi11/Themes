@@ -26,10 +26,40 @@ class GeminiClient:
     
     def __init__(self):
         load_dotenv()
-        self.client = genai.Client(api_key=os.getenv('API_KEY'))
-        self.model = 'gemini-2.0-flash'
+        
+        self.api_keys = self._load_api_keys()
+        self.current_key_index = 0
+        self.client = self._get_client()
+        self.model = 'gemini-2.0-flash' #'gemini-2.5-flash-preview-05-20' | 'gemini-2.5-pro-preview-06-05'
         self.max_retries = 5  
         self.initial_delay = 1
+
+    def _load_api_keys(self):
+        """환경변수에서 API 키들을 로드"""
+        keys = []
+        
+        # API_KEY_1, API_KEY_2, API_KEY_3... 형태로 여러 키 지원
+        for i in range(1, 4):  # 최대 9개 키 지원
+            key = os.getenv(f'API_KEY{i}')
+            if key:
+                keys.append(key)
+                    
+        if not keys:
+            raise ValueError("API 키가 설정되지 않았습니다. API_KEY 또는 API_KEY_1, API_KEY_2... 환경변수를 설정해주세요.")
+            
+        # logger.info(f"총 {len(keys)}개의 API 키가 로드되었습니다.")
+        return keys
+    
+    def _get_client(self):
+        """현재 API 키로 클라이언트 생성"""
+        return genai.Client(api_key=self.api_keys[self.current_key_index])
+    
+    def _rotate_key(self):
+        """다음 API 키로 로테이션"""
+        old_index = self.current_key_index
+        self.current_key_index = (self.current_key_index + 1) % len(self.api_keys)
+        self.client = self._get_client()
+        logger.warning(f"API 키 변경: {old_index + 1} -> {self.current_key_index + 1}")
 
     def retry_with_delay(func):
         def wrapper(self, *args, **kwargs):
@@ -38,6 +68,15 @@ class GeminiClient:
                 try:
                     return func(self, *args, **kwargs)
                 except Exception as e:
+                    error_msg = str(e).lower()
+                    
+                    if any(keyword in error_msg for keyword in ['quota', 'rate limit', 'resource exhausted', 'limit exceeded']):
+                        logger.warning(f"API 할당량 초과 감지: {e}")
+                        if len(self.api_keys) > 1:  # 키가 여러개인 경우만 로테이션
+                            self._rotate_key()
+                            # 키 로테이션 후 즉시 재시도 (delay 없이)
+                            continue
+                    
                     if attempt == self.max_retries - 1:
                         raise e
                     logger.error(f"gemini 호출 {attempt + 1}번째 실패: {e}")
