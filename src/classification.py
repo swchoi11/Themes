@@ -19,7 +19,7 @@ class ImageXMLClassifier:
             resource_dirs: 소스 디렉토리 리스트 (기본값: ['./resource/pass', './resource/default'])
             output_dir: 출력 디렉토리 (기본값: './output')
         """
-        self.resource_dirs = resource_dirs or ['./resource/pass', './resource/default']
+        self.resource_dirs = resource_dirs or ['./pass', './default']
         self.output_dir = output_dir or './output/classification'
         self.similarity_threshold = 90.0  # XML 유사도 임계값 (%)
     
