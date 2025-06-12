@@ -8,11 +8,11 @@ from src.layout import Layout
 from src.utils.utils import check_size, init_process, move_to_not_processed, save_results, check_valid_issues, unprocessed_issues, to_excel
 from src.utils.model import ResultModel
 from src.gemini import Gemini, IssueProcessor
-from src.utils.bucket import from_bucket_image_list, upload_to_bucket
+from src.utils.bucket import test_image_list
 
 # 0. 데이터 준비
 
-test_image_list = from_bucket_image_list()
+test_image_list = test_image_list()
 print(test_image_list)
 
 # 1. classification
