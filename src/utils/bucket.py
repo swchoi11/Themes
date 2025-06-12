@@ -26,9 +26,11 @@ def test_image_list():
     
     with open(image_list_file_path, 'r', encoding='utf-8') as file:
         image_list = file.readlines()
+        clean_image_list = [image.replace('\ufeff', '') for image in image_list]
         clean_image_list = [image.strip() for image in image_list if image.strip()]
         clean_image_list = [f'./mnt/resource/{image}' for image in clean_image_list]
         return clean_image_list
+    
 
 def download_file_from_bucket(source_blob_name: str, destination_file_name: str) -> bool:
     try:
@@ -60,17 +62,7 @@ def upload_to_bucket(json_filename: str):
         result_files.extend(glob.glob('output/images/*.png'))
         result_files.extend(glob.glob('output/images/not_processed/*.png'))
 
-
-        image_list_file_path = glob.glob('./Themes/vm*_image_list.csv')
-
-        if len(image_list_file_path) > 0:
-            logger.info("이미지 파일이 유일하지 않습니다.")
-            return []
-    
-        image_list_file_path = image_list_file_path[0]
-        INSTANCE_NUM = image_list_file_path.split('/')[-1].split('_')[1]
-        INSTANCE_NUM = int(INSTANCE_NUM)
-    
+        INSTANCE_NUM = get_instance_num()
 
         for result_file in result_files:
             input_file = result_file.replace('output/', '')
@@ -81,3 +73,27 @@ def upload_to_bucket(json_filename: str):
         print(f"파일 업로드 중 오류 발생: {e}")
         return False
     
+def get_instance_num():
+    image_list_file_path = glob.glob('./Themes/vm*_image_list.csv')
+
+    if len(image_list_file_path) > 0:
+        logger.info("이미지 파일이 유일하지 않습니다.")
+        return []
+
+    image_list_file_path = image_list_file_path[0]
+    INSTANCE_NUM = image_list_file_path.split('/')[-1].split('_')[1]
+    INSTANCE_NUM = int(INSTANCE_NUM)
+
+    return INSTANCE_NUM
+
+def set_api_key():
+    api_list_path = './Themes/keys.txt'
+
+    with open(api_list_path, 'r', encoding='utf-8') as file:
+        api_key_list = file.readlines()
+        api_key_list = [api_key.strip() for api_key in api_key_list if api_key.strip()]
+
+    instance_num = get_instance_num()
+
+
+    return api_key_list
