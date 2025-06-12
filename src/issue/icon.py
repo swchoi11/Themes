@@ -35,27 +35,27 @@ class Icon:
         
         # 디폴트 이미지를 한 번만 선택 (효율성을 위해)
         default_image = None
-        try:
-            group_result = self.match.select_group()
-            if group_result is not None:
-                try:
-                    _, selected_group = group_result
-                    default_xml_path = self.match.selct_default_image(selected_group)
-                    if default_xml_path != "":
-                        default_image_path = default_xml_path.replace('.xml', '.png')
-                        default_image = cv2.imread(default_image_path)
-                        if default_image is not None:
-                            logger.info(f"디폴트 이미지 로드 완료: {default_image_path}")
-                        else:
-                            logger.warning(f"디폴트 이미지 로드 실패: {default_image_path}")
-                    else:
-                        logger.warning("디폴트 이미지를 찾을 수 없습니다.")
-                except (TypeError, ValueError):
-                    logger.error("그룹 선택 결과를 언패킹할 수 없습니다.")
-            else:
-                logger.warning("그룹 선택 결과가 None입니다.")
-        except Exception as e:
-            logger.error(f"디폴트 이미지 선택 중 오류: {e}")
+        # try:
+#            group_result = self.match.select_group()
+        #     if group_result is not None:
+        #         try:
+        #             _, selected_group = group_result
+        #             default_xml_path = self.match.selct_default_image(selected_group)
+        #             if default_xml_path != "":
+        #                 default_image_path = default_xml_path.replace('.xml', '.png')
+        #                 default_image = cv2.imread(default_image_path)
+        #                 if default_image is not None:
+        #                     logger.info(f"디폴트 이미지 로드 완료: {default_image_path}")
+        #                 else:
+        #                     logger.warning(f"디폴트 이미지 로드 실패: {default_image_path}")
+        #             else:
+        #                 logger.warning("디폴트 이미지를 찾을 수 없습니다.")
+        #         except (TypeError, ValueError):
+        #             logger.error("그룹 선택 결과를 언패킹할 수 없습니다.")
+        #     else:
+        #         logger.warning("그룹 선택 결과가 None입니다.")
+        # except Exception as e:
+        #     logger.error(f"디폴트 이미지 선택 중 오류: {e}")
         
         try:
             # 아이콘 크기 컴포넌트만 추출
@@ -100,57 +100,57 @@ class Icon:
                     
                     # 전체 그룹에 대해 디폴트 검증 (디폴트 이미지를 매개변수로 전달)
                     all_bounds_str = [str(bounds) for bounds in group_bounds]
-                    is_normal_duplicate = self.check_default_duplicate(all_bounds_str, default_image)
+                    # is_normal_duplicate = self.check_default_duplicate(all_bounds_str, default_image)
                     
                     # 검증 결과에 따라 이슈 생성
-                    if not is_normal_duplicate:
-                        for icon_idx in duplicate_group:
-                            icon = components[icon_idx]
-                                                    
-                            # 그룹 내 다른 아이콘들의 위치 정보 포함
-                            other_bounds = [str(bounds) for i, bounds in enumerate(group_bounds) if i != duplicate_group.index(icon_idx)]
-                            bounds_list_str = ", ".join(other_bounds)
-                            
-                            location_id = bbox_to_location(icon['bounds'], self.image.shape[0], self.image.shape[1])
-                            location_type = EvalKPI.LOCATION[location_id]
+                    # if not is_normal_duplicate:
+                    for icon_idx in duplicate_group:
+                        icon = components[icon_idx]
+                                                
+                        # 그룹 내 다른 아이콘들의 위치 정보 포함
+                        other_bounds = [str(bounds) for i, bounds in enumerate(group_bounds) if i != duplicate_group.index(icon_idx)]
+                        bounds_list_str = ", ".join(other_bounds)
+                        
+                        location_id = bbox_to_location(icon['bounds'], self.image.shape[0], self.image.shape[1])
+                        location_type = EvalKPI.LOCATION[location_id]
 
-                            issue = ResultModel(
-                                filename = self.image_path,
-                                issue_type='design',
-                                component_id=icon['index'],
-                                ui_component_id="B",
-                                ui_component_type="ImageButton",
-                                score="",
-                                location_id=location_id,
-                                location_type=location_type,
-                                bbox=icon['bounds'],
-                                description_id="8",
-                                description_type="역할이 다른 기능 요소에 동일한 아이콘 이미지로 중복 존재",
-                                description=f"수평 구간에서 중복 아이콘 탐지: {len(duplicate_group)}개의 동일한 아이콘이 해당 수평 구간에서 발견됨. 중복 아이콘 위치들: [{bounds_list_str}] (디폴트와 다름)"
-                            )
+                    issue = ResultModel(
+                        filename = self.image_path,
+                        issue_type='design',
+                        component_id=icon['index'],
+                        ui_component_id="B",
+                        ui_component_type="ImageButton",
+                        score="",
+                        location_id=location_id,
+                        location_type=location_type,
+                        bbox=icon['bounds'],
+                        description_id="8",
+                        description_type="역할이 다른 기능 요소에 동일한 아이콘 이미지로 중복 존재",
+                        description=f"수평 구간에서 중복 아이콘 탐지: {len(duplicate_group)}개의 동일한 아이콘이 해당 수평 구간에서 발견됨. 중복 아이콘 위치들: [{bounds_list_str}] (디폴트와 다름)"
+                    )
 
-                            issues.append(issue)
-                            cv2.rectangle(self.image, (icon['bounds'][0], icon['bounds'][1]), (icon['bounds'][2], icon['bounds'][3]), (0, 255, 255), 2)
-                            cv2.putText(self.image, f"duplicate", (icon['bounds'][0], icon['bounds'][1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
-                            
-                        cv2.imwrite(self.output_path, self.image)
-                    else:
-                        logger.info(f"디폴트 이미지에서도 동일한 중복이 발견되어 정상으로 판정됨")
-                        issue = ResultModel(
-                            filename = self.image_path,
-                            issue_type='design',
-                            component_id=0,
-                            ui_component_id="",
-                            ui_component_type="",
-                            score="",
-                            location_id="",
-                            location_type="",
-                            bbox=[],
-                            description_id="8",
-                            description_type="역할이 다른 기능 요소에 동일한 아이콘 이미지로 중복 존재",
-                            description=""
-                        )
-                        issues.append(issue)
+                    issues.append(issue)
+                    cv2.rectangle(self.image, (icon['bounds'][0], icon['bounds'][1]), (icon['bounds'][2], icon['bounds'][3]), (0, 255, 255), 2)
+                    cv2.putText(self.image, f"duplicate", (icon['bounds'][0], icon['bounds'][1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
+                        
+                    cv2.imwrite(self.output_path, self.image)
+                else:
+                    logger.info(f"디폴트 이미지에서도 동일한 중복이 발견되어 정상으로 판정됨")
+                    issue = ResultModel(
+                        filename = self.image_path,
+                        issue_type='design',
+                        component_id=0,
+                        ui_component_id="",
+                        ui_component_type="",
+                        score="",
+                        location_id="",
+                        location_type="",
+                        bbox=[],
+                        description_id="8",
+                        description_type="역할이 다른 기능 요소에 동일한 아이콘 이미지로 중복 존재",
+                        description=""
+                    )
+                    issues.append(issue)
         except Exception as e:
             logger.error(f"아이콘 중복 탐지 중 오류: {e}")
         
