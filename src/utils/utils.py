@@ -12,6 +12,14 @@ from datetime import datetime
 import pandas as pd
 from src.utils.model import EvalKPI, ResultModel
 
+def check_xml(image_path: str):
+    xml_path = image_path.replace('.png', '.xml')
+
+    if os.path.isfile(xml_path):
+        return True
+
+    return False
+
 def normalize_xml_content(xml_path: str) -> str:
     """
     XML 파일을 파싱하여 정규화된 문자열로 변환
@@ -193,3 +201,16 @@ def bbox_to_location(bbox, image_height, image_width):
     # 기본값 반환 (찾지 못한 경우)
     return '4'  # 'MC' (Middle Center)
 
+def check_all_issues_json(json_filename, test_image_list):
+    
+    with open(json_filename, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    if data == [] or len(data) == 0:
+        return test_image_list
+    
+    for item in data:
+        filename = os.path.basename(item['filename'])
+        if filename in test_image_list:
+            test_image_list.remove(filename)
+
+    return test_image_list

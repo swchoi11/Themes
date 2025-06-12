@@ -29,6 +29,7 @@ def test_image_list():
         image_list = [image.replace('\ufeff', '') for image in image_list]
         clean_image_list = [image.strip() for image in image_list if image.strip()]
         clean_image_list = [f'./mnt/resource/{image}' for image in clean_image_list]
+        clean_image_list = sorted(clean_image_list, reverse=True)
         return clean_image_list
     
 
