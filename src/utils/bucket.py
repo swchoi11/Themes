@@ -50,9 +50,10 @@ def from_bucket_image_list(prefix: str = "image_list") :
 def test_image_list():
     image_list_file_path = from_bucket_image_list()
 
-    with open(image_list_file_path, 'r') as file:
+    with open(image_list_file_path, 'r', encoding='utf-8') as file:
         image_list = file.readlines()
-        return image_list
+        clean_image_list = [image.strip() for image in image_list if image.strip()]
+        return clean_image_list
 
 
 
