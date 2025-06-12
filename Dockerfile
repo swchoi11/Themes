@@ -37,4 +37,4 @@ ENV PYTHONPATH=/app
 ENV PATH="/usr/bin:${PATH}"
 
 # 기본 명령어
-#CMD ["python", "main.py"]
+CMD ["python3", "main.py"]
