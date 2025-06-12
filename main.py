@@ -67,5 +67,5 @@ to_excel(json_filename)
 processor = IssueProcessor()
 output_path = processor.sort_issues(json_filename)
 to_excel(output_path)
-json_filename = './output/jsons/final_issue/result-20250612.json'
+#json_filename = './output/jsons/final_issue/result-20250612.json'
 upload_to_bucket(json_filename)
