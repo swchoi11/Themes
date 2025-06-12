@@ -16,8 +16,8 @@ test_image_list = test_image_list()
     
  
 result = []
-for test_image in tqdm(test_image_list):
-# for test_image in tqdm(glob.glob('./resource/*.png')):
+# for test_image in tqdm(test_image_list):
+for test_image in tqdm(glob.glob('./resource/*.png')):
     json_filename = init_process()
     
 #    이미지 크기 확인

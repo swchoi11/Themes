@@ -29,4 +29,4 @@ COPY . .
 ENV PYTHONPATH=/app
 
 # 기본 명령어
-CMD ["python", "main.py"]
+#CMD ["python", "main.py"]
