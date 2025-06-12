@@ -25,9 +25,6 @@ RUN pip install -r requirements.txt
 # 애플리케이션 파일들 복사
 COPY . .
 
-# 출력 디렉토리 생성
-RUN mkdir -p output/jsons/all_issues output/jsons/final_issues output/excels/all_issues output/excels/final_issues output/images/not_processed
-
 # Python 경로 설정
 ENV PYTHONPATH=/app
 
