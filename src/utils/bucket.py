@@ -16,7 +16,7 @@ BUCKET_NAME = os.getenv('BUCKET_NAME')
 
 
 def test_image_list():
-    image_list_file_path = glob.glob('./Themes/vm*_image_list.csv')
+    image_list_file_path = glob.glob('./resource/vm*_image_list.csv')
 
     if len(image_list_file_path) > 0:
         logger.info("이미지 파일이 유일하지 않습니다.")
@@ -87,7 +87,7 @@ def get_instance_num():
     return INSTANCE_NUM
 
 def set_api_key():
-    api_list_path = './keys.txt'
+    api_list_path = './resource/api_keys.txt'
 
     with open(api_list_path, 'r', encoding='utf-8') as file:
         api_key_list = file.readlines()
