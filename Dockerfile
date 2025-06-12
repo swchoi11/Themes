@@ -1,4 +1,4 @@
-FROM python:3.11
+FROM python:3.12.3
 
 # 작업 디렉토리 설정
 WORKDIR /app
@@ -14,20 +14,19 @@ RUN apt-get update && apt-get install -y \
     wget \
     curl \
     git \
-    && apt-get clean \
+    && apt-get clean
 
-# requirements.txt 먼저 복사 (레이어 캐싱 최적화)
 COPY requirements.txt .
 
 # Python 의존성 설치
-RUN pip install --no-cache-dir --upgrade pip
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
 # 애플리케이션 파일들 복사
 COPY . .
 
 # 출력 디렉토리 생성
-RUN mkdir -p output output/jsons output/jsons/all_issues output/jsons/final_issues output/excels output/excels/all_issues output/excels/final_issues output/images output/images/not_detected output/images/not_processed
+RUN mkdir -p output/jsons/all_issues output/jsons/final_issues output/excels/all_issues output/excels/final_issues output/images/not_processed
 
 # Python 경로 설정
 ENV PYTHONPATH=/app

@@ -1,0 +1,15 @@
+.git
+.gitignore
+README.md
+docker-compose.yaml
+dockerfile
+*.pyc
+__pycache__/
+.pytest_cache/
+.vscode/
+.idea/
+*.log
+.DS_Store 
+default/
+original/
+pass/
