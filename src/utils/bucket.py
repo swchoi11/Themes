@@ -53,6 +53,7 @@ def test_image_list():
     with open(image_list_file_path, 'r', encoding='utf-8') as file:
         image_list = file.readlines()
         clean_image_list = [image.strip() for image in image_list if image.strip()]
+        clean_image_list = [f'./mnt/resource/{image}' for image in clean_image_list]
         return clean_image_list
 
 
