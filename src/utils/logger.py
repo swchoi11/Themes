@@ -55,7 +55,7 @@ def init_logger(
     logger.addHandler(ch)
 
     # 파일 출력 설정
-    fh = logging.FileHandler(f'output/log-{datetime.now().strftime("%Y-%m-%d")}.log')
+    fh = logging.FileHandler(f'log-{datetime.now().strftime("%Y-%m-%d")}.log')
     fh.setFormatter(formatter)
     fh.setLevel(log_level)
     logger.addHandler(fh)
