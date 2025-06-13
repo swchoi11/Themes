@@ -129,6 +129,6 @@ to_excel(json_filename)
 
 processor = IssueProcessor()
 output_path = processor.sort_issues(json_filename)
-
+## [1,1,1,1] -> [] 로 변경하는 부분 필요함
 to_excel(output_path)
 upload_to_bucket(json_filename)
