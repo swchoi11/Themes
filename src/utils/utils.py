@@ -1,24 +1,15 @@
+import os
+import re
+import cv2
+import json
+import random
+import pandas as pd
+from typing import Tuple
+from datetime import datetime
 import xml.etree.ElementTree as ET
 from difflib import SequenceMatcher
-from typing import Tuple
-import cv2
-import re
-import random
-import os
-import shutil
-import json
-import glob
-from datetime import datetime
-import pandas as pd
-from src.utils.model import EvalKPI, ResultModel
+from src.utils.model import EvalKPI
 
-def check_xml(image_path: str):
-    xml_path = image_path.replace('.png', '.xml')
-
-    if os.path.isfile(xml_path):
-        return True
-
-    return False
 
 def normalize_xml_content(xml_path: str) -> str:
     """
@@ -77,10 +68,6 @@ def draw_components(components, image_path, file_name='output.png'):
         cv2.rectangle(img, (component[0], component[1]), (component[2], component[3]), random_color, 2)
     cv2.imwrite(file_name, img)
 
-def check_size(image_path: str):
-    img = cv2.imread(image_path)
-    h, w = img.shape[:2]
-    return h/w <= 2.0
 
 def init_process():
     os.makedirs('./output/images/', exist_ok=True)
@@ -92,31 +79,6 @@ def init_process():
 
     json_filename = f'result-{datetime.now().strftime("%Y%m%d")}.json'
     return json_filename
-
-def move_to_not_processed(test_image: str):
-    file_name = os.path.basename(test_image)
-    xml_path = test_image.replace('.png', '.xml')
-    
-    # 이미지와 XML 파일 이동
-    shutil.copy2(test_image, f'./output/images/not_processed/{file_name}')
-    if os.path.exists(xml_path):
-        xml_name = os.path.basename(xml_path)
-        shutil.copy2(xml_path, f'./output/images/not_processed/{xml_name}')
-
-    return ResultModel(
-        filename=test_image,
-        issue_type="not_processed",
-        component_id=0,
-        ui_component_id="",
-        ui_component_type="",
-        score="5",
-        location_id="",
-        location_type="",
-        bbox=[],
-        description_id="",
-        description_type="",
-        description="사이즈가 맞지 않아 처리 하지 않습니다. 폴드만 처리됩니다."
-    )
 
 def save_results(all_results, filename):
     """결과를 JSON 파일에 저장"""
@@ -137,44 +99,6 @@ def save_results(all_results, filename):
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(existing_data, f, ensure_ascii=False, indent=2)
 
-def check_valid_issues(issues):
-    flag = False
-    for issue in issues:
-        if issue.bbox != []:
-            flag = True
-            break
-    return flag
-
-def unprocessed_issues(json_filename):
-    # 기존 JSON 파일 읽기
-    try:
-        with open(json_filename, 'r', encoding='utf-8') as f:
-            existing_data = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        existing_data = []
-    
-    # 새로운 이슈들 추가
-    for filename in glob.glob('./output/images/not_processed/*.png'):
-        issue = {
-            "filename": filename,
-            "issue_type": "normal",
-            "component_id": 0,
-            "ui_component_id": "",
-            "ui_component_type": "",
-            "severity": "0",
-            "location_id": "",
-            "location_type": "",
-            "bbox": [],
-            "description_id": "0",
-            "description_type": "",
-            "description": "사이즈가 맞지 않아 처리 하지 않습니다. 폴드만 처리됩니다.",
-            "ai_description": ""
-        }
-        existing_data.append(issue)
-    
-    # 전체 데이터를 다시 저장
-    with open(json_filename, 'w', encoding='utf-8') as f:
-        json.dump(existing_data, f, ensure_ascii=False, indent=2)
 
 def to_excel(json_filename):
     df = pd.read_json(json_filename)
@@ -215,27 +139,4 @@ def bbox_to_location(bbox, image_height, image_width):
     # 기본값 반환 (찾지 못한 경우)
     return '4'  # 'MC' (Middle Center)
 
-def check_all_issues_json(json_filename, test_image_list):
-    if not os.path.isfile(json_filename):
-        return test_image_list
-    
-    with open(json_filename, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-    
-    if data == [] or len(data) == 0:
-        return test_image_list
-    
-    for item in data:
-        # filename = os.path.basename(item['filename'])
-        # print(filename)
-        if item['filename'] in test_image_list:
-            test_image_list.remove(item['filename'])
 
-    return test_image_list
-
-def check_valid_image(image_path: str):
-    try:
-        img = cv2.imread(image_path)
-        return True
-    except Exception as e:
-        return False

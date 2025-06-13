@@ -2,7 +2,8 @@ from tqdm import tqdm
 import pandas as pd
 from datetime import datetime
 from src.layout import Layout
-from src.utils.utils import check_size, init_process, move_to_not_processed, save_results, check_valid_issues, unprocessed_issues, to_excel, check_all_issues_json, check_xml, check_valid_image
+from src.utils.utils import init_process, save_results, to_excel
+from src.utils.exceptions import move_to_not_processed, check_xml, check_size, check_valid_image, check_all_issues_json, check_valid_issues
 from src.utils.model import ResultModel
 from src.gemini import Gemini, IssueProcessor
 from src.utils.bucket import test_image_list, upload_to_bucket, set_api_key
@@ -23,7 +24,6 @@ exception = []
 for test_image in tqdm(valid_test_list):
     result = []
     try:
-        # 1. XML 체크 (최우선)
         if not check_xml(test_image):
             issue = ResultModel(
                 filename=test_image,
@@ -43,7 +43,6 @@ for test_image in tqdm(valid_test_list):
             save_results(result, json_filename)
             continue
 
-        # 2. 이미지 유효성 체크
         if not check_valid_image(test_image):
             issue = ResultModel(
                 filename=test_image,
@@ -63,7 +62,6 @@ for test_image in tqdm(valid_test_list):
             save_results(result, json_filename)
             continue
 
-        # 3. 이미지 크기 체크
         if not check_size(test_image):
             result.append(move_to_not_processed(test_image).model_dump())
             save_results(result, json_filename)
