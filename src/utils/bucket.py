@@ -97,7 +97,7 @@ def set_api_key():
     
     # 인스턴스 번호에 따라 시작 인덱스 계산 (각 인스턴스마다 3개씩 할당)
     # 할당량 문제가 현재는 없으므로 1개만 가져오고 3개를 복사하겟음
-    start_index = int(instance_num) * 3
+    start_index = (int(instance_num)-10) * 3
     end_index = int(start_index) + 3  # 3개를 가져오기 위해 +3
     
     # 할당된 3개의 키 추출
