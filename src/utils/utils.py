@@ -120,8 +120,22 @@ def move_to_not_processed(test_image: str):
 
 def save_results(all_results, filename):
     """결과를 JSON 파일에 저장"""
+    # 기존 데이터 읽기
+    try:
+        with open(filename, 'r', encoding='utf-8') as f:
+            existing_data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        existing_data = []
+    
+    # 새로운 데이터 추가
+    if isinstance(existing_data, list):
+        existing_data.extend(all_results)
+    else:
+        existing_data = all_results
+    
+    # 전체 데이터를 다시 저장
     with open(filename, 'w', encoding='utf-8') as f:
-        json.dump(all_results, f, ensure_ascii=False, indent=2)
+        json.dump(existing_data, f, ensure_ascii=False, indent=2)
 
 def check_valid_issues(issues):
     flag = False
@@ -212,8 +226,16 @@ def check_all_issues_json(json_filename, test_image_list):
         return test_image_list
     
     for item in data:
-        filename = os.path.basename(item['filename'])
-        if filename in test_image_list:
-            test_image_list.remove(filename)
+        # filename = os.path.basename(item['filename'])
+        # print(filename)
+        if item['filename'] in test_image_list:
+            test_image_list.remove(item['filename'])
 
     return test_image_list
+
+def check_valid_image(image_path: str):
+    try:
+        img = cv2.imread(image_path)
+        return True
+    except Exception as e:
+        return False

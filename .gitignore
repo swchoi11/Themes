@@ -17,3 +17,4 @@ __pycache__/
 *.xml
 result-0605.json
 service_account.json
+/mnt

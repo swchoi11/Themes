@@ -2,13 +2,14 @@ from tqdm import tqdm
 import pandas as pd
 from datetime import datetime
 from src.layout import Layout
-from src.utils.utils import check_size, init_process, move_to_not_processed, save_results, check_valid_issues, unprocessed_issues, to_excel, check_all_issues_json, check_xml
+from src.utils.utils import check_size, init_process, move_to_not_processed, save_results, check_valid_issues, unprocessed_issues, to_excel, check_all_issues_json, check_xml, check_valid_image
 from src.utils.model import ResultModel
 from src.gemini import Gemini, IssueProcessor
 from src.utils.bucket import test_image_list, upload_to_bucket, set_api_key
+import os
 
 # 0. 데이터 준비
-# set_api_key()
+set_api_key()
 
 test_image_list = test_image_list()
 
@@ -16,48 +17,65 @@ json_filename = init_process()
 json_filename = f'./output/jsons/all_issues/{json_filename}'
 
 valid_test_list = check_all_issues_json(json_filename, test_image_list)
-
      
-result = []
 exception = []
 
 for test_image in tqdm(valid_test_list):
-# for test_image in tqdm(glob.glob('./resource/test/*.png')):
-    
+    result = []
     try:
+        # 1. XML 체크 (최우선)
         if not check_xml(test_image):
             issue = ResultModel(
                 filename=test_image,
-                issue_type="no xml",
+                issue_type="no_xml",
                 component_id=0,
                 ui_component_id="",
                 ui_component_type="",
-                score="5",
+                score="0",
                 location_id="",
                 location_type="",
-                bbox=[],
+                bbox=[1,1,1,1],
                 description_id="",
                 description_type="",
                 description="xml 파일이 없습니다."
             )
             result.append(issue.model_dump())
+            save_results(result, json_filename)
             continue
 
-        
-    #    이미지 크기 확인
+        # 2. 이미지 유효성 체크
+        if not check_valid_image(test_image):
+            issue = ResultModel(
+                filename=test_image,
+                issue_type="invalid_image",
+                component_id=0,
+                ui_component_id="",
+                ui_component_type="",
+                score="0",
+                location_id="",
+                location_type="",
+                bbox=[1,1,1,1],
+                description_id="",
+                description_type="",
+                description="이미지를 읽을 수 없습니다."
+            )
+            result.append(issue.model_dump())
+            save_results(result, json_filename)
+            continue
+
+        # 3. 이미지 크기 체크
         if not check_size(test_image):
             result.append(move_to_not_processed(test_image).model_dump())
+            save_results(result, json_filename)
             continue
         
-    #    2. layout check
+        # 4. layout check (기본 체크 모두 통과 후)
         layout = Layout(test_image)
         issues = layout.run_layout_check() 
         
-    #    3. gemini check
+        # 5. gemini check
         gemini = Gemini(test_image)
         issues.extend(gemini.layout_issues())
-
-
 
         if not check_valid_issues(issues):
             issues = [ResultModel(
@@ -81,13 +99,32 @@ for test_image in tqdm(valid_test_list):
                 result.append(issue.model_dump())
         
         save_results(result, json_filename)
+
     except Exception as e:
-        exception.append(test_image)
+        issue = {
+            "filename": test_image,
+            "exception": str(e),
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
+        exception.append(issue)
         continue
 
-df = pd.DataFrame(exception)
-df.to_csv(f'./output/exception-{datetime.now().strftime("%Y%m%d")}.csv', 
-          mode = 'a', index=False, header=False, encoding='utf-8-sig')
+    # 예외 데이터가 있는 경우에만 CSV 저장
+    if exception:
+        csv_filename = f'./output/exception-{datetime.now().strftime("%Y%m%d")}.csv'
+        
+        # DataFrame 생성
+        df = pd.DataFrame(exception)
+        
+        # 파일이 존재하는지 확인
+        file_exists = os.path.isfile(csv_filename)
+        
+        # CSV 저장 (헤더는 파일이 없을 때만 추가)
+        df.to_csv(csv_filename, 
+                 mode='a', 
+                 index=False, 
+                 header=not file_exists,
+                 encoding='utf-8-sig')
 
 # json 파일을 돌면서 제미나이 -> 최종 결과 산출
 to_excel(json_filename)

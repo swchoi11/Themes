@@ -14,7 +14,6 @@ logger = init_logger()
 load_dotenv()
 BUCKET_NAME = os.getenv('BUCKET_NAME')
 
-
 def test_image_list():
     image_list_file_path = glob.glob('./resource/vm*_image_list.csv')
 
@@ -95,15 +94,14 @@ def set_api_key():
         api_key_list = [api_key.strip() for api_key in api_key_list if api_key.strip()]
 
     instance_num = get_instance_num()
-    print(instance_num)
     
     # 인스턴스 번호에 따라 시작 인덱스 계산 (각 인스턴스마다 3개씩 할당)
     # 할당량 문제가 현재는 없으므로 1개만 가져오고 3개를 복사하겟음
-    start_index = int(instance_num)
-    # end_index = int(start_index) + 3  # 3개를 가져오기 위해 +3
+    start_index = int(instance_num) * 3
+    end_index = int(start_index) + 3  # 3개를 가져오기 위해 +3
     
     # 할당된 3개의 키 추출
-    instance_keys = [api_key_list[start_index]] * 3
+    instance_keys = api_key_list[start_index:end_index]
     # .env 파일에 API 키 저장
     env_content = []
     
@@ -122,7 +120,7 @@ def set_api_key():
     
     # 새로운 API 키들 추가
     for i, key in enumerate(instance_keys, 1):
-        env_content.append(f'API_KEY{i}={key}\n')
+        env_content.append(f'API_KEY{i} = "{key}"\n')
     
     # .env 파일에 쓰기
     with open(env_path, 'w', encoding='utf-8') as f:
