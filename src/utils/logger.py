@@ -1,8 +1,8 @@
-## logging
 import logging
-from colorlog import ColoredFormatter
 import time
 import functools
+from colorlog import ColoredFormatter
+from datetime import datetime
 
 APP_LOGGER_NAME = 'THEMES'
 
@@ -53,6 +53,13 @@ def init_logger(
     ch.setFormatter(formatter)
     ch.setLevel(log_level)
     logger.addHandler(ch)
+
+    # 파일 출력 설정
+    fh = logging.FileHandler(f'output/logs/log-{datetime.now().strftime("%Y-%m-%d")}.log')
+    fh.setFormatter(formatter)
+    fh.setLevel(log_level)
+    logger.addHandler(fh)
+
 
     return logger
 

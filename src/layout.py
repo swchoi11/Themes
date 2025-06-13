@@ -4,7 +4,7 @@ from src.issue.cutoff import Cutoff
 from src.utils.detect import Detect
 from src.utils.logger import init_logger
 from src.issue.visibility import Visibility
-from src.issue.alignment import Align, get_dial_alignment
+from src.issue.alignment import Align
 
 logger = init_logger()
 
@@ -35,14 +35,8 @@ class Layout:
             issues.extend(visibility.run_visibility_check())
             logger.info(f"visibility 검증 완료")
             
-        # 3-5. 전화버튼 정렬 검증 --> src/issue/alignment.py (미완성)
-        if 'android.widget.DialerButton' in classes:
-            # 만약 전화 버튼 컴포넌트가 있는 경우
-                # 3. 전화버튼이 정렬 안됨
-            get_dial_alignment(self.image_path)
-            logger.info(f"dial 정렬 검증 완료")
-        
-        # 3-3. 아이콘 잘림 이슈 검증 --> src/issue/cutoff.py
+
+        # 3-2. 아이콘 잘림 이슈 검증 --> src/issue/cutoff.py
         if 'android.widget.RadioButton' in classes:
             # 만약 라디오버튼 컴포넌트가 있는 경우
                 # 7. 아이콘의 가장자리가 잘려 보이지 않음
@@ -51,7 +45,7 @@ class Layout:
             logger.info(f"radio 검증 완료")
             
 
-        # 3-4. 동일 아이콘 검증 --> src/issue/icon.py(고도화 필요)
+        # 3-3. 동일 아이콘 검증 --> src/issue/icon.py(고도화 필요)
         icon = Icon(self.image_path)
         icon_issues = icon.run_icon_check()
         issues.extend(icon_issues)
@@ -62,7 +56,7 @@ class Layout:
             # 8. 완벽하게 동일한 아이콘이 있음
         logger.info("icon 검증 완료")
 
-        # 3-3. 정렬 이슈 검증 --> src/issue/alignment.py(고도화 필요)
+        # 3-4. 정렬 이슈 검증 --> src/issue/alignment.py(고도화 필요)
         align = Align(self.image_path)
         issues.extend(align.run_alignment_check())
         logger.info("alignment 검증 완료")

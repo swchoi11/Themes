@@ -334,7 +334,7 @@ class Visibility():
             else:
                 issue = ResultModel(
                     filename = self.image_path,
-                    issue_type = "visibility",
+                    issue_type = "normal_visibility",
                     component_id = 0,
                     ui_component_id = "",
                     ui_component_type = "",
@@ -343,7 +343,7 @@ class Visibility():
                     location_type = "",
                     bbox = [],
                     description_id = "0",
-                    description_type = "텍스트, 아이콘과 배경 간 대비가 낮아 가독성이 떨어짐",
+                    description_type = "정상입니다.",
                     description = ""
                 )
 

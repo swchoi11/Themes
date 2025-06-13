@@ -1,13 +1,13 @@
-from tqdm import tqdm
+import os
 import pandas as pd
+from tqdm import tqdm
 from datetime import datetime
 from src.layout import Layout
-from src.utils.utils import init_process, save_results, to_excel
-from src.utils.exceptions import move_to_not_processed, check_xml, check_size, check_valid_image, check_all_issues_json, check_valid_issues
 from src.utils.model import ResultModel
 from src.gemini import Gemini, IssueProcessor
+from src.utils.utils import init_process, save_results, to_excel
 from src.utils.bucket import test_image_list, upload_to_bucket, set_api_key
-import os
+from src.utils.exceptions import move_to_not_processed, check_xml, check_size, check_valid_image, check_all_issues_json, check_valid_issues
 
 # 0. 데이터 준비
 set_api_key()
@@ -85,7 +85,7 @@ for test_image in tqdm(valid_test_list):
                 score="5",
                 location_id="",
                 location_type="",
-                bbox=[],
+                bbox=[1,1,1,1],
                 description_id="",
                 description_type="",
                 description="문제가 없습니다."

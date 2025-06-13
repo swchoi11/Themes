@@ -74,7 +74,7 @@ class Cutoff:
         if not issues:
             issues = [ResultModel(
                 filename=self.image_path,
-                issue_type='cutoff',
+                issue_type='normal_cutoff',
                 component_id=0,
                 ui_component_id="",
                 ui_component_type="",
@@ -83,7 +83,7 @@ class Cutoff:
                 location_type="",
                 bbox=[],
                 description_id="7",
-                description_type="아이콘의 가장자리가 보이지 않음거나 잘려보임(이미지 제외)",
+                description_type="정상입니다.",
                 description="",
             )]
 

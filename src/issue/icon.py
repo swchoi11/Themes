@@ -138,7 +138,7 @@ class Icon:
                     logger.info(f"디폴트 이미지에서도 동일한 중복이 발견되어 정상으로 판정됨")
                     issue = ResultModel(
                         filename = self.image_path,
-                        issue_type='design',
+                        issue_type='normal_design',
                         component_id=0,
                         ui_component_id="",
                         ui_component_type="",
@@ -147,7 +147,7 @@ class Icon:
                         location_type="",
                         bbox=[],
                         description_id="8",
-                        description_type="역할이 다른 기능 요소에 동일한 아이콘 이미지로 중복 존재",
+                        description_type="정상입니다.",
                         description=""
                     )
                     issues.append(issue)

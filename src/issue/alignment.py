@@ -76,7 +76,7 @@ class Align:
         if not results:
             results = [ResultModel(
                 filename=self.image_path,
-                issue_type="alignment",
+                issue_type="normal_alignment",
                 component_id=0,
                 ui_component_id="",
                 ui_component_type="",
@@ -85,7 +85,7 @@ class Align:
                 location_type="",
                 bbox=[],
                 description_id="4",
-                description_type="컴포넌트 내부 요소들의 수직/수평 정렬이 균일하지 않음",
+                description_type="정상입니다.",
                 description=""
             )]
 
@@ -190,61 +190,61 @@ class Align:
             # 같은 bounds를 가진 다른 그룹이 있는지 확인
             duplicate_count = sum(1 for g in groups if g['bounds'] == bounds)
 
-# 다이얼러 전용 정렬 확인 함수 (기존 코드 유지)
-def get_dial_alignment(image_path: str):
-    """다이얼러 앱 전용 정렬 확인 함수"""
-    try:
-        from paddleocr import PaddleOCR
+# # 다이얼러 전용 정렬 확인 함수 (기존 코드 유지)
+# def get_dial_alignment(image_path: str):
+#     """다이얼러 앱 전용 정렬 확인 함수"""
+#     try:
+#         from paddleocr import PaddleOCR
         
-        ocr = PaddleOCR(
-            det_model_dir='./src/weights/en_PP-OCRv3_det_infer',
-            rec_model_dir='./src/weights/en_PP-OCRv3_rec_infer',
-            cls_model_dir='./src/weights/ch_ppocr_mobile_v2.0_cls_infer',
-            lang='en',
-            use_angle_cls=False,
-            use_gpu=False, 
-            show_log=False,
-        )
+#         ocr = PaddleOCR(
+#             det_model_dir='./src/weights/en_PP-OCRv3_det_infer',
+#             rec_model_dir='./src/weights/en_PP-OCRv3_rec_infer',
+#             cls_model_dir='./src/weights/ch_ppocr_mobile_v2.0_cls_infer',
+#             lang='en',
+#             use_angle_cls=False,
+#             use_gpu=False, 
+#             show_log=False,
+#         )
 
-        image = cv2.imread(image_path)
-        h, w = image.shape[:2]
+#         image = cv2.imread(image_path)
+#         h, w = image.shape[:2]
 
-        result = ocr.ocr(image_path)[0]
-        if not result:
-            return []
+#         result = ocr.ocr(image_path)[0]
+#         if not result:
+#             return []
 
-        # 3등분 기준 중심선
-        expected_centers = [
-            w * 1/6,  # 1열 (좌)
-            w * 3/6,  # 2열 (중앙)
-            w * 5/6   # 3열 (우)
-        ]
+#         # 3등분 기준 중심선
+#         expected_centers = [
+#             w * 1/6,  # 1열 (좌)
+#             w * 3/6,  # 2열 (중앙)
+#             w * 5/6   # 3열 (우)
+#         ]
 
-        threshold = 30  # 허용 편차(px)
-        misaligned = []
+#         threshold = 30  # 허용 편차(px)
+#         misaligned = []
 
-        for line in result:
-            box, (text, conf) = line
-            x_coords = [pt[0] for pt in box]
-            x_center = (min(x_coords) + max(x_coords)) / 2
+#         for line in result:
+#             box, (text, conf) = line
+#             x_coords = [pt[0] for pt in box]
+#             x_center = (min(x_coords) + max(x_coords)) / 2
 
-            # 어떤 열에 해당하는지 추정
-            col_idx = np.argmin([abs(x_center - cx) for cx in expected_centers])
-            offset = abs(x_center - expected_centers[col_idx])
+#             # 어떤 열에 해당하는지 추정
+#             col_idx = np.argmin([abs(x_center - cx) for cx in expected_centers])
+#             offset = abs(x_center - expected_centers[col_idx])
 
-            if offset > threshold:
-                misaligned.append({
-                    "text": text,
-                    "x_center": x_center,
-                    "expected": expected_centers[col_idx],
-                    "offset": offset
-                })
+#             if offset > threshold:
+#                 misaligned.append({
+#                     "text": text,
+#                     "x_center": x_center,
+#                     "expected": expected_centers[col_idx],
+#                     "offset": offset
+#                 })
 
-        return misaligned
+#         return misaligned
         
-    except ImportError:
-        print("PaddleOCR를 사용할 수 없습니다. 다이얼러 정렬 확인을 건너뜁니다.")
-        return []
-    except Exception as e:
-        print(f"다이얼러 정렬 확인 중 오류: {e}")
-        return []
+#     except ImportError:
+#         print("PaddleOCR를 사용할 수 없습니다. 다이얼러 정렬 확인을 건너뜁니다.")
+#         return []
+#     except Exception as e:
+#         print(f"다이얼러 정렬 확인 중 오류: {e}")
+#         return []
