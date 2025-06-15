@@ -20,8 +20,8 @@ logger = init_logger()
 class Gemini:
     def __init__(self):
         load_dotenv()
-        self.client = genai.Client(api_key=os.getenv('API_KEY31'))
-        self.model = 'gemini-2.0-flash'  #'gemini-2.5-flash-preview-05-20' | 'gemini-2.5-pro-preview-06-05'
+        self.client = genai.Client(api_key=os.getenv('API_KEY'))
+        self.model = 'gemini-2.5-flash-preview-05-20'  #'gemini-2.5-flash-preview-05-20' | 'gemini-2.5-pro-preview-06-05'
         self.max_retries = 10
         self.initial_delay = 1
 
@@ -63,7 +63,7 @@ class Gemini:
 
     @retry_with_delay
     @timefn
-    def _call_gemini_image_text(self, prompt, image, text, model) -> Issue:
+    def _call_gemini_image_text(self, prompt, image, text, model=None) -> Issue:
         target_image = self.client.files.upload(file=image)
         # logger.info(f"image 업로드 완료: {image}")
 
