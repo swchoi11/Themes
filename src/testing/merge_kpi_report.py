@@ -18,7 +18,6 @@ def check_image_processing_status(root_dir='./output'):
     resource_dir = os.path.join(os.path.dirname(root_dir), 'resource')
     excel_dir = os.path.join(root_dir, 'excels', 'final_issue')
 
-
     print(f"작업 디렉토리: {os.path.abspath(root_dir)}")
     print(f"   - 처리된 이미지 폴더: {images_dir}")
     print(f"   - 미처리 이미지 폴더: {not_processed_dir}")
@@ -360,23 +359,47 @@ def extract_fail_codes(filename):
     if pd.isna(filename):
         return pd.Series([None, None, None])
 
-    # Fail_[숫자]_ 패턴 찾기
-    match = re.search(r'Fail_\[(\d+)\]_', str(filename))
+    # 대괄호 안의 내용을 모두 찾기 (숫자와 문자 모두 포함)
+    matches = re.findall(r'\[([^\]]+)\]', str(filename))
 
-    if match:
-        code = match.group(1)  # 숫자 부분 추출
+    if not matches:
+        return pd.Series([None, None, None])
 
-        # 3자리로 패딩 (예: 21 -> 021)
-        code = code.zfill(3)
+    # 각 매치된 값을 처리
+    results = []
+    for match in matches:
+        # 숫자만 있는 경우
+        if match.isdigit():
+            code = match.zfill(3)  # 3자리로 패딩
+            itemname = int(code[0])
+            location = int(code[1])
+            desc = int(code[2])
+            results.append([itemname, location, desc])
 
-        # 각 자리수 분리
-        itemname = int(code[0])  # 첫 번째 자리: ItemName
-        location = int(code[1])  # 두 번째 자리: Location
-        desc = int(code[2])  # 세 번째 자리: Desc
+        # 문자가 포함된 경우 - 각 문자/숫자를 개별 처리
+        else:
+            # 문자열을 문자 단위로 분리하여 처리
+            chars = list(match)
 
-        return pd.Series([itemname, location, desc])
+            # 3개 값으로 만들기 (부족하면 0으로 채우고, 넘치면 처음 3개만)
+            while len(chars) < 3:
+                chars.append('0')
+            chars = chars[:3]
+
+            # 각 문자를 숫자로 변환 (문자는 ASCII 값 또는 특별한 규칙 적용)
+            processed_chars = []
+            for char in chars:
+                if char.isdigit():
+                    processed_chars.append(int(char))
+                else:
+                    processed_chars.append(ord(char.lower()) - ord('a') + 1)
+
+            results.append(processed_chars)
+
+    # 첫 번째 매치된 결과 반환
+    if results:
+        return pd.Series(results[0])
     else:
-        # Fail_ 패턴이 없으면 모두 None
         return pd.Series([None, None, None])
 
 
@@ -432,13 +455,14 @@ if __name__ == "__main__":
     merged_result['bbox'] = merged_result['bbox'].replace('[1.0, 1.0, 1.0, 1.0]', '[]')
 
     merged_result['filename'] = merged_result['filename'].apply(find_fail_version)
+    merged_result = merged_result[merged_result['issue_type']!='no_xml']
     merged_result.to_excel(f'{BASE_ROOTDIR}/merged_results.xlsx')
 
     merged_result[['GT_ItemName', 'GT_Location', 'GT_Desc']] = merged_result['filename'].apply(extract_fail_codes)
-    merged_result['GroundTrue'] = merged_result['GT_Desc'].isna()
-    merged_result['Predict'] = merged_result['description_id'].isna()
+    merged_result['GroundTrue'] = merged_result['GT_Desc'].notna()
+    merged_result['Predict'] = merged_result['description_id'].notna()
 
-    merged_result['MATCH'] = merged_result['GroundTrue'] & merged_result['Predict']
+    merged_result['MATCH'] = merged_result['GroundTrue'] == merged_result['Predict']
 
     merged_result['DescMatch'] = merged_result.apply(compare_desc_match, axis=1)
     merged_result['LocationMatch'] = merged_result.apply(compare_location_match, axis=1)
