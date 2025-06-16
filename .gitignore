@@ -1,4 +1,4 @@
-.env
+*/.env
 /weights/*
 /output/*/*
 /resource/*
@@ -18,3 +18,6 @@ __pycache__/
 result-0605.json
 service_account.json
 /mnt
+*.log
+old_api_key.txt
+output/
