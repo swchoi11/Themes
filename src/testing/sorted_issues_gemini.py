@@ -2,7 +2,7 @@ import os
 import json
 import ast
 import cv2
-import tempfile
+
 from typing import List
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -93,7 +93,7 @@ class BoundingBoxVisualizer:
                 ax.add_patch(rect)
 
                 # 텍스트 추가 (인덱스 포함)
-                ax.text(10, 10 + idx * 30, f'{idx}: {issue_type.upper()}',
+                ax.text(10, 10 + idx * 30, f'BOX {idx + 1:02d}: {issue_type.upper()}',
                         ha='left', va='top',
                         fontsize=12, fontweight='bold', color='white',
                         bbox=dict(boxstyle="square,pad=0.3", facecolor=color, alpha=0.9))
@@ -114,27 +114,25 @@ class BoundingBoxVisualizer:
                     ax.add_patch(rect)
 
                     # 텍스트 추가 (인덱스 포함)
-                    label = f"{idx}: {issue_type.upper()}"
+                    label = f"BOX {idx + 1:02d}: {issue_type.upper()}"
                     ax.text(x1, y1, label,
                             ha='left', va='bottom',
                             fontsize=10, fontweight='bold', color='white',
                             bbox=dict(boxstyle="square,pad=0.1", facecolor=color, alpha=0.9))
 
         # 임시 파일에 저장
-        temp_file = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
-        temp_path = temp_file.name
-        temp_file.close()
-
+        os.makedirs('./temp', exist_ok=True)
+        temp_path = f'./temp/{filename}'
         plt.savefig(temp_path, dpi=dpi, bbox_inches='tight',
                     pad_inches=0, facecolor='white', edgecolor='none')
         plt.close()
-
         return temp_path
 
 
 def _sort_issues_by_file(image_path: str, issues: List[dict]) -> dict:
     """단일 파일의 이슈들을 정렬 - 2개 이상의 이슈가 있을 때 Gemini가 가장 중요한 것 선택"""
 
+    issues = [issue for issue in issues if issue.get('issue_type') != 'normal']
     # 바운딩 박스 시각화 객체 생성
     visualizer = BoundingBoxVisualizer()
 
@@ -154,25 +152,22 @@ def _sort_issues_by_file(image_path: str, issues: List[dict]) -> dict:
     # 바운딩 박스 정보 생성
     box_info = []
     for idx, issue in enumerate(issues):
-        ui_component = issue.get('ui_component', 'Unknown Component')
-        box_info.append(f"- BOX {idx + 1:02d}: {ui_component}")
+        box_info.append(f"BOX {idx + 1:02d}")
 
     # 동적 프롬프트 생성
         # 바운딩 박스 정보 생성
         box_info = []
         for idx, issue in enumerate(issues):
-            ui_component = issue.get('ui_component', 'Unknown Component')
             issue_type = issue.get('issue_type', 'unknown')
-            box_info.append(f"- BOX {idx + 1:02d}: {ui_component} ({issue_type})")
+            box_info.append(f"BOX {idx + 1:02d}: ({issue_type})")
 
-        # 개선된 프롬프트 생성
         prompt = f"""
         안드로이드 애플리케이션의 UI 품질 검사를 수행하고 있습니다.
         UI 스크린샷을 분석하여 UI 문제점을 검토하고 보고하는 작업을 담당하고 있습니다.
     
-        이미지에서 문제가 예상되는 부분은 **색상이 있는 테두리 박스**로 표시되어 있습니다.
-        현재 스크린샷에는 총 {len(issues)}개의 바운딩 박스가 있습니다.
-        각 바운딩 박스 위에는 "BOX 01", "BOX 02" 등의 번호가 표시되어 있습니다.
+        이미지에서 문제가 예상 되는 부분은 **색상이 있는 테두리 박스**로 표시 되어 있습니다.
+        현재 이미지(스크린 샷)에는 총 {len(issues)}개의 바운딩 박스가 있습니다.
+        각 바운딩 박스 위에는 "BOX 01: cutoff", "BOX 02: design" 등의 번호가 표시되어 있습니다.
     
         **검토 대상 이슈 유형:**
         {chr(10).join(f"- **{issue_type.upper()}**: {issue_descriptions.get(issue_type, '일반적인 UI 문제')}" for issue_type in issue_types)}
@@ -205,14 +200,13 @@ def _sort_issues_by_file(image_path: str, issues: List[dict]) -> dict:
 
     try:
         # Gemini API 호출 (바운딩 박스가 그려진 이미지 사용)
-        result = gemini._call_gemini_image_text(prompt, image_with_bbox, issue_text, model='')
+        result = gemini._call_gemini_image_text(prompt, image_with_bbox, issue_text)
 
         # 원본 이슈 중에서 가장 우선순위가 높은 것을 선택
         # (Gemini의 응답을 기반으로 최종 이슈 결정)
         # 여기서는 첫 번째 이슈를 기본으로 하고 AI 설명만 업데이트
-        selected_issue = issues[0].copy()  # 첫 번째 이슈를 기본으로
+        selected_issue = dict(result)
         selected_issue['description'] = result.ai_description   ## result.description
-        selected_issue['score'] = result.score
 
         return selected_issue
 
@@ -220,21 +214,13 @@ def _sort_issues_by_file(image_path: str, issues: List[dict]) -> dict:
         print(f"Gemini 검증 중 오류 발생: {e}")
         # 오류 발생 시 첫 번째 이슈 반환
         return issues[0]
-    finally:
-        # 임시 파일 정리
-        if image_with_bbox != image_path and os.path.exists(image_with_bbox):
-            try:
-                os.unlink(image_with_bbox)
-            except:
-                pass
 
 
 if __name__ == "__main__":
 
-    BASE_DIR = '../../eval'
     dirpath = '../../resource/image'
-    filepath = './dataset.xlsx'
-    output_file = f'{BASE_DIR}/{gemini.model}.csv'
+    filepath = './resource/dataset.xlsx'
+    output_file = f'./output/{gemini.model}.csv'
 
     # 파일 존재 확인
     if not os.path.exists(filepath):
@@ -242,20 +228,32 @@ if __name__ == "__main__":
         exit(1)
 
     df = pd.read_excel(filepath)
+    df = df[~df['issue_type'].isin(['not_processed', 'no_xml'])]
     df['filename'] = df.apply(
         lambda row: str(row['label']) + os.path.basename(row['filename'])
         if pd.notna(row['label']) and row['label'] != ''
         else os.path.basename(row['filename']),
         axis=1
     )
+
+    df['issue_type'] = df['issue_type'].apply(
+        lambda x: 'normal' if str(x).startswith('normal_') else str(x)
+    )
+
     for filename, group in df.groupby('filename'):
         image_path = os.path.join(dirpath, filename)
+
         if not os.path.isfile(image_path):
             print(f"not found: {image_path}")
             continue
-        issues = group.to_dict('records')
 
-        selected_issue = _sort_issues_by_file(image_path, issues)
+        issues = group.to_dict('records')
+        if (group['issue_type'] == 'normal').all():
+            # 모두 normal이면 첫 번째 이슈를 선택
+            selected_issue = issues[0]
+        else:
+            selected_issue = _sort_issues_by_file(image_path, issues)
+
         if selected_issue:
             # CSV는 mode='a'가 잘 작동함
             pd.DataFrame([selected_issue]).to_csv(
