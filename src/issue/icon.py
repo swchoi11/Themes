@@ -132,8 +132,11 @@ class Icon:
                     issues.append(issue)
                     cv2.rectangle(self.image, (icon['bounds'][0], icon['bounds'][1]), (icon['bounds'][2], icon['bounds'][3]), (0, 255, 255), 2)
                     cv2.putText(self.image, f"duplicate", (icon['bounds'][0], icon['bounds'][1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 2)
-                        
                     cv2.imwrite(self.output_path, self.image)
+                    
+                    # with open('icontestimages/result.txt', 'a') as f:
+                    #     f.write(f"{issue.model_dump_json()}\n")
+
                 else:
                     logger.info(f"디폴트 이미지에서도 동일한 중복이 발견되어 정상으로 판정됨")
                     issue = ResultModel(

@@ -21,3 +21,4 @@ service_account.json
 *.log
 old_api_key.txt
 output/
+icontestimages/

@@ -8,6 +8,7 @@ from src.gemini import Gemini, IssueProcessor
 from src.utils.utils import init_process, save_results, to_excel
 from src.utils.bucket import test_image_list, upload_to_bucket, set_api_key
 from src.utils.exceptions import move_to_not_processed, check_xml, check_size, check_valid_image, check_all_issues_json, check_valid_issues
+from src.utils.postproc import run_image_dump
 
 # 0. 데이터 준비
 set_api_key()
@@ -130,5 +131,7 @@ to_excel(json_filename)
 processor = IssueProcessor()
 output_path = processor.sort_issues(json_filename)
 ## [1,1,1,1] -> [] 로 변경하는 부분 필요함
-to_excel(output_path)
-upload_to_bucket(json_filename)
+final_output_path = to_excel(output_path)
+upload_to_bucket(final_output_path)
+print(final_output_path)
+run_image_dump(final_output_path, './mnt/resource', './output/images/final_issues/')

@@ -104,6 +104,7 @@ def to_excel(json_filename):
     df = pd.read_json(json_filename)
     output_path = json_filename.replace('.json', '.xlsx').replace('jsons','excels') 
     df.to_excel(output_path, index=False)
+    return output_path
 
 
 def bbox_to_location(bbox, image_height, image_width):
