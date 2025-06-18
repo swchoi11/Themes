@@ -53,20 +53,19 @@ def upload_to_bucket(json_filename: str):
         filename = os.path.basename(json_filename).replace('.json', '')
     
         result_files = [
-            f'output/jsons/all_issues/{filename}.json',
-            f'output/jsons/final_issue/{filename}.json',
             f'output/excels/all_issues/{filename}.xlsx',
             f'output/excels/final_issue/{filename}.xlsx',
+            f'output/{filename}_normal.txt'
             ]        
         
-        result_files.extend(glob.glob('output/images/*.png'))
-        result_files.extend(glob.glob('output/images/not_processed/*.png'))
+        # result_files.extend(glob.glob('output/images/*.png'))
+        # result_files.extend(glob.glob('output/images/not_processed/*.png'))
 
         INSTANCE_NUM = get_instance_num()
 
         for result_file in result_files:
             input_file = result_file.replace('output/', '')
-            blob = bucket.blob(f"result/vm{INSTANCE_NUM}/{input_file}")
+            blob = bucket.blob(f"output/themes/vm_{INSTANCE_NUM}/{input_file}")
             blob.upload_from_filename(result_file)
 
     except Exception as e:

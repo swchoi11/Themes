@@ -133,3 +133,5 @@ xlsx_filename = to_excel(json_filename)
 processor = IssueProcessor()
 output_path = processor.sort_issues(json_filename)
 final_output_path = to_excel(output_path)
+
+upload_to_bucket(final_output_path)

@@ -138,7 +138,7 @@ class GeminiClient:
                 "response_schema": Result.model_json_schema(),
             }
         )
-        print(response.text)
+        # print(response.text)
         result = Result.model_validate(json.loads(response.text))
         if result.score == "":
             result.score = "5"
@@ -362,7 +362,7 @@ class IssueProcessor:
         
         print(f"최종 {len(final_issues)}개 이슈가 {output_file_name}에 저장되었습니다.")
 
-        normal_file_name = json_filename.replace('all_issues/', '').replace('jsons/','').replace('.json', '_normal.txt')
+        normal_file_name = json_filename.replace('all_issues/', '').replace('jsons/','').replace('.json', '-normal.txt')
         with open(normal_file_name, 'w', encoding='utf-8') as f:
             pd.DataFrame(normal_issues).to_csv(f, 
                                         mode='a',
