@@ -73,7 +73,7 @@ def upload_to_bucket(json_filename: str):
         return False
     
 def get_instance_num():
-    image_list_file_path = glob.glob('./resource/vm*_image_list.csv')
+    image_list_file_path = glob.glob('./util_files/vm*_image_list.csv')
 
     if len(image_list_file_path) > 1:
         logger.info("이미지 파일이 유일하지 않습니다.")
