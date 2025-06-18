@@ -55,7 +55,7 @@ def upload_to_bucket(json_filename: str):
         result_files = [
             f'output/excels/all_issues/{filename}',
             f'output/excels/final_issue/{filename}',
-            f'output/{filename.replace("xlsx", "")}_normal.txt'
+            f'output/{filename.replace(".xlsx", "")}-normal.txt'
             ]        
         
         # result_files.extend(glob.glob('output/images/*.png'))
