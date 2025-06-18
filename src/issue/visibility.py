@@ -240,10 +240,10 @@ class Visibility():
     def calculate_contrast(self, colors):
         if len(colors) < 2:
             #print("색상이 2개 미만이므로 대비 계산 불가")
-            return False
+            return False, 0.0  # 대비 계산 불가능한 경우 False와 0.0 반환
                 
         max_contrast = 0
-        contrast_results = []
+        has_sufficient_contrast = False
         
         for i in range(len(colors)):
             for j in range(i+1, len(colors)):
@@ -255,13 +255,13 @@ class Visibility():
 
                 contrast = (lighter + 0.05) / (darker + 0.05)
                 max_contrast = max(max_contrast, contrast)
-                                
                 # WCAG AA 기준 (4.5:1) 또는 더 관대한 기준 (3:1) 사용
-                if contrast >= 2.0:
+                # print(contrast)
+                if contrast >= 4.5:
                     # #print(f"충분한 대비 발견! 대비값: {contrast:.2f}")
-                    contrast_results.append(True)
+                    has_sufficient_contrast = True
 
-        return any(contrast_results), max_contrast
+        return has_sufficient_contrast, max_contrast
     
     def run_visibility_check(self):        
         try:
@@ -281,11 +281,15 @@ class Visibility():
                     continue
                 
                 # 대비 검사
-                contrast_result, max_contrast =self.calculate_contrast(colors)
-
-                if not contrast_result:
+                has_sufficient_contrast, max_contrast = self.calculate_contrast(colors)
+                
+                # 충분한 대비가 없는 경우에만 이슈 생성
+                if not has_sufficient_contrast:
                     try:
                         resource_id = component.get('resource_id', 'unknown')
+                        location_id = bbox_to_location(component['bounds'], self.img.shape[0], self.img.shape[1])
+                        location_type = EvalKPI.LOCATION[location_id]
+                        
                         issue = ResultModel(
                             filename=self.image_path,
                             issue_type = "visibility",
@@ -293,62 +297,32 @@ class Visibility():
                             ui_component_id = "5",
                             ui_component_type = "TextView",
                             score = "",
-                            location_id = "",
-                            location_type = "",
+                            location_id = location_id,
+                            location_type = location_type,
                             bbox=component['bounds'],
                             description_id = "0",
                             description_type = "텍스트, 아이콘과 배경 간 대비가 낮아 가독성이 떨어짐",
-                            description=f"{component.get('type', 'Unknown')}, {resource_id}에서 가독성 이슈 발생 - 색상 대비 부족:{max_contrast}"
+                            description=f"{component.get('type', 'Unknown')}, {resource_id}에서 가독성 이슈 발생 - 색상 대비 부족:{max_contrast:.2f}"
                         )
                         issues.append(issue)
                     except Exception as e:
                         logger.error(f"이슈 생성 중 오류: {e}")
                         logger.error(f"컴포넌트 데이터: {component}")
             
-            # 가장 낮은 대비 값을 가지는 이슈를 저장
+            # 모든 이슈가 있는 컴포넌트들을 이미지에 표시
             if issues:
-                min_contrast = min(issues, key=lambda x: x.description.split(":")[-1])
-                
-                
-                cv2.rectangle(self.img, (min_contrast.issue_location[0], min_contrast.issue_location[1]), (min_contrast.issue_location[2], min_contrast.issue_location[3]), (0, 255, 0), 2)
-                cv2.putText(self.img, f"contrast: {min_contrast.issue_description.split(':')[-1]}", (min_contrast.issue_location[0], min_contrast.issue_location[1]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
-                cv2.imwrite(self.output_path, self.img)
-                
-                location_id = bbox_to_location(min_contrast.bbox, self.img.shape[0], self.img.shape[1])
-                location_type = EvalKPI.LOCATION[location_id]
-
-                issue = ResultModel(
-                    filename = self.image_path,
-                    issue_type = "visibility",
-                    component_id = min_contrast.component_id,
-                    ui_component_id = "",
-                    ui_component_type = min_contrast.ui_component_type,
-                    score = "",
-                    location_id = "",
-                    location_type = "",
-                    bbox = min_contrast.bbox,
-                    description_id = "0",
-                    description_type = "텍스트, 아이콘과 배경 간 대비가 낮아 가독성이 떨어짐",
-                    description = min_contrast.description
-                )
-            else:
-                issue = ResultModel(
-                    filename = self.image_path,
-                    issue_type = "normal_visibility",
-                    component_id = 0,
-                    ui_component_id = "",
-                    ui_component_type = "",
-                    score = "",
-                    location_id = "",
-                    location_type = "",
-                    bbox = [],
-                    description_id = "0",
-                    description_type = "정상입니다.",
-                    description = ""
-                )
-
-            return [issue]
-            # return issues
+                try:
+                    for issue in issues:
+                        x1, y1, x2, y2 = issue.bbox
+                        cv2.rectangle(self.img, (int(x1), int(y1)), (int(x2), int(y2)), (0, 255, 0), 2)
+                        contrast_text = f"contrast: {issue.description.split(':')[-1]}"
+                        cv2.putText(self.img, contrast_text, (int(x1), int(y1)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 2)
+                    
+                    cv2.imwrite(self.output_path, self.img)
+                except Exception as e:
+                    logger.error(f"이미지 표시 중 오류: {e}")
+            
+            return issues
         except Exception as e:
             #print(f"가독성 검사 중 오류 발생: {e}")
             return []

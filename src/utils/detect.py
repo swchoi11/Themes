@@ -59,9 +59,18 @@ class Detect:
     def _filter_button(self):
         button_classes = [
         'android.widget.Button',
-        'android.widget.ImageButton', 
+        'android.widget.ImageButton',
+        'android.widget.ToggleButton',
+        'android.widget.Switch',
         'android.widget.RadioButton',
-        'android.widget.CheckBox'
+        'android.widget.CheckBox',
+        'android.widget.Spinner',
+        'android.widget.AutoCompleteTextView',
+        'android.widget.MultiAutoCompleteTextView',
+        'android.widget.MultiSelectListPreference',
+        'android.widget.ListPreference',
+        'android.widget.SeekBar',
+        'android.widget.RatingBar',
         ]
         components = self.get_class_components(button_classes)
         return components
@@ -72,6 +81,13 @@ class Detect:
         'android.widget.EditText',
         'android.widget.Button',
         'android.widget.ImageButton', 
+        'android.widget.ToggleButton',
+        'android.widget.ImageView',
+        'android.view.View',
+        'android.widget.AutoCompleteTextView',
+        'android.widget.MultiAutoCompleteTextView',
+        'android.widget.RadioButton',
+        'android.widget.CheckBox',
         ]
         components = self.get_class_components(classes)
         return components

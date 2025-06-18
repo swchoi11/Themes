@@ -23,7 +23,9 @@ def check_size(image_path: str):
 def check_valid_issues(issues):
     flag = False
     for issue in issues:
-        if issue.bbox != []:
+        if issue.score == "":
+            issue.score = "5"
+        if issue.bbox != [] or int(issue.score) <= 4:
             flag = True
             break
     return flag

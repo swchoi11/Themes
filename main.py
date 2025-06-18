@@ -9,7 +9,7 @@ from src.utils.utils import init_process, save_results, to_excel
 from src.utils.bucket import test_image_list, upload_to_bucket, set_api_key
 from src.utils.exceptions import move_to_not_processed, check_xml, check_size, check_valid_image, check_all_issues_json, check_valid_issues
 from src.utils.postproc import run_image_dump
-
+import glob
 # 0. 데이터 준비
 set_api_key()
 
@@ -18,8 +18,8 @@ test_image_list = test_image_list()
 json_filename = init_process()
 json_filename = f'./output/jsons/all_issues/{json_filename}'
 
-valid_test_list = check_all_issues_json(json_filename, test_image_list)
-     
+# valid_test_list = check_all_issues_json(json_filename, test_image_list)
+valid_test_list = glob.glob('./failimages/*.png')
 exception = []
 
 for test_image in tqdm(valid_test_list):
@@ -132,6 +132,6 @@ processor = IssueProcessor()
 output_path = processor.sort_issues(json_filename)
 ## [1,1,1,1] -> [] 로 변경하는 부분 필요함
 final_output_path = to_excel(output_path)
-upload_to_bucket(final_output_path)
-print(final_output_path)
-run_image_dump(final_output_path, './mnt/resource', './output/images/final_issues/')
+# upload_to_bucket(final_output_path)
+# print(final_output_path)
+# run_image_dump(final_output_path, './mnt/resource', './output/images/final_issues/')
