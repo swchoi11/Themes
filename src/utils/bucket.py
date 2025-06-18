@@ -92,7 +92,6 @@ def set_api_key():
         api_key_list = file.readlines()
         api_key_list = [api_key.strip() for api_key in api_key_list if api_key.strip()]
 
-    download_file_from_bucket(f'image_list/vm{instance_num}_image_list.csv', './util_files/vm{instance_num}_image_list.csv')
     instance_num = get_instance_num()
     
     # 인스턴스 번호에 따라 시작 인덱스 계산 (각 인스턴스마다 3개씩 할당)
