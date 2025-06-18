@@ -15,7 +15,7 @@ load_dotenv()
 BUCKET_NAME = os.getenv('BUCKET_NAME')
 
 def test_image_list():
-    image_list_file_path = glob.glob('./resource/vm*_image_list.csv')
+    image_list_file_path = glob.glob('./util_files/vm*_image_list.csv')
 
     if len(image_list_file_path) > 1:
         logger.info("이미지 파일이 유일하지 않습니다.")
@@ -126,5 +126,7 @@ def set_api_key():
         f.writelines(env_content)
     
     logger.info(f"인스턴스 {instance_num}에 API 키 {len(instance_keys)}개 설정 완료")
+
+    download_file_from_bucket(f'image_list/vm{instance_num}_image_list.csv', './util_files/vm{instance_num}_image_list.csv')
     
     return instance_keys
