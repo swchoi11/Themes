@@ -8,8 +8,7 @@ from src.gemini import Gemini, IssueProcessor
 from src.utils.utils import init_process, save_results, to_excel
 from src.utils.bucket import test_image_list, upload_to_bucket, set_api_key
 from src.utils.exceptions import move_to_not_processed, check_xml, check_size, check_valid_image, check_all_issues_json, check_valid_issues
-from src.utils.postproc import run_image_dump
-from src.finalinference import final_inference
+
 import glob
 
 # 0. 데이터 준비

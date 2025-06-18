@@ -86,7 +86,7 @@ def get_instance_num():
     return INSTANCE_NUM
 
 def set_api_key():
-    api_list_path = './resource/api_keys.txt'
+    api_list_path = './util_files/api_keys.txt'
 
     with open(api_list_path, 'r', encoding='utf-8') as file:
         api_key_list = file.readlines()
