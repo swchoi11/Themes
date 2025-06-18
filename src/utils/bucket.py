@@ -52,21 +52,26 @@ def upload_to_bucket(json_filename: str):
 
         filename = os.path.basename(json_filename).replace('.json', '')
     
-        result_files = [
-            f'output/excels/all_issues/{filename}',
-            f'output/excels/final_issue/{filename}',
-            f'output/{filename.replace(".xlsx", "")}-normal.txt'
-            ]        
-        
-        # result_files.extend(glob.glob('output/images/*.png'))
-        # result_files.extend(glob.glob('output/images/not_processed/*.png'))
-
         INSTANCE_NUM = get_instance_num()
 
-        for result_file in result_files:
-            input_file = result_file.replace('output/', '')
-            blob = bucket.blob(f"output/themes/vm_{INSTANCE_NUM}/{input_file}")
-            blob.upload_from_filename(result_file)
+        result_file = f'output/excels/all_issues/{filename}'
+        
+        blob = bucket.blob(f"output/themes/excels/all_issues/vm_{INSTANCE_NUM}_{filename}")
+        blob.upload_from_filename(result_file)
+
+        result_file = f'output/excels/final_issue/{filename}'
+        blob = bucket.blob(f"output/themes/excels/final_issue/vm_{INSTANCE_NUM}_{filename}")
+        blob.upload_from_filename(result_file)
+
+        result_file = f'output/{filename.replace(".xlsx", "")}-normal.txt'
+        blob = bucket.blob(f"output/themes/normal/vm_{INSTANCE_NUM}_{filename.replace(".xlsx", "")}-normal.txt")
+        blob.upload_from_filename(result_file)
+
+
+
+
+
+
 
     except Exception as e:
         print(f"파일 업로드 중 오류 발생: {e}")
