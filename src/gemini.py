@@ -310,9 +310,16 @@ class IssueProcessor:
         with open(json_filename, 'r', encoding='utf-8') as f:
             json_data = json.load(f)
         
+        # 테스트 이미지 목록 로드
+        test_images = self._load_test_images()
+        
         issues_by_file = defaultdict(list)
         for item in json_data:
             filename = item['filename']
+            # 테스트 이미지에 있는 파일만 처리
+            if filename not in test_images:
+                continue
+                
             if item['score'] == "":
                 item['score'] = "5"
             item['score'] = int(item['score'])
@@ -374,6 +381,36 @@ class IssueProcessor:
 
         return output_file_name
 
+    def _load_test_images(self) -> set:
+        """테스트 이미지 목록을 로드합니다."""
+        import glob
+        
+        # 이미지 리스트 파일 찾기
+        image_list_files = glob.glob('./util_files/vm*_image_list.csv')
+        
+        if not image_list_files:
+            print("테스트 이미지 리스트 파일을 찾을 수 없습니다.")
+            return set()
+        
+        image_list_file = image_list_files[0]
+        test_images = set()
+        
+        try:
+            with open(image_list_file, 'r', encoding='utf-8') as f:
+                for line in f:
+                    filename = line.strip()
+                    if filename:
+                        # 파일명을 JSON의 filename 형식에 맞게 변환
+                        if not filename.startswith('./'):
+                            filename = f'./{filename}'
+                        test_images.add(filename)
+            
+            print(f"테스트 이미지 {len(test_images)}개 로드 완료")
+            return test_images
+            
+        except Exception as e:
+            print(f"테스트 이미지 로드 중 오류: {e}")
+            return set()
 
     def _sort_issues_by_file(self, issues: List[dict]) -> dict:
         """이슈를 정렬하는 메서드"""
