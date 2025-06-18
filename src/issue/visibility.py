@@ -12,7 +12,7 @@ from src.utils.model import EvalKPI
 logger = init_logger()
 
 class Visibility():
-    def __init__(self, file_path: str, filter_type: str = 'text'):
+    def __init__(self, file_path: str, filter_type: str = 'all'):
         
         if file_path.endswith(".xml"):
             self.image_path = file_path.replace(".xml", ".png")
@@ -257,7 +257,7 @@ class Visibility():
                 max_contrast = max(max_contrast, contrast)
                 # WCAG AA 기준 (4.5:1) 또는 더 관대한 기준 (3:1) 사용
                 # print(contrast)
-                if contrast >= 4.5:
+                if contrast >= 2.5:
                     # #print(f"충분한 대비 발견! 대비값: {contrast:.2f}")
                     has_sufficient_contrast = True
 
@@ -267,6 +267,7 @@ class Visibility():
         try:
             logger.info(f"가독성 검사 시작: {self.image_path}")
             issues = []
+            print(f"가독성 검사 중 컴포넌트 수: {len(self.components)}")
             for component in tqdm(self.components, desc="가독성 검사 중"):
 
                 x1, y1, x2, y2 = component['bounds']

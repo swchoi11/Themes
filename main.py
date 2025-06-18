@@ -19,7 +19,7 @@ json_filename = init_process()
 json_filename = f'./output/jsons/all_issues/{json_filename}'
 
 # valid_test_list = check_all_issues_json(json_filename, test_image_list)
-valid_test_list = glob.glob('./failimages/*.png')
+valid_test_list = glob.glob('./sample40/*.png')
 exception = []
 
 for test_image in tqdm(valid_test_list):

@@ -51,6 +51,8 @@ class Detect:
         text_classes = [
         'android.widget.TextView',
         'android.widget.EditText'
+        'android.widget.AutoCompleteTextView',
+        'android.widget.MultiAutoCompleteTextView',
         ]
         components = self.get_class_components(text_classes)
         valid_components = self._text_content_filter(components)
@@ -65,8 +67,6 @@ class Detect:
         'android.widget.RadioButton',
         'android.widget.CheckBox',
         'android.widget.Spinner',
-        'android.widget.AutoCompleteTextView',
-        'android.widget.MultiAutoCompleteTextView',
         'android.widget.MultiSelectListPreference',
         'android.widget.ListPreference',
         'android.widget.SeekBar',
@@ -90,7 +90,12 @@ class Detect:
         'android.widget.CheckBox',
         ]
         components = self.get_class_components(classes)
-        return components
+        print(f"no_filter 컴포넌트 수: {len(components)}")
+        size_filtered_components = self._size_filter_dict(components)
+        print(f"size_filtered_components 컴포넌트 수: {len(size_filtered_components)}")
+        valid_components = self._include_filter(size_filtered_components)
+        print(f"valid_components 컴포넌트 수: {len(valid_components)}")
+        return valid_components
 
     def _is_contained_node(self, inner_node, outer_node):
         """노드 간 포함관계 확인"""
@@ -156,6 +161,18 @@ class Detect:
                             'bounds': bounds
                         }
                         valid_components.append(valid_component)
+        return valid_components
+    
+    def _size_filter_dict(self, components):
+        """딕셔너리 형태의 컴포넌트 리스트를 크기로 필터링"""
+        valid_components = []
+        for component in components:
+            bounds = component.get('bounds')
+            if bounds:
+                width = abs(bounds[2] - bounds[0])
+                height = abs(bounds[3] - bounds[1])
+                if width < self.image_width * 0.5 and height < self.image_height * 0.5:
+                    valid_components.append(component)
         return valid_components
     
     def _include_filter(self, components):
