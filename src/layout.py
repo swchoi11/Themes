@@ -31,12 +31,9 @@ class Layout:
                 # 0. text, 아이콘과 배경간 대비가 낮아 가독성이 떨어짐
                 # 1. 하이라이트된 항목, 텍스트와 배경간 대비가 낮아 가독성이 떨어짐
                 # 2. 상호작용 가능한 요소가 시각적으로 명확히 구분되지 않음
-            visibility = Visibility(self.image_path, filter_type="all")
-            print(f"visibility 검증 중 컴포넌트 수: {len(visibility.components)}")
+            visibility = Visibility(self.image_path, filter_type="text")
             visibility_issues = visibility.run_visibility_check()
-            print(f"visibility 이슈: {visibility_issues}")
             issues.extend(visibility_issues)
-            print(f"visibility 추가 후 issues: {issues}")
             logger.info(f"visibility 검증 완료")
             
 

@@ -18,7 +18,7 @@ from src.utils.detect import Detect
 from src.utils.utils import get_bounds, bbox_to_location
 import cv2
 import os
-
+import pandas as pd
 logger = init_logger()
 
 class GeminiClient:
@@ -138,6 +138,10 @@ class GeminiClient:
                 "response_schema": Result.model_json_schema(),
             }
         )
+        print(response.text)
+        result = Result.model_validate(json.loads(response.text))
+        if result.score == "":
+            result.score = "5"
         logger.info(f"gemini 호출 완료")
         return Result.model_validate(json.loads(response.text))
     
@@ -309,42 +313,41 @@ class IssueProcessor:
         issues_by_file = defaultdict(list)
         for item in json_data:
             filename = item['filename']
+            if item['score'] == "":
+                item['score'] = "5"
+            item['score'] = int(item['score'])
             issues_by_file[filename].append(item)
 
         final_issues = []
+        normal_issues = []
         print(f"총 {len(issues_by_file)}개 파일 처리")
         
         for filename, file_issues in issues_by_file.items():
             print(f"파일 {filename}의 이슈 {len(file_issues)}개 처리 중...")
             try:
-                valid_issues = [issue for issue in file_issues if issue['bbox'] != []]
+                valid_issues = [issue for issue in file_issues if  issue['score'] < 5] #issue['bbox'] != [] and
                 print(f"유효한 이슈: {len(valid_issues)}개")
                 
                 if len(valid_issues) == 0:
-                    # 유효한 이슈가 없는 경우 -> 정상으로 처리
-                    normal_issue = {
+                    # 유효한 이슈가 없는 경우 -> final_inference로 추가 검증
+                    normal_issues.append({
                         "filename": filename,
-                        "issue_type": "normal",
-                        "component_id": 0,
-                        "ui_component_id": "",
-                        "ui_component_type": "",
-                        "score": "0",
-                        "location_id": "",
-                        "location_type": "",
-                        "bbox": [],
-                        "description_id": "",
-                        "description_type": "",
-                        "description": "문제가 없습니다."
-                    }
-                    final_issues.append(normal_issue)
+                    })
                     
                 elif len(valid_issues) == 1:
                     # 유효한 이슈가 1개인 경우 -> 바로 추가
-                    final_issues.append(valid_issues[0])
+                    if valid_issues[0]['issue_type'] == "not_processed":
+
+                        normal_issues.append({
+                            "filename": filename,
+                        })
+
+                    else:
+                        final_issues.append(valid_issues[0])
                     
                 else:
                     # 유효한 이슈가 2개 이상인 경우 -> Gemini에게 검증 요청
-                    sorted_issue = self._sort_issues_by_file(filename, valid_issues)
+                    sorted_issue = self._sort_issues_by_file(valid_issues)
                     if sorted_issue:
                         final_issues.append(sorted_issue)
                     
@@ -358,30 +361,39 @@ class IssueProcessor:
             json.dump(final_issues, f, ensure_ascii=False, indent=2)
         
         print(f"최종 {len(final_issues)}개 이슈가 {output_file_name}에 저장되었습니다.")
+
+        normal_file_name = json_filename.replace('all_issues/', '').replace('jsons/','').replace('.json', '_normal.txt')
+        with open(normal_file_name, 'w', encoding='utf-8') as f:
+            pd.DataFrame(normal_issues).to_csv(f, 
+                                        mode='a',
+                                        index=False,
+                                        header=not os.path.isfile(normal_file_name),
+                                        encoding='utf-8-sig')
+
+        print(f"normal 이슈{len(normal_issues)}개가 {normal_file_name}에 저장되었습니다.")
+
         return output_file_name
 
-    def _sort_issues_by_file(self, image_path: str, issues: List[dict]) -> dict:
-        """단일 파일의 이슈들을 정렬 - 2개 이상의 이슈가 있을 때 Gemini가 가장 중요한 것 선택"""
-        prompt = Prompt.sort_detected_issues_prompt()
-        issue_text = json.dumps(issues, ensure_ascii=False, indent=2)
+
+    def _sort_issues_by_file(self, issues: List[dict]) -> dict:
+        """이슈를 정렬하는 메서드"""
+        # 각 이슈의 score를 정수로 변환
+        for issue in issues:
+            if isinstance(issue['score'], str):
+                issue['score'] = int(issue['score'])
+            # description_id가 문자열인 경우 16진수로 변환 시도
+            if isinstance(issue['description_id'], str):
+                try:
+                    issue['description_id'] = int(issue['description_id'], base=16)
+                except ValueError:
+                    # 16진수 변환 실패시 10진수로 변환 시도
+                    try:
+                        issue['description_id'] = int(issue['description_id'])
+                    except ValueError:
+                        pass  # 변환 실패시 그대로 유지
         
-        try:
-            # Gemini API 호출
-            result = self.gemini_client.call_gemini_image_text(prompt, image_path, issue_text)
-            
-            # 원본 이슈 중에서 가장 우선순위가 높은 것을 선택
-            # (Gemini의 응답을 기반으로 최종 이슈 결정)
-            # 여기서는 첫 번째 이슈를 기본으로 하고 AI 설명만 업데이트
-            selected_issue = issues[0].copy()  # 첫 번째 이슈를 기본으로
-            selected_issue['description'] = result.description
-            selected_issue['score'] = result.score
-            
-            return selected_issue
-            
-        except Exception as e:
-            print(f"Gemini 검증 중 오류 발생: {e}")
-            # 오류 발생 시 첫 번째 이슈 반환
-            return issues[0]
+        sorted_issues = sorted(issues, key=lambda x: (x['score'], x['description_id']), reverse=True)
+        return sorted_issues[0]
 
 
 # 기존 Gemini 클래스와의 호환성을 위한 래퍼

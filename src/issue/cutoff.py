@@ -71,22 +71,6 @@ class Cutoff:
             )
         issues.append(result)
 
-        if not issues:
-            issues = [ResultModel(
-                filename=self.image_path,
-                issue_type='normal_cutoff',
-                component_id=0,
-                ui_component_id="",
-                ui_component_type="",
-                score="",
-                location_id="",
-                location_type="",
-                bbox=[],
-                description_id="7",
-                description_type="정상입니다.",
-                description="",
-            )]
-
         return issues
 
 

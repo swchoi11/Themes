@@ -77,7 +77,7 @@ def init_process():
     os.makedirs('./output/excels/all_issues', exist_ok=True)
     os.makedirs('./output/excels/final_issue', exist_ok=True)
     
-    json_filename = f'result-{datetime.now().strftime("%Y%m%d")}.json'
+    json_filename = f'./output/jsons/all_issues/result-{datetime.now().strftime("%Y%m%d")}.json'
     return json_filename
 
 def save_results(all_results, filename):

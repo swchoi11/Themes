@@ -143,8 +143,6 @@ class Prompt:
         다음 이미지와 이미지에서 검출된 이슈를 보고, 이슈의 심각도를 판단해 주세요. 
         이미지에는 검출된 이슈와 관련된 바운딩 박스가 그려져있습니다. 전체 이미지와의 관계 속에서 이 이슈의 심각도를 판단해주세요.
         
-    
-
         score 값은 이슈의 심각도 정도를 말합니다. 이에 대한 측도는 다음과 같습니다.
         - 1: (Fail with Critical issue)
         - 2: (Fail with issue)
@@ -154,6 +152,12 @@ class Prompt:
         
         description 값은 이슈의 설명을 말합니다. 기존의 설명을 통합하여 자세하게 작성해주세요.
         한국어로 작성해주세요.
+
+        출력 예시는 이렇습니다. 
+        {
+        "score": "1",
+        "description": "이슈의 설명"
+        }
         """
 
 
@@ -168,3 +172,22 @@ class Prompt:
 
         선택한 이슈에 대한 구체적인 선택 이유를 ai_description에 제공해 주세요.
         """
+    
+    @staticmethod
+    def final_inspect_prompt():
+        prompt ="""
+        You are an AI assistant that inspects the UI quality of Android applications. Please inspect the UI quality based on the screenshot of the Android application provided.
+        The screenshot provided has bounding boxes that can distinguish UI components, and the names of UI components are labeled on the upper left of each bounding box (Text, Button, etc.)
+        Please measure the following items for each UI component.
+        - visibility: **Text**, **icons**, **imageviews**, **Image**, etc. are similar to the background color, making it difficult for people to see with their eyes.
+        **Please exclude bounding boxes and labels on the top of bounding boxes from QA**
+        Please also calculate the "score" for visibility issues. It has a value of 0 to 9. 9 is the highest visibility.
+        **Please give a score for each UI component**
+        **Please output only the 3 most problematic UI components**
+        Please output in table format. The table must include the following contents.
+        * UI component bound box label
+        * Reason
+        * Score
+        Please answer in Korean.
+        """
+        return prompt

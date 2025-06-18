@@ -9,17 +9,18 @@ from src.utils.utils import init_process, save_results, to_excel
 from src.utils.bucket import test_image_list, upload_to_bucket, set_api_key
 from src.utils.exceptions import move_to_not_processed, check_xml, check_size, check_valid_image, check_all_issues_json, check_valid_issues
 from src.utils.postproc import run_image_dump
+from src.finalinference import final_inference
 import glob
+
 # 0. 데이터 준비
 set_api_key()
 
 test_image_list = test_image_list()
 
 json_filename = init_process()
-json_filename = f'./output/jsons/all_issues/{json_filename}'
 
-# valid_test_list = check_all_issues_json(json_filename, test_image_list)
-valid_test_list = glob.glob('./sample40/*.png')
+valid_test_list = check_all_issues_json(json_filename, test_image_list)
+# valid_test_list = glob.glob('./sample40/*.png')
 exception = []
 
 for test_image in tqdm(valid_test_list):
@@ -32,7 +33,7 @@ for test_image in tqdm(valid_test_list):
                 component_id=0,
                 ui_component_id="",
                 ui_component_type="",
-                score="0",
+                score="5",
                 location_id="",
                 location_type="",
                 bbox=[1,1,1,1],
@@ -51,7 +52,7 @@ for test_image in tqdm(valid_test_list):
                 component_id=0,
                 ui_component_id="",
                 ui_component_type="",
-                score="0",
+                score="5",
                 location_id="",
                 location_type="",
                 bbox=[1,1,1,1],
@@ -126,12 +127,9 @@ for test_image in tqdm(valid_test_list):
                  encoding='utf-8-sig')
 
 # json 파일을 돌면서 제미나이 -> 최종 결과 산출
-to_excel(json_filename)
+xlsx_filename = to_excel(json_filename)
 
+# sort_issues에서 final_inference 로직이 통합되어 있으므로 별도 호출 불필요
 processor = IssueProcessor()
 output_path = processor.sort_issues(json_filename)
-## [1,1,1,1] -> [] 로 변경하는 부분 필요함
 final_output_path = to_excel(output_path)
-# upload_to_bucket(final_output_path)
-# print(final_output_path)
-# run_image_dump(final_output_path, './mnt/resource', './output/images/final_issues/')

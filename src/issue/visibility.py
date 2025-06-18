@@ -257,7 +257,7 @@ class Visibility():
                 max_contrast = max(max_contrast, contrast)
                 # WCAG AA 기준 (4.5:1) 또는 더 관대한 기준 (3:1) 사용
                 # print(contrast)
-                if contrast >= 2.5:
+                if contrast >= 1.5:
                     # #print(f"충분한 대비 발견! 대비값: {contrast:.2f}")
                     has_sufficient_contrast = True
 

@@ -73,22 +73,6 @@ class Align:
                 )
                 results.append(result)
         
-        if not results:
-            results = [ResultModel(
-                filename=self.image_path,
-                issue_type="normal_alignment",
-                component_id=0,
-                ui_component_id="",
-                ui_component_type="",
-                score="",
-                location_id="",
-                location_type="",
-                bbox=[],
-                description_id="4",
-                description_type="정상입니다.",
-                description=""
-            )]
-
         return results
 
     
