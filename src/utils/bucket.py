@@ -27,7 +27,7 @@ def test_image_list():
         image_list = file.readlines()
         image_list = [image.replace('\ufeff', '') for image in image_list]
         clean_image_list = [image.strip() for image in image_list if image.strip()]
-        clean_image_list = [f'./mnt/resource/{image}' for image in clean_image_list]
+        clean_image_list = [f'./resource/{image}' for image in clean_image_list]
         clean_image_list = sorted(clean_image_list, reverse=True)
         return clean_image_list
     
@@ -53,9 +53,9 @@ def upload_to_bucket(json_filename: str):
         filename = os.path.basename(json_filename).replace('.json', '')
     
         result_files = [
-            f'output/excels/all_issues/{filename}.xlsx',
-            f'output/excels/final_issue/{filename}.xlsx',
-            f'output/{filename}_normal.txt'
+            f'output/excels/all_issues/{filename}',
+            f'output/excels/final_issue/{filename}',
+            f'output/{filename.replace("xlsx", "")}_normal.txt'
             ]        
         
         # result_files.extend(glob.glob('output/images/*.png'))
