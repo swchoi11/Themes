@@ -93,7 +93,7 @@ def set_api_key():
         api_key_list = [api_key.strip() for api_key in api_key_list if api_key.strip()]
 
     instance_num = get_instance_num()
-    
+    print(instance_num)
     # 인스턴스 번호에 따라 시작 인덱스 계산 (각 인스턴스마다 3개씩 할당)
     # 할당량 문제가 현재는 없으므로 1개만 가져오고 3개를 복사하겟음
     start_index = (int(instance_num)-10) * 3
