@@ -81,7 +81,7 @@ def main():
         
         if chunk:  # 빈 청크가 아닌 경우에만 CSV 생성
             df = pd.DataFrame(chunk, columns=["FileName"])
-            local_filename = f'{OUTPUT_PREFIX}{i}_image_list.csv'
+            local_filename = f'{OUTPUT_DIR}/{OUTPUT_PREFIX}{i}_image_list.csv'
             bucket_filename = f'image_list/{OUTPUT_PREFIX}{i}_image_list.csv'
             
             try:
