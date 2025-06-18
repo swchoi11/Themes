@@ -1775,6 +1775,7 @@ if __name__ == "__main__":
 
     img_paths = glob.glob(f"{rootDir}/image/*.png", recursive=True)
     broken_files = []
+    not_found_component = []
 
     for image_path in tqdm(img_paths):
         filename = os.path.splitext(os.path.basename(image_path))[0]
@@ -1788,17 +1789,23 @@ if __name__ == "__main__":
         print(f"image path: {image_path}")
         if is_image_valid(image_path):
             broken_files.append(os.path.basename(image_path))
-            print(f"해당 파일은 손상 되었습니다.: {image_path}")
+            print(f"해당 파일에 컴포넌트가 존재하지 않습니다.: {image_path}")
             continue
 
         if not os.path.isfile(xml_path):
             continue
 
-        result = parser.parse_by_layout(image=image_path, xml_path=xml_path)
+        try:
+            result = parser.parse_by_layout(image=image_path, xml_path=xml_path)
+        except Exception as e:
+            not_found_component.append(os.path.basename(image_path))
+            print(f"해당 파일은 손상 되었습니다.: {image_path}")
+            continue
+
         with open(f"{OUT_DIR}/{filename}.json", "w", encoding="utf-8") as f:
             json.dump(result, f, ensure_ascii=False, indent=2)
 
-        print("=== UI 스켈레톤 구조 ===")
+        print("\n=== UI 스켈레톤 구조 ===")
         print(f"   구조 타입: {result['skeleton']['structure_type']}")
         print(f"   총 요소 수: {len(result['skeleton']['elements'])}")
 
@@ -1815,3 +1822,7 @@ if __name__ == "__main__":
     df = pd.DataFrame(broken_files, columns=["filename"])
     df.to_csv("broken_images.csv", index=False, encoding="utf-8")
     print(f"[완료] 손상된 이미지 {len(df)}개")
+
+    df = pd.DataFrame(not_found_component, columns=["filename"])
+    df.to_csv("not_found_images.csv", index=False, encoding="utf-8")
+    print(f"[완료] 컴포넌트 존재 하지 않음 {len(df)}개")
