@@ -455,7 +455,7 @@ if __name__ == "__main__":
     merged_result['bbox'] = merged_result['bbox'].replace('[1.0, 1.0, 1.0, 1.0]', '[]')
 
     merged_result['filename'] = merged_result['filename'].apply(find_fail_version)
-    merged_result = merged_result[merged_result['issue_type']!='no_xml']
+    merged_result = merged_result[~merged_result['issue_type'].isin(['no_xml', 'not_processed'])]
     merged_result.to_excel(f'{BASE_ROOTDIR}/merged_results.xlsx')
 
     merged_result[['GT_ItemName', 'GT_Location', 'GT_Desc']] = merged_result['filename'].apply(extract_fail_codes)
