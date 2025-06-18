@@ -264,7 +264,7 @@ class BoundingBoxVisualizer:
                             bbox=dict(boxstyle="square,pad=0.1", facecolor=color, alpha=0.9))
 
         # 임시 파일에 저장
-        os.makedirs('./temp', exist_ok=True)
+        os.makedirs('testing/temp', exist_ok=True)
         temp_path = f'./temp/{os.path.basename(image_path)}'
         plt.savefig(temp_path, dpi=dpi, bbox_inches='tight',
                     pad_inches=0, facecolor='white', edgecolor='none')
@@ -370,13 +370,15 @@ def _sort_issues_by_file(image_path: str, issues: List[dict]) -> dict:
 
 if __name__ == "__main__":
 
-    dirpath = '../../output/visualization'
-    filepath = './resource/dataset.xlsx'
-    output_file = './output/visibility000.csv'
-    report_file = './output/report.csv'
+    dirpath = '../output/visualization'
+    filepath = '../resource/dataset.xlsx'
+    output_file = '../output/report.csv'
 
-    report = pd.read_csv(report_file)
-    report_filename = np.unique(report['filename'])
+    report_filename=[]
+    if os.path.exists(output_file):
+        report = pd.read_csv(output_file)
+        report_filename = np.unique(report['filename'])
+
 
     # 파일 존재 확인
     if not os.path.exists(filepath):
@@ -422,7 +424,10 @@ if __name__ == "__main__":
             selected_issue = _sort_issues_by_file(image_path, issues)
             if selected_issue:
                 # CSV는 mode='a'가 잘 작동함
-                pd.DataFrame([filename,selected_issue]
+                pd.DataFrame([{
+                    "filename":filename,
+                    "selected_issue":selected_issue
+                }]
                     ).to_csv(
                     output_file,
                     mode='a',
@@ -437,4 +442,4 @@ if __name__ == "__main__":
         issue_report.append(f'{filename}:{e}')
 
     report= pd.DataFrame(issue_report)
-    report.to_excel('./output/issue_report.xlsx')
+    report.to_excel('../output/issue_report.xlsx')
