@@ -375,7 +375,7 @@ class IssueProcessor:
         # final_issues가 있는 경우에만 JSON 파일 저장
         if final_issues:
             output_file_name = excel_filename.replace('all_issues', 'final_issue')
-            final_df = pd.DataFrame(finel_issues)
+            final_df = pd.DataFrame(final_issues)
             final_df.to_excel(output_file_name, index=False)
 
             print(f"최종 {len(final_issues)}개 이슈가 {output_file_name}에 저장되었습니다.")
