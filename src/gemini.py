@@ -306,33 +306,31 @@ class IssueProcessor:
         self.gemini_client = GeminiClient()
     
     def sort_issues(self, excel_filename: str) -> str:
-        """이슈들을 정렬하고 최종 결과 생성"""
+        """엑셀 파일에서 이슈들을 정렬하고 최종 결과 생성"""
+        # 엑셀 파일 읽기
         try:
             df = pd.read_excel(excel_filename)
-            print(len(df))
+            print(f"엑셀 파일 로드 완료: {len(df)}개 행")
         except Exception as e:
-            print(e)
+            print(f"엑셀 파일 읽기 오류: {e}")
             return ""
-        
-        # 테스트 이미지 목록 로드
-        test_images = self._load_test_images()
         
         issues_by_file = defaultdict(list)
         for _, row in df.iterrows():
-            filename = row.get('filename','')
-            # 테스트 이미지에 있는 파일만 처리
-            if filename not in test_images:
-                continue
+            filename = row.get('filename', '')
             
+            # 행을 딕셔너리로 변환
             item = row.to_dict()
-            score = item.get('score','')
+            
+            # score 처리
+            score = item.get('score', '')
             if score == "" or pd.isna(score):
                 item['score'] = "5"
             try:
                 item['score'] = int(float(score))
-            except Exception as e:
+            except (ValueError, TypeError):
                 item['score'] = 5
-
+                
             issues_by_file[filename].append(item)
 
         final_issues = []
@@ -342,23 +340,21 @@ class IssueProcessor:
         for filename, file_issues in issues_by_file.items():
             print(f"파일 {filename}의 이슈 {len(file_issues)}개 처리 중...")
             try:
-                valid_issues = [issue for issue in file_issues if issue['bbox'] != []] 
+                valid_issues = [issue for issue in file_issues if issue['score'] < 5]
                 print(f"유효한 이슈: {len(valid_issues)}개")
                 
                 if len(valid_issues) == 0:
-                    # 유효한 이슈가 없는 경우 -> final_inference로 추가 검증
+                    # 유효한 이슈가 없는 경우 -> normal_issues에 추가
                     normal_issues.append({
                         "filename": filename,
                     })
                     
                 elif len(valid_issues) == 1:
                     # 유효한 이슈가 1개인 경우 -> 바로 추가
-                    if valid_issues[0]['issue_type'] == "not_processed":
-
+                    if valid_issues[0].get('issue_type') == "not_processed":
                         normal_issues.append({
                             "filename": filename,
                         })
-
                     else:
                         final_issues.append(valid_issues[0])
                     
@@ -372,18 +368,18 @@ class IssueProcessor:
                 print(f"오류 ({filename}): {e}")
                 continue
         
-        # final_issues가 있는 경우에만 JSON 파일 저장
+        # final_issues가 있는 경우에만 엑셀 파일 저장
         if final_issues:
-            output_file_name = excel_filename.replace('all_issues', 'final_issue')
+            output_file_name = excel_filename.replace('.xlsx', '_final_issue.xlsx')
             final_df = pd.DataFrame(final_issues)
             final_df.to_excel(output_file_name, index=False)
-
             print(f"최종 {len(final_issues)}개 이슈가 {output_file_name}에 저장되었습니다.")
         else:
-            output_file_name = excel_filename.replace('all_issues', 'final_issue')
+            output_file_name = excel_filename.replace('.xlsx', '_final_issue.xlsx')
             print(f"최종 이슈가 없어서 {output_file_name} 파일을 생성하지 않습니다.")
 
-        normal_file_name = excel_filename.replace('all_issues/', '').replace('jsons/','').replace('.json', '-normal.txt')
+        # normal_issues 저장
+        normal_file_name = excel_filename.replace('.xlsx', '_normal.txt')
         with open(normal_file_name, 'w', encoding='utf-8') as f:
             pd.DataFrame(normal_issues).to_csv(f, 
                                         mode='a',
@@ -394,6 +390,26 @@ class IssueProcessor:
         print(f"normal 이슈{len(normal_issues)}개가 {normal_file_name}에 저장되었습니다.")
 
         return output_file_name
+
+    def _sort_issues_by_file(self, issues: List[dict]) -> dict:
+        """이슈를 정렬하는 메서드"""
+        # 각 이슈의 score를 정수로 변환
+        for issue in issues:
+            if isinstance(issue['score'], str):
+                issue['score'] = int(issue['score'])
+            # description_id가 문자열인 경우 16진수로 변환 시도
+            if isinstance(issue['description_id'], str):
+                try:
+                    issue['description_id'] = int(issue['description_id'], base=16)
+                except ValueError:
+                    # 16진수 변환 실패시 10진수로 변환 시도
+                    try:
+                        issue['description_id'] = int(issue['description_id'])
+                    except ValueError:
+                        pass  # 변환 실패시 그대로 유지
+        
+        sorted_issues = sorted(issues, key=lambda x: (x['score'], x['description_id']), reverse=True)
+        return sorted_issues[0]
 
     def _load_test_images(self) -> set:
         """테스트 이미지 목록을 로드합니다."""
@@ -425,26 +441,6 @@ class IssueProcessor:
         except Exception as e:
             print(f"테스트 이미지 로드 중 오류: {e}")
             return set()
-
-    def _sort_issues_by_file(self, issues: List[dict]) -> dict:
-        """이슈를 정렬하는 메서드"""
-        # 각 이슈의 score를 정수로 변환
-        for issue in issues:
-            if isinstance(issue['score'], str):
-                issue['score'] = int(issue['score'])
-            # description_id가 문자열인 경우 16진수로 변환 시도
-            if isinstance(issue['description_id'], str):
-                try:
-                    issue['description_id'] = int(issue['description_id'], base=16)
-                except ValueError:
-                    # 16진수 변환 실패시 10진수로 변환 시도
-                    try:
-                        issue['description_id'] = int(issue['description_id'])
-                    except ValueError:
-                        pass  # 변환 실패시 그대로 유지
-        
-        sorted_issues = sorted(issues, key=lambda x: (x['score'], x['description_id']), reverse=True)
-        return sorted_issues[0]
 
 
 # 기존 Gemini 클래스와의 호환성을 위한 래퍼
