@@ -25,7 +25,7 @@ def check_valid_issues(issues):
     for issue in issues:
         if issue.score == "":
             issue.score = "5"
-        if issue.bbox != [] or int(issue.score) <= 4:
+        if issue.bbox != []:
             flag = True
             break
     return flag

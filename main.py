@@ -86,7 +86,7 @@ for test_image in tqdm(valid_test_list):
                 score="5",
                 location_id="",
                 location_type="",
-                bbox=[1,1,1,1],
+                bbox=[],
                 description_id="",
                 description_type="",
                 description="문제가 없습니다."
