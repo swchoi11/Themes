@@ -362,12 +362,15 @@ class IssueProcessor:
                 print(f"오류 ({filename}): {e}")
                 continue
         
-        # 결과를 JSON 파일로 저장
-        output_file_name = json_filename.replace('all_issues', 'final_issue')
-        with open(output_file_name, 'w', encoding='utf-8') as f:
-            json.dump(final_issues, f, ensure_ascii=False, indent=2)
-        
-        print(f"최종 {len(final_issues)}개 이슈가 {output_file_name}에 저장되었습니다.")
+        # final_issues가 있는 경우에만 JSON 파일 저장
+        if final_issues:
+            output_file_name = json_filename.replace('all_issues', 'final_issue')
+            with open(output_file_name, 'w', encoding='utf-8') as f:
+                json.dump(final_issues, f, ensure_ascii=False, indent=2)
+            print(f"최종 {len(final_issues)}개 이슈가 {output_file_name}에 저장되었습니다.")
+        else:
+            output_file_name = json_filename.replace('all_issues', 'final_issue')
+            print(f"최종 이슈가 없어서 {output_file_name} 파일을 생성하지 않습니다.")
 
         normal_file_name = json_filename.replace('all_issues/', '').replace('jsons/','').replace('.json', '-normal.txt')
         with open(normal_file_name, 'w', encoding='utf-8') as f:
