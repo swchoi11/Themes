@@ -8,6 +8,7 @@ import json
 from typing import Optional, List
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
 
 from common.logger import timefn
 from common.prompt import Prompt
@@ -21,7 +22,7 @@ class Gemini:
     def __init__(self):
         load_dotenv()
         self.client = genai.Client(api_key=os.getenv('API_KEY'))
-        self.model = 'gemini-2.5-flash-preview-05-20'  #'gemini-2.5-flash-preview-05-20' | 'gemini-2.5-pro-preview-06-05'
+        self.model = 'gemini-2.5-pro'  #'gemini-2.5-flash-preview-05-20' | 'gemini-2.5-pro-preview-06-05'
         self.max_retries = 10
         self.initial_delay = 1
 
@@ -82,6 +83,54 @@ class Gemini:
         )
         # logger.info(f"gemini 호출 완료")
         return Issue.model_validate(json.loads(response.text))
+
+    @retry_with_delay
+    @timefn
+    def _call_gemini_issue_inspection(self, prompt, image, model=None):
+
+        target_image = self.client.files.upload(file=image)
+
+        response = self.client.models.generate_content(
+            model=model if model else self.model,
+            contents=[
+                prompt,
+                target_image,
+            ],
+        )
+        return response.text
+
+    def _call_gemini_issue_parsing(self, prompt, model=None):
+
+        response = self.client.models.generate_content_stream(
+            model=model if model else self.model,
+            contents=[
+                types.Content(
+                    role="user",
+                    parts=[
+                        types.Part(text=prompt)
+                    ]
+                ),
+            ],
+            config=types.GenerateContentConfig(
+                temperature=1,
+                top_p=1,
+                max_output_tokens=8192,
+                safety_settings=[types.SafetySetting(
+                  category="HARM_CATEGORY_HATE_SPEECH",
+                  threshold="OFF"
+                ),types.SafetySetting(
+                  category="HARM_CATEGORY_DANGEROUS_CONTENT",
+                  threshold="OFF"
+                ),types.SafetySetting(
+                  category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                  threshold="OFF"
+                ),types.SafetySetting(
+                  category="HARM_CATEGORY_HARASSMENT",
+                  threshold="OFF"
+                )],
+              )
+        )
+        return response
 
     def generate_response(self, prompt, image, text: Optional[str] = None, model: Optional[str]=None) -> Issue:
         if not text is None:
