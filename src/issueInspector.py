@@ -498,12 +498,13 @@ class UIQualityInspector:
 
     def fix_csv_columns(self):
         """
-        CSV 파일의 중간 열들을 하나로 합치는 함수 (개선된 버전)
-        - 첫 번째 열: 이미지명 (그대로 유지)
-        - 마지막 열: 스코어 (그대로 유지)
-        - 중간 열들: 모두 합쳐서 하나의 텍스트 열로 만들기
+        CSV 파일을 4열 구조로 단순하게 변환
+        - 첫 번째 열: 이미지명 (filename)
+        - 두 번째 열: UI component
+        - 세 번째 열: description (나머지 모든 중간 열들을 합침)
+        - 네 번째 열: 스코어 (숫자인 열을 찾아서)
 
-        빈 행, 길이가 다른 행, 부분적으로 빈 셀들을 모두 처리합니다.
+        패턴 매칭 없이 최대한 단순하게 처리
         """
 
         fixed_rows = []
@@ -523,38 +524,186 @@ class UIQualityInspector:
                 # 빈 셀들을 빈 문자열로 정규화
                 normalized_row = [cell.strip() if cell else '' for cell in row]
 
-                # 길이에 따른 처리
-                if len(normalized_row) == 1:
-                    # 1열만 있는 경우: 이미지명만 있고 설명과 스코어는 빈값
-                    image_name = normalized_row[0]
-                    description = ""
-                    score = ""
-                    print(f"경고: {i + 1}행 - 1열만 존재 (이미지명만): {image_name}")
+                print(f"행 {i + 1}: {normalized_row}")
 
-                elif len(normalized_row) == 3:
-                    # 2열인 경우: 첫 번째는 이미지명, 두 번째는 스코어로 처리
-                    image_name = normalized_row[0]
-                    description = ""
-                    score = normalized_row[1]
+                # 기본값 설정
+                filename = ""
+                ui_component = ""
+                score = ""
 
+                # 1. 첫 번째 열: 항상 이미지명
+                if len(normalized_row) >= 1:
+                    filename = normalized_row[0]
+
+                # 2. 스코어 찾기 (숫자인 열)
+                score_index = None
+                for idx, cell in enumerate(normalized_row):
+                    if self._is_score(cell):
+                        score_index = idx
+                        score = self._extract_score_value(cell)  # / 앞의 숫자만 추출
+                        break
+
+                # 3. 두 번째 열: UI component (스코어가 아닌 경우)
+                if len(normalized_row) >= 2 and score_index != 1:
+                    ui_component = normalized_row[1]
+
+                # 4. 나머지 모든 열: description으로 합치기
+                description_parts = []
+                for idx, cell in enumerate(normalized_row[1:], 1):  # 첫 번째 열(이미지명) 제외
+                    if idx != score_index and cell.strip():  # 스코어 열이 아니고 빈 값이 아닌 경우
+                        if idx == 1:
+                            # 두 번째 열이 UI component로 사용된 경우는 제외
+                            if score_index == 1 or not ui_component:
+                                description_parts.append(cell.strip())
+                        else:
+                            description_parts.append(cell.strip())
+
+                # description 합치기
+                combined_description = ' '.join(description_parts)
+
+                # UI component와 description이 합쳐진 경우 ... 기준으로 분리
+                ui_component, description = self._split_ui_and_description(ui_component, combined_description)
+
+                # 결과 출력 (디버깅용)
+                print(f"  → filename: {filename}")
+                print(f"  → ui_component: {ui_component}")
+                print(f"  → description: {description}")
+                print(f"  → score: {score}")
+                print()
+
+                # 결과 추가
+                fixed_rows.append([filename, ui_component, description, score])
+
+        # DataFrame 생성 및 저장
+        dataframe = pd.DataFrame(fixed_rows, columns=['filename', 'ui_component', 'description', 'score'])
+
+        # 빈 이미지명 행 제거
+        dataframe = dataframe[dataframe['filename'].str.strip() != '']
+
+        # CSV 저장 (인덱스 제외)
+        dataframe.to_csv(self.config.OUTPUT_RESULT_PATH, index=False, encoding='utf-8')
+
+        print(f"처리 완료: {len(fixed_rows)}개 행 처리, {skipped_rows}개 행 건너뜀")
+        print(f"최종 저장: {len(dataframe)}개 행")
+        print(f"save final report: {self.config.OUTPUT_RESULT_PATH}")
+
+        return dataframe
+
+    def _split_ui_and_description(self, ui_component, combined_description):
+        """
+        UI component와 description을 ... 기준으로 분리
+
+        예시:
+        - "input(EditText_13): Category n..." → UI: "input(EditText_13): Category n", DESC: ""
+        - "" + "input(EditText_13): Category n...'Category name' 텍스트..."
+          → UI: "input(EditText_13): Category n", DESC: "'Category name' 텍스트..."
+        """
+        # UI component가 비어있고 combined_description에 ... 가 있는 경우
+        if not ui_component.strip() and combined_description and '...' in combined_description:
+            parts = combined_description.split('...', 1)
+            if len(parts) == 2:
+                ui_part = parts[0].strip() + '...'  # ... 포함해서 UI component로
+                desc_part = parts[1].strip()
+                return ui_part, desc_part
+
+        # UI component에 ... 가 있는 경우
+        if ui_component and '...' in ui_component:
+            parts = ui_component.split('...', 1)
+            if len(parts) == 2:
+                ui_part = parts[0].strip() + '...'  # ... 포함해서 UI component로
+                desc_part = parts[1].strip()
+                # combined_description이 있으면 합치기
+                if combined_description:
+                    desc_part = (desc_part + ' ' + combined_description).strip()
+                return ui_part, desc_part
+
+        # combined_description에만 ... 가 있는 경우
+        if combined_description and '...' in combined_description:
+            parts = combined_description.split('...', 1)
+            if len(parts) == 2:
+                # 기존 ui_component가 있으면 유지, 없으면 앞부분을 사용
+                if ui_component.strip():
+                    desc_part = parts[1].strip()
+                    return ui_component, desc_part
                 else:
-                    # 3열 이상인 경우: 정상 처리
-                    image_name = normalized_row[0]
-                    score = normalized_row[-1]
+                    ui_part = parts[0].strip() + '...'
+                    desc_part = parts[1].strip()
+                    return ui_part, desc_part
 
-                    # 중간 열들 합치기 (빈 셀들도 포함하되 연속된 공백은 제거)
-                    middle_cols = normalized_row[1:-1]
-                    description = ' '.join(middle_cols).strip()
-                    # 연속된 공백들을 하나로 정리
-                    description = ' '.join(description.split())
+        # ... 가 없거나 분리할 수 없는 경우 원본 반환
+        return ui_component, combined_description
 
-                # 결과 추가 (모든 경우를 포함)
-                fixed_rows.append([image_name, description, score])
+    def _extract_score_value(self, cell):
+        """
+        셀에서 실제 스코어 값만 추출
+        1/9 -> "1", 3.5 -> "3", -1 -> "0", 4 -> "4"
+        소수점은 정수 부분만, 음수는 0으로 처리
+        """
+        cell = cell.strip()
 
-        dataframe = pd.DataFrame(fixed_rows, columns=['filename', 'description', 'score'])
-        dataframe.to_csv(self.config.OUTPUT_RESULT_PATH)
+        # 1. / 가 있는 경우 앞의 숫자만 추출
+        if '/' in cell:
+            parts = cell.split('/')
+            if len(parts) >= 2:
+                front_part = parts[0].strip()
+                try:
+                    num = float(front_part)
+                    # 음수는 0으로, 소수점은 정수 부분만
+                    result = max(0, int(num))
+                    return str(result)
+                except ValueError:
+                    return "0"
 
-        return print(f"save final report: {self.config.OUTPUT_RESULT_PATH}")
+        # 2. 순수한 정수인 경우
+        if cell.isdigit():
+            return cell
+
+        # 3. 음수 또는 소수점 처리
+        try:
+            num = float(cell)
+            # 음수는 0으로, 소수점은 정수 부분만
+            result = max(0, int(num))
+            return str(result)
+        except ValueError:
+            return "0"
+
+    def _is_score(self, cell):
+        """
+        셀이 스코어(숫자)인지 간단하게 확인
+        1/9, 2/10 같은 형태도 처리 (/ 앞의 숫자만 사용)
+        스코어 범위: 0-10
+        소수점은 정수 부분만 사용 (3.5 → 3)
+        음수는 0으로 처리 (-1 → 0)
+        """
+        cell = cell.strip()
+
+        # 1. / 가 있는 경우 앞의 숫자만 확인
+        if '/' in cell:
+            parts = cell.split('/')
+            if len(parts) >= 2:
+                front_part = parts[0].strip()
+                try:
+                    num = float(front_part)
+                    # 음수는 0으로, 소수점은 정수 부분만
+                    num = max(0, int(num))
+                    return 0 <= num <= 10
+                except ValueError:
+                    return False
+            return False  # / 가 있지만 올바른 형태가 아닌 경우
+
+        # 2. 순수한 숫자인지 확인
+        if cell.isdigit():
+            num = int(cell)
+            return 0 <= num <= 10  # 0-10 범위의 점수
+
+        # 3. 음수 또는 소수점 숫자인지 확인
+        try:
+            num = float(cell)
+            # 음수는 0으로, 소수점은 정수 부분만
+            num = max(0, int(num))
+            return 0 <= num <= 10
+        except ValueError:
+            return False
 
 
 if __name__ == "__main__":
