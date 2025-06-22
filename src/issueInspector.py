@@ -34,7 +34,7 @@ class Config:
         self.ISSUE_REPORT_PATH = f'{self.SAVE_DIR}/issue_report.xlsx'
 
         # Processing settings
-        self.BATCH_SIZE = 5
+        self.BATCH_SIZE = 6
         self.MAX_RETRIES = 3
         self.RETRY_DELAY = 5
 
@@ -531,7 +531,7 @@ class UIQualityInspector:
                     score = ""
                     print(f"경고: {i + 1}행 - 1열만 존재 (이미지명만): {image_name}")
 
-                elif len(normalized_row) == 2:
+                elif len(normalized_row) == 3:
                     # 2열인 경우: 첫 번째는 이미지명, 두 번째는 스코어로 처리
                     image_name = normalized_row[0]
                     description = ""
