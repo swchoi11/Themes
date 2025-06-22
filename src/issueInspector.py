@@ -4,6 +4,7 @@ import glob
 import json
 import ast
 import cv2
+import csv
 import numpy as np
 
 from typing import List, Optional
@@ -28,6 +29,7 @@ class Config:
         self.OUTPUT_RAW_REPORT_PATH = f'{self.SAVE_DIR}/raw.csv'
         self.OUTPUT_REPORT_PATH = f'{self.SAVE_DIR}/report.csv'
         self.OUTPUT_PARSED_PATH = f'{self.SAVE_DIR}/parse_report.csv'
+        self.OUTPUT_RESULT_PATH = f'{self.SAVE_DIR}/final_report.csv'
         self.ERROR_LOG_PATH = f'{self.SAVE_DIR}/error.txt'
         self.ISSUE_REPORT_PATH = f'{self.SAVE_DIR}/issue_report.xlsx'
 
@@ -359,7 +361,7 @@ class UIQualityInspector:
             data.append({'filename': current_filename, 'description': current_description})
 
         df = pd.DataFrame(data)
-        df.to_csv(self.config.OUTPUT_REPORT_PATH, mode='a', header=not os.path.exists(self.config.OUTPUT_REPORT_PATH), index=True)
+        df.to_csv(self.config.OUTPUT_REPORT_PATH, index=True)
 
     def _generate_chunk_data(self, batch):
         csv_data = ''.join(batch)
@@ -494,6 +496,66 @@ class UIQualityInspector:
         except Exception as e:
             print(f"Failed to save error log: {e}")
 
+    def fix_csv_columns(self):
+        """
+        CSV 파일의 중간 열들을 하나로 합치는 함수 (개선된 버전)
+        - 첫 번째 열: 이미지명 (그대로 유지)
+        - 마지막 열: 스코어 (그대로 유지)
+        - 중간 열들: 모두 합쳐서 하나의 텍스트 열로 만들기
+
+        빈 행, 길이가 다른 행, 부분적으로 빈 셀들을 모두 처리합니다.
+        """
+
+        fixed_rows = []
+        skipped_rows = 0
+
+        # CSV 파일 읽기
+        with open(self.config.OUTPUT_PARSED_PATH, 'r', encoding='utf-8') as f:
+            csv_reader = csv.reader(f)
+
+            for i, row in enumerate(csv_reader):
+                # 완전히 빈 행 건너뛰기
+                if not row or all(cell.strip() == '' for cell in row):
+                    print(f"빈 행 건너뜀: {i + 1}행")
+                    skipped_rows += 1
+                    continue
+
+                # 빈 셀들을 빈 문자열로 정규화
+                normalized_row = [cell.strip() if cell else '' for cell in row]
+
+                # 길이에 따른 처리
+                if len(normalized_row) == 1:
+                    # 1열만 있는 경우: 이미지명만 있고 설명과 스코어는 빈값
+                    image_name = normalized_row[0]
+                    description = ""
+                    score = ""
+                    print(f"경고: {i + 1}행 - 1열만 존재 (이미지명만): {image_name}")
+
+                elif len(normalized_row) == 2:
+                    # 2열인 경우: 첫 번째는 이미지명, 두 번째는 스코어로 처리
+                    image_name = normalized_row[0]
+                    description = ""
+                    score = normalized_row[1]
+
+                else:
+                    # 3열 이상인 경우: 정상 처리
+                    image_name = normalized_row[0]
+                    score = normalized_row[-1]
+
+                    # 중간 열들 합치기 (빈 셀들도 포함하되 연속된 공백은 제거)
+                    middle_cols = normalized_row[1:-1]
+                    description = ' '.join(middle_cols).strip()
+                    # 연속된 공백들을 하나로 정리
+                    description = ' '.join(description.split())
+
+                # 결과 추가 (모든 경우를 포함)
+                fixed_rows.append([image_name, description, score])
+
+        dataframe = pd.DataFrame(fixed_rows, columns=['filename', 'description', 'score'])
+        dataframe.to_csv(self.config.OUTPUT_RESULT_PATH)
+
+        return print(f"save final report: {self.config.OUTPUT_RESULT_PATH}")
+
 
 if __name__ == "__main__":
 
@@ -508,6 +570,9 @@ if __name__ == "__main__":
         # Parse reports with Gemini
         print("Starting report parsing...")
         inspector.parse_reports_with_gemini()
+
+        print("Final report processing...")
+        inspector.fix_csv_columns()
 
         print("Processing completed successfully!")
 
