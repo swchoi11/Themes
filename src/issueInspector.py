@@ -167,6 +167,12 @@ class UIQualityInspector:
         - visibility: **Text**, **icons**, **imageviews**, **Image**, etc. are similar to the background color, making it difficult for people to see with their eyes.
         **Please exclude bounding boxes and labels on the top of bounding boxes from QA**
         Please also calculate the "score" for visibility issues. It has a value of 0 to 9. 9 is the highest visibility.
+        
+        - duplicate: **TextView**, **button** with different functional roles but using identical icon images, creating confusion for users about their distinct purposes. 
+        Icons must be completely identical in all aspects including color, shape, size, and visual appearance to be considered duplicates. 
+        **Please exclude bounding boxes and labels on the top of bounding boxes from QA** 
+        Please also calculate the "score" for duplicate issues. It has a value of 0 to 3. 0 is the highest duplicate issue.
+        
         **Please give a score for each UI component**
         **Please output only the 3 most problematic UI components**
         Please output in table format. The table must include the following contents.
@@ -181,11 +187,10 @@ class UIQualityInspector:
         You are an AI assistant that inspects the UI quality of Android applications. Please inspect the UI quality based on the screenshot of the Android application provided.
         The screenshot provided has bounding boxes that can distinguish UI components, and the names of UI components are labeled on the upper left of each bounding box (RadioButton, ToggleButton, Switch, etc.)
         Please measure the following items for each UI component.
-        cut-off: **RadioButton**, **ToggleButton**, and **Switch** components for vertical truncation at top and bottom edges that distorts circular shapes into non-circular forms.
-
+        - cut-off: **RadioButton**, **ToggleButton**, and **Switch** components for vertical truncation at top and bottom edges that distorts circular shapes into non-circular forms.
         **Please exclude bounding boxes and their labels from quality assessment**        
         **Please exclude bounding boxes and labels on the top of bounding boxes from QA**
-        Please also calculate the "score" for cut-off issues. It has a value of 0 to 4. 0 is the highest cut-off issue.
+        Please also calculate the "score" for cut-off issues. It has a value of 0 to 3. 0 is the highest cut-off issue.
         **Please give a score for each UI component**
         **Please output only the 3 most problematic UI components**
         Please output in table format. The table must include the following contents.
@@ -585,10 +590,17 @@ class UIQualityInspector:
                 # 결과 저장
                 if inspection_result:
                     result_data = [filename, inspection_result]
-                    if cutoff_result:
-                        result_data.append(f"CUTOFF_INSPECTION: {cutoff_result}")
 
-                    pd.DataFrame([result_data]).to_csv(
+                    if cutoff_result:
+
+                        pd.DataFrame([filename, cutoff_result]).to_csv(
+                            self.config.OUTPUT_RAW_REPORT_PATH,
+                            mode='a',
+                            header=not os.path.exists(self.config.OUTPUT_RAW_REPORT_PATH),  # 첫 번째만 헤더 포함
+                            index=False
+                        )
+
+                    pd.DataFrame(result_data).to_csv(
                         self.config.OUTPUT_RAW_REPORT_PATH,
                         mode='a',
                         header=not os.path.exists(self.config.OUTPUT_RAW_REPORT_PATH),  # 첫 번째만 헤더 포함
