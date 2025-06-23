@@ -28,7 +28,7 @@ def process_score(score):
         front_num = int(score_str.split('/')[0])
         processed_score = front_num + 1
     else:
-        processed_score = int(score_str) + 1
+        processed_score = int(float(score_str)) + 1
 
     # 5점 이상인 경우 5로 제한
     if processed_score >= 5:
@@ -554,17 +554,82 @@ if __name__ == "__main__":
 
     print(f"\nKPI 매트릭스 저장 완료: {REPORT_DIR_PATH}/final_kpi_matrix_total.csv")
 
+    final_rows = []
+    for filename, group in df.groupby('FileName'):
+        filtered_group = group[group['Score'] < 3]         # 점수가 3 미만인 것들만 필터링
+        filtered_group['sort_priority'] = filtered_group['itemName'].apply(
+            lambda x: 1 if x in ['text', 'icon', 'button'] else 0
+        )
+        filtered_group = filtered_group.sort_values(['Score', 'sort_priority']).drop('sort_priority', axis=1)
+
+        if filtered_group.empty:
+            first_row = group.iloc[0]
+            gt = first_row['GroundTruth']
+            pred = False
+            row_data = {
+                'FileName': first_row['FileName'],
+                'GroundTruth': gt,
+                'Predict': pred,
+                'Match': gt == pred,
+                'Score': first_row['Score'],
+                'itemName': first_row['itemName'],
+                'ComponentID': first_row['ComponentID'],
+                'BBOX': first_row['BBOX'],
+                'Location': first_row['Location'],
+                'Description': first_row['Description'],
+                'Reason': first_row['Reason'],
+                'ui_component': first_row['ui_component']
+            }
+            final_rows.append(row_data)
+            continue
+
+        sorted_group = filtered_group.sort_values('Score')
+        first_row = sorted_group.iloc[0]
+
+        if sorted_group['itemName'].isin(['text', 'icon', 'button']).all():
+            gt = first_row['GroundTruth']
+            pred = False
+            row_data = {
+                'FileName': first_row['FileName'],
+                'GroundTruth': gt,
+                'Predict': pred,
+                'Match': gt == pred,
+                'Score': first_row['Score'],
+                'itemName': first_row['itemName'],
+                'ComponentID': first_row['ComponentID'],
+                'BBOX': first_row['BBOX'],
+                'Location': first_row['Location'],
+                'Description': first_row['Description'],
+                'Reason': first_row['Reason'],
+                'ui_component': first_row['ui_component']
+            }
+            final_rows.append(row_data)
+            continue
+
+        final_rows.append(first_row.to_dict())
+
+    final_df = pd.DataFrame(final_rows)
+    final_df.to_csv(f'{REPORT_DIR_PATH}/final_kpi_matrix.csv', index=False)
+
+
     # 이미지에 BBOX 그리기 (기존 기능 유지)
     print("\n이미지에 BBOX 그리기 시작...")
-    for filename, group in tqdm(df.groupby('FileName'), desc="Drawing BBOX"):
-        # group = group[(group['Score'] < 3)]
-        # if group.empty:
-        #     print(f"건너뛰기: {filename} - Score < 3인 항목이 없음")
-        #     continue
-        #
-        # if group['itemName'].isin(['text', 'icon', 'button']).all():
-        #     print(f"건너뛰기: {filename} - 모든 itemName이 ['text', 'icon', 'button'] 중 하나임")
-        #     continue
+    for filename, group in tqdm(final_df.groupby('FileName'), desc="Drawing BBOX"):
+        print(filename)
+
+        if group['Score'].isna().all():
+            print(f"건너뛰기: {filename} - Score 열이 없거나 모든 값이 NaN")
+            continue
+
+        group = group[(group['Score'] < 3)]
+
+        if group.empty:
+            print(f"건너뛰기: {filename} - Score < 3인 항목이 없음")
+            continue
+
+        if group['itemName'].isin(['text', 'icon', 'button']).all():
+            print(f"건너뛰기: {filename} - 모든 itemName이 ['text', 'icon', 'button'] 중 하나임")
+            continue
 
         base_filename = os.path.splitext(filename)[0]
         json_path = f'{JSON_DIR_PATH}/{base_filename}.json'

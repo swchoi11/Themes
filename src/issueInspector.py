@@ -5,15 +5,13 @@ import json
 import ast
 import cv2
 import csv
-import numpy as np
+
 
 from typing import List, Optional
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 from src.gemini import Gemini
-from google import genai
-from google.genai import types
 
 from tqdm import tqdm
 
@@ -24,15 +22,17 @@ class Config:
     def __init__(self):
         self.SAVE_DIR = '../output/report'
         os.makedirs(self.SAVE_DIR, exist_ok=True)
-        self.VISUALIZATION_DIR = '../output/visualization/'
+        self.VISUALIZATION_DIR = '../output/visualization'
         self.JSON_DIR = '../output/json/'
-        self.DATASET_PATH = '../resource/dataset.xlsx'  # 중간 산출물
+        self.DATASET_PATH = '../resource/Theme*_image_list.csv'
+        self.IMAGE_LIST = pd.read_csv(glob.glob(self.DATASET_PATH)[0], header=None)[0].tolist()
         self.OUTPUT_RAW_REPORT_PATH = f'{self.SAVE_DIR}/raw.csv'
         self.OUTPUT_REPORT_PATH = f'{self.SAVE_DIR}/report.csv'
         self.OUTPUT_PARSED_PATH = f'{self.SAVE_DIR}/parse_report.csv'
         self.OUTPUT_RESULT_PATH = f'{self.SAVE_DIR}/final_report.csv'
         self.ERROR_LOG_PATH = f'{self.SAVE_DIR}/error.txt'
         self.ISSUE_REPORT_PATH = f'{self.SAVE_DIR}/issue_report.xlsx'
+
 
         # Processing settings
         self.BATCH_SIZE = 6
@@ -160,19 +160,22 @@ class UIQualityInspector:
 
     def _get_visibility_inspection_prompt(self) -> str:
 
+        #
+        #         - duplicate: **TextView**, **button** with different functional roles but using identical icon images, creating confusion for users about their distinct purposes.
+        #         Icons must be completely identical in all aspects including color, shape, size, and visual appearance to be considered duplicates.
+        #         **Please exclude bounding boxes and labels on the top of bounding boxes from QA**
+        #         Please also calculate the "score" for duplicate issues. It has a value of 0 to 3. 0 is the highest duplicate issue.
+        #
+
         return """
         You are an AI assistant that inspects the UI quality of Android applications. Please inspect the UI quality based on the screenshot of the Android application provided.
         The screenshot provided has bounding boxes that can distinguish UI components, and the names of UI components are labeled on the upper left of each bounding box (Text, Button, etc.)
         Please measure the following items for each UI component.
-        - visibility: **Text**, **icons**, **imageviews**, **Image**, etc. are similar to the background color, making it difficult for people to see with their eyes.
+        - visibility: **Text**, **imageviews**, **Image**, etc. are similar to the background color, making it difficult for people to see with their eyes.
         **Please exclude bounding boxes and labels on the top of bounding boxes from QA**
+        **Please also exclude TextView component bounding boxes that are composed entirely of only one single solid color from the visibility assessment**
         Please also calculate the "score" for visibility issues. It has a value of 0 to 9. 9 is the highest visibility.
-        
-        - duplicate: **TextView**, **button** with different functional roles but using identical icon images, creating confusion for users about their distinct purposes. 
-        Icons must be completely identical in all aspects including color, shape, size, and visual appearance to be considered duplicates. 
-        **Please exclude bounding boxes and labels on the top of bounding boxes from QA** 
-        Please also calculate the "score" for duplicate issues. It has a value of 0 to 3. 0 is the highest duplicate issue.
-        
+
         **Please give a score for each UI component**
         **Please output only the 3 most problematic UI components**
         Please output in table format. The table must include the following contents.
@@ -187,10 +190,10 @@ class UIQualityInspector:
         You are an AI assistant that inspects the UI quality of Android applications. Please inspect the UI quality based on the screenshot of the Android application provided.
         The screenshot provided has bounding boxes that can distinguish UI components, and the names of UI components are labeled on the upper left of each bounding box (RadioButton, ToggleButton, Switch, etc.)
         Please measure the following items for each UI component.
-        - cut-off: **RadioButton**, **ToggleButton**, and **Switch** components for vertical truncation at top and bottom edges that distorts circular shapes into non-circular forms.
+        - cut-off: only **RadioButton** components for vertical truncation at top and bottom edges that distorts circular shapes into non-circular forms.
         **Please exclude bounding boxes and their labels from quality assessment**        
         **Please exclude bounding boxes and labels on the top of bounding boxes from QA**
-        Please also calculate the "score" for cut-off issues. It has a value of 0 to 3. 0 is the highest cut-off issue.
+        Please also calculate the "score" for cut-off issues. It has a value of 0 to 4. 0 is the highest cut-off issue.
         **Please give a score for each UI component**
         **Please output only the 3 most problematic UI components**
         Please output in table format. The table must include the following contents.
@@ -219,152 +222,6 @@ class UIQualityInspector:
         {csv_data}
         """
 
-    import os
-    import glob
-    import json
-    import ast
-    import cv2
-    import csv
-    import numpy as np
-
-    from typing import List, Optional
-    import pandas as pd
-    import matplotlib.pyplot as plt
-    from matplotlib.patches import Rectangle
-    from src.gemini import Gemini
-    from google import genai
-    from google.genai import types
-
-    from tqdm import tqdm
-
-    class Config:
-        """Configuration class for file paths and settings"""
-
-        def __init__(self):
-            self.SAVE_DIR = '../output/report'
-            os.makedirs(self.SAVE_DIR, exist_ok=True)
-            self.VISUALIZATION_DIR = '../output/visualization'
-            self.JSON_DIR = '../resource/json'  # JSON 파일 디렉토리 추가
-            self.DATASET_PATH = '../resource/dataset.xlsx'  # 중간 산출물
-            self.OUTPUT_RAW_REPORT_PATH = f'{self.SAVE_DIR}/raw.csv'
-            self.OUTPUT_REPORT_PATH = f'{self.SAVE_DIR}/report.csv'
-            self.OUTPUT_PARSED_PATH = f'{self.SAVE_DIR}/parse_report.csv'
-            self.OUTPUT_RESULT_PATH = f'{self.SAVE_DIR}/final_report.csv'
-            self.ERROR_LOG_PATH = f'{self.SAVE_DIR}/error.txt'
-            self.ISSUE_REPORT_PATH = f'{self.SAVE_DIR}/issue_report.xlsx'
-
-            # Processing settings
-            self.BATCH_SIZE = 6
-            self.MAX_RETRIES = 3
-            self.RETRY_DELAY = 5
-
-    class BoundingBoxVisualizer:
-        """바운딩 박스 시각화를 위한 클래스"""
-
-        def __init__(self):
-            # 이슈 타입별 색상 정의
-            self.issue_colors_mpl = {
-                'normal': (0.5, 0.5, 0.5),  # 회색
-                'alignment': (1.0, 0.0, 0.0),  # 빨강
-                'cutoff': (0.0, 1.0, 1.0),  # 시안
-                'design': (0.0, 1.0, 0.0),  # 초록
-                'default': (1.0, 1.0, 0.0)  # 노랑
-            }
-
-        def parse_bbox(self, bbox_str) -> List[float]:
-            """바운딩 박스 문자열 파싱"""
-            if pd.isna(bbox_str) or bbox_str == '' or bbox_str == '[]':
-                return []
-
-            try:
-                if isinstance(bbox_str, str):
-                    bbox = ast.literal_eval(bbox_str)
-                else:
-                    bbox = bbox_str
-
-                if isinstance(bbox, list) and len(bbox) == 4:
-                    return [float(x) for x in bbox]
-                else:
-                    return []
-            except Exception as e:
-                print(f"[WARNING] bbox 파싱 실패: {bbox_str}, 오류: {e}")
-                return []
-
-        def create_image_with_bboxes(self, image_path: str, issues: List[dict], temp_dir='./temp') -> str:
-            """이미지에 모든 이슈의 바운딩 박스를 그려서 임시 파일로 저장"""
-
-            if not os.path.exists(image_path):
-                print(f"[ERROR] 이미지 파일 없음: {image_path}")
-                return image_path
-
-            image = cv2.imread(image_path)
-            if image is None:
-                print(f"[ERROR] 이미지 로드 실패: {image_path}")
-                return image_path
-
-            # BGR to RGB 변환
-            image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-            h, w = image.shape[:2]
-
-            # 이미지 크기에 맞춰 figure 크기 조정
-            dpi = 100
-            fig_w = w / dpi
-            fig_h = h / dpi
-
-            fig, ax = plt.subplots(figsize=(fig_w, fig_h), dpi=dpi)
-            ax.imshow(image_rgb)
-            ax.axis('off')
-            plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
-
-            # 각 이슈에 대해 바운딩 박스 그리기
-            for idx, issue in enumerate(issues):
-                issue_type = issue.get('issue_type', 'default')
-                bbox = issue.get('bbox', '')
-                color = self.issue_colors_mpl.get(issue_type, self.issue_colors_mpl['default'])
-
-                if not bbox:
-                    # 바운딩 박스가 없으면 전체 이미지 크기로 설정
-                    rect = Rectangle((2, 2), w - 4, h - 4,
-                                     linewidth=3, edgecolor=color,
-                                     facecolor='none', alpha=0.8)
-                    ax.add_patch(rect)
-                    ax.text(10, 10 + idx * 30, f'BOX {idx + 1:02d}: {issue_type.upper()}',
-                            ha='left', va='top',
-                            fontsize=12, fontweight='bold', color='white',
-                            bbox=dict(boxstyle="square,pad=0.3", facecolor=color, alpha=0.9))
-                else:
-                    # 정규화된 좌표인지 확인
-                    if all(0 <= coord <= 1 for coord in bbox):
-                        x1, y1, x2, y2 = bbox[0] * w, bbox[1] * h, bbox[2] * w, bbox[3] * h
-                    else:
-                        x1, y1, x2, y2 = bbox
-
-                    # 좌표 유효성 검사
-                    x1 = max(0, min(w, x1))
-                    y1 = max(0, min(h, y1))
-                    x2 = max(0, min(w, x2))
-                    y2 = max(0, min(h, y2))
-
-                    if x2 > x1 and y2 > y1:
-                        rect = Rectangle((x1, y1), x2 - x1, y2 - y1,
-                                         linewidth=3, edgecolor=color,
-                                         facecolor='none', alpha=0.8)
-                        ax.add_patch(rect)
-
-                        label = f"BOX {idx + 1:02d}: {issue_type.upper()}"
-                        ax.text(x1, y1, label,
-                                ha='left', va='bottom',
-                                fontsize=10, fontweight='bold', color='white',
-                                bbox=dict(boxstyle="square,pad=0.1", facecolor=color, alpha=0.9))
-
-            # 임시 파일 저장
-            os.makedirs(temp_dir, exist_ok=True)
-            temp_path = os.path.join(temp_dir, os.path.basename(image_path))
-            plt.savefig(temp_path, dpi=dpi, bbox_inches='tight',
-                        pad_inches=0, facecolor='white', edgecolor='none')
-            plt.close()
-            return temp_path
-
     def _has_cutoff_components(self, image_path: str) -> bool:
         """
         이미지에 해당하는 JSON 파일에서 RadioButton, ToggleButton, Switch 컴포넌트가 있는지 확인
@@ -386,8 +243,9 @@ class UIQualityInspector:
                 data = json.load(f)
 
             # cutoff 검사 대상 컴포넌트들 (set으로 더 빠른 검색)
-            cutoff_components = {'RadioButton', 'ToggleButton', 'Switch'}
+            # cutoff_components = {'RadioButton', 'ToggleButton', 'Switch'}
 
+            cutoff_components ={'RadioButton'}
             # 1. 특정 JSON 구조에서 빠른 검색: obj['skelton']['elements'][i]['id']
             try:
                 if 'skelton' in data and 'elements' in data['skelton']:
@@ -562,8 +420,9 @@ class UIQualityInspector:
 
     def total_process(self):
 
-        image_list = [os.path.basename(path) for path in glob.glob(f'{self.config.VISUALIZATION_DIR}/*.png')]
+        # image_list = [os.path.basename(path) for path in glob.glob(f'{self.config.VISUALIZATION_DIR}/*.png')]
 
+        image_list = self.config.IMAGE_LIST
         if os.path.isfile(self.config.OUTPUT_RAW_REPORT_PATH):
             self._convert_report_format()
             processed = self.get_processed_files()
