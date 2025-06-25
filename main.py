@@ -10,7 +10,7 @@ from src.utils.bucket import test_image_list, upload_to_bucket, set_api_key
 from src.utils.exceptions import move_to_not_processed, check_xml, check_size, check_valid_image, check_all_issues_json, check_valid_issues
 
 import glob
-'''
+
 # 0. 데이터 준비
 set_api_key()
 
@@ -127,11 +127,10 @@ for test_image in tqdm(valid_test_list):
 
 # json 파일을 돌면서 제미나이 -> 최종 결과 산출
 xlsx_filename = to_excel(json_filename)
-'''
+
 # sort_issues에서 final_inference 로직이 통합되어 있으므로 별도 호출 불필요
-xlsx_filename = './output/excels/all_issues/result-20250619.xlsx'
 processor = IssueProcessor()
 output_path = processor.sort_issues(xlsx_filename)
-#final_output_path = to_excel(output_path)
+final_output_path = to_excel(output_path)
 
-#upload_to_bucket(final_output_path)
+upload_to_bucket(final_output_path)
